@@ -1,0 +1,9 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" rx="12" fill="#4B0082"/>
+  <circle cx="60" cy="38" r="13" stroke="#FFFFFF" stroke-width="2.5" fill="none"/>
+  <path d="M60 28 L60 48" stroke="#FFD700" stroke-width="2.5"/>
+  <path d="M50 38 L70 38" stroke="#FFD700" stroke-width="2.5"/>
+  <circle cx="60" cy="38" r="5" fill="#FFD700"/>
+  <text x="60" y="80" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFD700" text-anchor="middle">IIT</text>
+  <text x="60" y="98" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#FFFFFF" text-anchor="middle">INDORE</text>
+</svg>

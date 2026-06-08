@@ -1,0 +1,8 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" rx="12" fill="#800000"/>
+  <path d="M60 26 L75 38 L70 58 L50 58 L45 38 Z" stroke="#FFFFFF" stroke-width="2.5" fill="none"/>
+  <circle cx="60" cy="43" r="6" fill="#FFD700"/>
+  <path d="M50 46 L60 38 L70 46" stroke="#FFFFFF" stroke-width="2"/>
+  <text x="60" y="80" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFD700" text-anchor="middle">IIT</text>
+  <text x="60" y="98" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#FFFFFF" text-anchor="middle">ROORKEE</text>
+</svg>

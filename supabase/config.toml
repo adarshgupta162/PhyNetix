@@ -1,0 +1,28 @@
+project_id = "ydqyvirmwanyllihhkml"
+
+[functions.start-test]
+verify_jwt = true
+
+[functions.get-test-questions]
+verify_jwt = true
+
+[functions.submit-test]
+verify_jwt = true
+
+[functions.recalculate-scores]
+verify_jwt = true
+
+[functions.admin-reset-password]
+verify_jwt = true
+
+[functions.send-notification]
+verify_jwt = true
+
+[functions.send-bulk-notification]
+verify_jwt = true
+
+[functions.delete-user]
+verify_jwt = true
+
+[functions.extract-answer-key]
+verify_jwt = true
