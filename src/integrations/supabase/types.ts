@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       chapters: {
         Row: {
           course_id: string
@@ -49,6 +82,36 @@ export type Database = {
           },
         ]
       }
+      community_messages: {
+        Row: {
+          created_at: string | null
+          deleted_by: string | null
+          deleted_reason: string | null
+          id: string
+          is_deleted: boolean | null
+          message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_by?: string | null
+          deleted_reason?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          message: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deleted_by?: string | null
+          deleted_reason?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          message?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       courses: {
         Row: {
           color: string | null
@@ -79,6 +142,27 @@ export type Database = {
         }
         Relationships: []
       }
+      departments: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -86,6 +170,7 @@ export type Database = {
           id: string
           is_read: boolean | null
           message: string
+          requires_action: boolean | null
           title: string
           type: string | null
           user_id: string
@@ -96,6 +181,7 @@ export type Database = {
           id?: string
           is_read?: boolean | null
           message: string
+          requires_action?: boolean | null
           title: string
           type?: string | null
           user_id: string
@@ -106,6 +192,7 @@ export type Database = {
           id?: string
           is_read?: boolean | null
           message?: string
+          requires_action?: boolean | null
           title?: string
           type?: string | null
           user_id?: string
@@ -438,6 +525,51 @@ export type Database = {
           },
         ]
       }
+      staff_requests: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          entity_id: string | null
+          entity_type: string | null
+          from_user_id: string
+          id: string
+          metadata: Json | null
+          request_type: string
+          status: string | null
+          title: string
+          to_user_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          from_user_id: string
+          id?: string
+          metadata?: Json | null
+          request_type: string
+          status?: string | null
+          title: string
+          to_user_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          from_user_id?: string
+          id?: string
+          metadata?: Json | null
+          request_type?: string
+          status?: string | null
+          title?: string
+          to_user_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       test_attempts: {
         Row: {
           answers: Json | null
@@ -743,24 +875,35 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          department_id: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          department_id?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          department_id?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -774,6 +917,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
       user_completed_test: {
         Args: { _test_id: string; _user_id: string }
         Returns: boolean
