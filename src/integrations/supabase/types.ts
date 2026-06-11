@@ -155,6 +155,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           currency: string
+          current_students: number | null
           description: string | null
           discount_price: number | null
           duration_days: number | null
@@ -185,6 +186,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string
+          current_students?: number | null
           description?: string | null
           discount_price?: number | null
           duration_days?: number | null
@@ -215,6 +217,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string
+          current_students?: number | null
           description?: string | null
           discount_price?: number | null
           duration_days?: number | null
@@ -826,8 +829,10 @@ export type Database = {
           provider: string | null
           provider_order_id: string | null
           provider_payment_id: string | null
+          refund_amount: number | null
           refund_reason: string | null
           refunded_at: string | null
+          refunded_by: string | null
           status: string
           test_id: string | null
           updated_at: string
@@ -844,8 +849,10 @@ export type Database = {
           provider?: string | null
           provider_order_id?: string | null
           provider_payment_id?: string | null
+          refund_amount?: number | null
           refund_reason?: string | null
           refunded_at?: string | null
+          refunded_by?: string | null
           status?: string
           test_id?: string | null
           updated_at?: string
@@ -862,8 +869,10 @@ export type Database = {
           provider?: string | null
           provider_order_id?: string | null
           provider_payment_id?: string | null
+          refund_amount?: number | null
           refund_reason?: string | null
           refunded_at?: string | null
+          refunded_by?: string | null
           status?: string
           test_id?: string | null
           updated_at?: string
@@ -896,53 +905,98 @@ export type Database = {
       phynetix_library: {
         Row: {
           category: string | null
+          chapter: string | null
+          correct_answer: Json | null
           created_at: string
           created_by: string | null
           description: string | null
+          difficulty: string | null
           exam_type: string | null
           file_size: number | null
           file_type: string | null
           file_url: string | null
           id: string
+          is_active: boolean
           is_published: boolean
+          library_id: string | null
+          marks: number | null
+          negative_marks: number | null
+          options: Json | null
+          question_image_url: string | null
+          question_text: string | null
+          question_type: string | null
+          solution_image_url: string | null
+          solution_text: string | null
           subject: string | null
           tags: string[] | null
           thumbnail_url: string | null
+          time_seconds: number | null
           title: string
+          topic: string | null
           updated_at: string
         }
         Insert: {
           category?: string | null
+          chapter?: string | null
+          correct_answer?: Json | null
           created_at?: string
           created_by?: string | null
           description?: string | null
+          difficulty?: string | null
           exam_type?: string | null
           file_size?: number | null
           file_type?: string | null
           file_url?: string | null
           id?: string
+          is_active?: boolean
           is_published?: boolean
+          library_id?: string | null
+          marks?: number | null
+          negative_marks?: number | null
+          options?: Json | null
+          question_image_url?: string | null
+          question_text?: string | null
+          question_type?: string | null
+          solution_image_url?: string | null
+          solution_text?: string | null
           subject?: string | null
           tags?: string[] | null
           thumbnail_url?: string | null
+          time_seconds?: number | null
           title: string
+          topic?: string | null
           updated_at?: string
         }
         Update: {
           category?: string | null
+          chapter?: string | null
+          correct_answer?: Json | null
           created_at?: string
           created_by?: string | null
           description?: string | null
+          difficulty?: string | null
           exam_type?: string | null
           file_size?: number | null
           file_type?: string | null
           file_url?: string | null
           id?: string
+          is_active?: boolean
           is_published?: boolean
+          library_id?: string | null
+          marks?: number | null
+          negative_marks?: number | null
+          options?: Json | null
+          question_image_url?: string | null
+          question_text?: string | null
+          question_type?: string | null
+          solution_image_url?: string | null
+          solution_text?: string | null
           subject?: string | null
           tags?: string[] | null
           thumbnail_url?: string | null
+          time_seconds?: number | null
           title?: string
+          topic?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1179,6 +1233,8 @@ export type Database = {
           require_microphone: boolean
           require_screen: boolean
           retention_days: number
+          screenshot_enabled: boolean
+          screenshot_interval_seconds: number
           test_id: string
           updated_at: string
         }
@@ -1194,6 +1250,8 @@ export type Database = {
           require_microphone?: boolean
           require_screen?: boolean
           retention_days?: number
+          screenshot_enabled?: boolean
+          screenshot_interval_seconds?: number
           test_id: string
           updated_at?: string
         }
@@ -1209,6 +1267,8 @@ export type Database = {
           require_microphone?: boolean
           require_screen?: boolean
           retention_days?: number
+          screenshot_enabled?: boolean
+          screenshot_interval_seconds?: number
           test_id?: string
           updated_at?: string
         }
@@ -1955,31 +2015,43 @@ export type Database = {
         Row: {
           allowed: boolean
           created_at: string
+          created_by: string | null
           extra_time_minutes: number | null
           id: string
           notes: string | null
+          result_release_delay_minutes: number | null
+          submit_disabled: boolean
           test_id: string
           updated_at: string
+          updated_by: string | null
           user_id: string
         }
         Insert: {
           allowed?: boolean
           created_at?: string
+          created_by?: string | null
           extra_time_minutes?: number | null
           id?: string
           notes?: string | null
+          result_release_delay_minutes?: number | null
+          submit_disabled?: boolean
           test_id: string
           updated_at?: string
+          updated_by?: string | null
           user_id: string
         }
         Update: {
           allowed?: boolean
           created_at?: string
+          created_by?: string | null
           extra_time_minutes?: number | null
           id?: string
           notes?: string | null
+          result_release_delay_minutes?: number | null
+          submit_disabled?: boolean
           test_id?: string
           updated_at?: string
+          updated_by?: string | null
           user_id?: string
         }
         Relationships: [
@@ -2120,6 +2192,10 @@ export type Database = {
         | "teacher"
         | "data_manager"
         | "test_manager"
+        | "academic_admin"
+        | "operations_admin"
+        | "finance_admin"
+        | "marketing_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2255,6 +2331,10 @@ export const Constants = {
         "teacher",
         "data_manager",
         "test_manager",
+        "academic_admin",
+        "operations_admin",
+        "finance_admin",
+        "marketing_admin",
       ],
     },
   },
