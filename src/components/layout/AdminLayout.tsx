@@ -69,7 +69,6 @@ const allNavSections = {
     {
       title: "Content",
       items: [
-        { icon: FileText, label: "PDF Tests", path: "/admin/pdf-tests" },
         { icon: ClipboardList, label: "Tests", path: "/admin/tests" },
         { icon: Video, label: "Live Monitoring", path: "/admin/live-monitoring" },
         { icon: BookOpen, label: "Question Bank", path: "/admin/question-bank" },
@@ -96,7 +95,6 @@ const allNavSections = {
     {
       title: "Content",
       items: [
-        { icon: FileText, label: "PDF Tests", path: "/admin/pdf-tests" },
         { icon: ClipboardList, label: "Tests", path: "/admin/tests" },
         { icon: Video, label: "Live Monitoring", path: "/admin/live-monitoring" },
         { icon: BookOpen, label: "Question Bank", path: "/admin/question-bank" },
@@ -160,16 +158,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const { activeRole, userRoles } = useStaffRoles();
   const { settings: platformSettings } = usePlatformSettings();
 
-  const navSections = useMemo(() => {
-    const sections = getNavSections(activeRole);
-    if (!platformSettings.show_pdf_tests) {
-      return sections.map((section) => ({
-        ...section,
-        items: section.items.filter((item) => item.path !== "/admin/pdf-tests"),
-      }));
-    }
-    return sections;
-  }, [activeRole, platformSettings.show_pdf_tests]);
+  const navSections = useMemo(() => getNavSections(activeRole), [activeRole]);
 
   // All flat items for command palette
   const allItems = useMemo(() => navSections.flatMap((s) => s.items.map((it) => ({ ...it, section: s.title }))), [navSections]);

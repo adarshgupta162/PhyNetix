@@ -66,7 +66,6 @@ export default function AcademicDashboard() {
 
   const quickActions = [
     { label: "Create Test", path: "/admin/test-creator", icon: Plus },
-    { label: "PDF Tests", path: "/admin/pdf-tests", icon: FileText },
     { label: "Question Bank", path: "/admin/question-bank", icon: BookOpen },
     { label: "PhyNetix Library", path: "/admin/phynetix-library", icon: Library },
   ];
