@@ -398,17 +398,6 @@ export default function AdminSettings() {
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="flex items-center justify-between p-4 rounded-lg border border-border">
                   <div>
-                    <div className="font-medium">Show PDF Tests</div>
-                    <div className="text-sm text-muted-foreground">Show/hide PDF tests from admin sidebar and student nav</div>
-                  </div>
-                  <Switch
-                    checked={platformSettingsDB.show_pdf_tests}
-                    onCheckedChange={(checked) => updateSetting('show_pdf_tests', checked)}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-4 rounded-lg border border-border">
-                  <div>
                     <div className="font-medium">Allow New Signups</div>
                     <div className="text-sm text-muted-foreground">Enable or disable new user registrations</div>
                   </div>
