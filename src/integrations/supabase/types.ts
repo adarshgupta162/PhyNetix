@@ -737,6 +737,7 @@ export type Database = {
           data: Json | null
           event_type: string
           id: string
+          metadata: Json | null
           session_id: string | null
         }
         Insert: {
@@ -744,6 +745,7 @@ export type Database = {
           data?: Json | null
           event_type: string
           id?: string
+          metadata?: Json | null
           session_id?: string | null
         }
         Update: {
@@ -751,6 +753,7 @@ export type Database = {
           data?: Json | null
           event_type?: string
           id?: string
+          metadata?: Json | null
           session_id?: string | null
         }
         Relationships: [
@@ -1885,8 +1888,10 @@ export type Database = {
           extra_time_minutes: number | null
           fullscreen_exit_count: number | null
           id: string
+          last_submitted_at: string | null
           percentile: number | null
           rank: number | null
+          reopened_at: string | null
           result_available_at: string | null
           result_release_delay_minutes: number | null
           roll_number: string | null
@@ -1906,8 +1911,10 @@ export type Database = {
           extra_time_minutes?: number | null
           fullscreen_exit_count?: number | null
           id?: string
+          last_submitted_at?: string | null
           percentile?: number | null
           rank?: number | null
+          reopened_at?: string | null
           result_available_at?: string | null
           result_release_delay_minutes?: number | null
           roll_number?: string | null
@@ -1927,8 +1934,10 @@ export type Database = {
           extra_time_minutes?: number | null
           fullscreen_exit_count?: number | null
           id?: string
+          last_submitted_at?: string | null
           percentile?: number | null
           rank?: number | null
+          reopened_at?: string | null
           result_available_at?: string | null
           result_release_delay_minutes?: number | null
           roll_number?: string | null
