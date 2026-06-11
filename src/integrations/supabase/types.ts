@@ -47,6 +47,163 @@ export type Database = {
         }
         Relationships: []
       }
+      batch_enrollments: {
+        Row: {
+          batch_id: string
+          created_at: string
+          enrolled_at: string
+          expires_at: string | null
+          id: string
+          payment_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          enrolled_at?: string
+          expires_at?: string | null
+          id?: string
+          payment_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          enrolled_at?: string
+          expires_at?: string | null
+          id?: string
+          payment_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batch_enrollments_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      batch_tests: {
+        Row: {
+          batch_id: string
+          created_at: string
+          id: string
+          sort_order: number | null
+          test_id: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          id?: string
+          sort_order?: number | null
+          test_id: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          id?: string
+          sort_order?: number | null
+          test_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batch_tests_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "batch_tests_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      batches: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          discount_price: number | null
+          duration_days: number | null
+          ends_at: string | null
+          exam_type: string | null
+          features: Json | null
+          id: string
+          is_free: boolean
+          is_published: boolean
+          join_code: string | null
+          name: string
+          price: number
+          starts_at: string | null
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          discount_price?: number | null
+          duration_days?: number | null
+          ends_at?: string | null
+          exam_type?: string | null
+          features?: Json | null
+          id?: string
+          is_free?: boolean
+          is_published?: boolean
+          join_code?: string | null
+          name: string
+          price?: number
+          starts_at?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          discount_price?: number | null
+          duration_days?: number | null
+          ends_at?: string | null
+          exam_type?: string | null
+          features?: Json | null
+          id?: string
+          is_free?: boolean
+          is_published?: boolean
+          join_code?: string | null
+          name?: string
+          price?: number
+          starts_at?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batches_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chapters: {
         Row: {
           course_id: string
@@ -112,6 +269,68 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          applies_to: string
+          batch_id: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          updated_at: string
+          used_count: number
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          applies_to?: string
+          batch_id?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          updated_at?: string
+          used_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          applies_to?: string
+          batch_id?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          updated_at?: string
+          used_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupons_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           color: string | null
@@ -163,6 +382,348 @@ export type Database = {
         }
         Relationships: []
       }
+      dpp_attempts: {
+        Row: {
+          answers: Json | null
+          completed_at: string | null
+          created_at: string
+          dpp_id: string
+          id: string
+          score: number | null
+          started_at: string
+          time_taken_seconds: number | null
+          total_marks: number | null
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          dpp_id: string
+          id?: string
+          score?: number | null
+          started_at?: string
+          time_taken_seconds?: number | null
+          total_marks?: number | null
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          dpp_id?: string
+          id?: string
+          score?: number | null
+          started_at?: string
+          time_taken_seconds?: number | null
+          total_marks?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dpp_attempts_dpp_id_fkey"
+            columns: ["dpp_id"]
+            isOneToOne: false
+            referencedRelation: "dpps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dpp_questions: {
+        Row: {
+          created_at: string
+          dpp_id: string
+          id: string
+          marks: number | null
+          question_id: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string
+          dpp_id: string
+          id?: string
+          marks?: number | null
+          question_id?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string
+          dpp_id?: string
+          id?: string
+          marks?: number | null
+          question_id?: string | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dpp_questions_dpp_id_fkey"
+            columns: ["dpp_id"]
+            isOneToOne: false
+            referencedRelation: "dpps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dpp_questions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dpps: {
+        Row: {
+          batch_id: string | null
+          chapter_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          difficulty: string | null
+          exam_type: string | null
+          id: string
+          is_published: boolean
+          scheduled_for: string | null
+          subject: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          batch_id?: string | null
+          chapter_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty?: string | null
+          exam_type?: string | null
+          id?: string
+          is_published?: boolean
+          scheduled_for?: string | null
+          subject?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          batch_id?: string | null
+          chapter_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty?: string | null
+          exam_type?: string | null
+          id?: string
+          is_published?: boolean
+          scheduled_for?: string | null
+          subject?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dpps_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dpps_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      institution_members: {
+        Row: {
+          created_at: string
+          id: string
+          institution_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          institution_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          institution_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "institution_members_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      institutions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          slug: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          slug?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          slug?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      monitoring_events: {
+        Row: {
+          created_at: string
+          data: Json | null
+          event_type: string
+          id: string
+          session_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          event_type: string
+          id?: string
+          session_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          event_type?: string
+          id?: string
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoring_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "monitoring_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monitoring_permissions: {
+        Row: {
+          attempt_id: string | null
+          camera_granted: boolean
+          created_at: string
+          id: string
+          microphone_granted: boolean
+          screen_granted: boolean
+          session_id: string | null
+        }
+        Insert: {
+          attempt_id?: string | null
+          camera_granted?: boolean
+          created_at?: string
+          id?: string
+          microphone_granted?: boolean
+          screen_granted?: boolean
+          session_id?: string | null
+        }
+        Update: {
+          attempt_id?: string | null
+          camera_granted?: boolean
+          created_at?: string
+          id?: string
+          microphone_granted?: boolean
+          screen_granted?: boolean
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoring_permissions_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "test_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monitoring_permissions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "proctoring_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monitoring_sessions: {
+        Row: {
+          attempt_id: string | null
+          created_at: string
+          data: Json | null
+          id: string
+          status: string
+          test_id: string | null
+          user_id: string
+        }
+        Insert: {
+          attempt_id?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          status?: string
+          test_id?: string | null
+          user_id: string
+        }
+        Update: {
+          attempt_id?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          status?: string
+          test_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoring_sessions_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "test_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monitoring_sessions_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -198,6 +759,467 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          batch_id: string | null
+          coupon_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json | null
+          provider: string | null
+          provider_order_id: string | null
+          provider_payment_id: string | null
+          refund_reason: string | null
+          refunded_at: string | null
+          status: string
+          test_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          batch_id?: string | null
+          coupon_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          provider?: string | null
+          provider_order_id?: string | null
+          provider_payment_id?: string | null
+          refund_reason?: string | null
+          refunded_at?: string | null
+          status?: string
+          test_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          batch_id?: string | null
+          coupon_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          provider?: string | null
+          provider_order_id?: string | null
+          provider_payment_id?: string | null
+          refund_reason?: string | null
+          refunded_at?: string | null
+          status?: string
+          test_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      phynetix_library: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          exam_type: string | null
+          file_size: number | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          is_published: boolean
+          subject: string | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          exam_type?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          is_published?: boolean
+          subject?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          exam_type?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          is_published?: boolean
+          subject?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          description: string | null
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
+      proctoring_alerts: {
+        Row: {
+          alert_type: string
+          attempt_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          session_id: string | null
+          severity: string
+          status: string
+        }
+        Insert: {
+          alert_type: string
+          attempt_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          session_id?: string | null
+          severity?: string
+          status?: string
+        }
+        Update: {
+          alert_type?: string
+          attempt_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          session_id?: string | null
+          severity?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_alerts_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "test_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proctoring_alerts_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "proctoring_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proctoring_events: {
+        Row: {
+          attempt_id: string | null
+          created_at: string
+          data: Json | null
+          event_type: string
+          id: string
+          session_id: string | null
+        }
+        Insert: {
+          attempt_id?: string | null
+          created_at?: string
+          data?: Json | null
+          event_type: string
+          id?: string
+          session_id?: string | null
+        }
+        Update: {
+          attempt_id?: string | null
+          created_at?: string
+          data?: Json | null
+          event_type?: string
+          id?: string
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_events_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "test_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proctoring_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "proctoring_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proctoring_recordings: {
+        Row: {
+          attempt_id: string | null
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          provider: string | null
+          recording_url: string | null
+          session_id: string | null
+        }
+        Insert: {
+          attempt_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          provider?: string | null
+          recording_url?: string | null
+          session_id?: string | null
+        }
+        Update: {
+          attempt_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          provider?: string | null
+          recording_url?: string | null
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_recordings_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "test_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proctoring_recordings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "proctoring_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proctoring_sessions: {
+        Row: {
+          attempt_id: string | null
+          created_at: string
+          ended_at: string | null
+          id: string
+          last_heartbeat_at: string | null
+          metadata: Json | null
+          provider_room_name: string | null
+          started_at: string
+          status: string
+          test_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempt_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          last_heartbeat_at?: string | null
+          metadata?: Json | null
+          provider_room_name?: string | null
+          started_at?: string
+          status?: string
+          test_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempt_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          last_heartbeat_at?: string | null
+          metadata?: Json | null
+          provider_room_name?: string | null
+          started_at?: string
+          status?: string
+          test_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_sessions_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "test_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proctoring_sessions_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proctoring_test_settings: {
+        Row: {
+          allow_optional_device_fallback: boolean
+          allow_specific_users_only: boolean
+          created_at: string
+          enabled: boolean
+          id: string
+          instructions: string | null
+          recording_enabled: boolean
+          require_camera: boolean
+          require_microphone: boolean
+          require_screen: boolean
+          retention_days: number
+          test_id: string
+          updated_at: string
+        }
+        Insert: {
+          allow_optional_device_fallback?: boolean
+          allow_specific_users_only?: boolean
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          instructions?: string | null
+          recording_enabled?: boolean
+          require_camera?: boolean
+          require_microphone?: boolean
+          require_screen?: boolean
+          retention_days?: number
+          test_id: string
+          updated_at?: string
+        }
+        Update: {
+          allow_optional_device_fallback?: boolean
+          allow_specific_users_only?: boolean
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          instructions?: string | null
+          recording_enabled?: boolean
+          require_camera?: boolean
+          require_microphone?: boolean
+          require_screen?: boolean
+          retention_days?: number
+          test_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_test_settings_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: true
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proctoring_user_overrides: {
+        Row: {
+          allow_optional_device_fallback: boolean | null
+          allowed: boolean
+          created_at: string
+          enabled: boolean | null
+          id: string
+          notes: string | null
+          require_camera: boolean | null
+          require_microphone: boolean | null
+          require_screen: boolean | null
+          test_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allow_optional_device_fallback?: boolean | null
+          allowed?: boolean
+          created_at?: string
+          enabled?: boolean | null
+          id?: string
+          notes?: string | null
+          require_camera?: boolean | null
+          require_microphone?: boolean | null
+          require_screen?: boolean | null
+          test_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allow_optional_device_fallback?: boolean | null
+          allowed?: boolean
+          created_at?: string
+          enabled?: boolean | null
+          id?: string
+          notes?: string | null
+          require_camera?: boolean | null
+          require_microphone?: boolean | null
+          require_screen?: boolean | null
+          test_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_user_overrides_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -459,6 +1481,68 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      question_bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          question_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          question_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          question_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_bookmarks_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_paragraphs: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          image_url: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       questions: {
         Row: {
@@ -813,6 +1897,47 @@ export type Database = {
           },
         ]
       }
+      test_user_overrides: {
+        Row: {
+          allowed: boolean
+          created_at: string
+          extra_time_minutes: number | null
+          id: string
+          notes: string | null
+          test_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allowed?: boolean
+          created_at?: string
+          extra_time_minutes?: number | null
+          id?: string
+          notes?: string | null
+          test_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allowed?: boolean
+          created_at?: string
+          extra_time_minutes?: number | null
+          id?: string
+          notes?: string | null
+          test_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_user_overrides_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tests: {
         Row: {
           answer_key_uploaded: boolean | null
@@ -917,8 +2042,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_enrolled_in_batch: {
+        Args: { _batch_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      proctoring_schema_health: { Args: never; Returns: Json }
       user_completed_test: {
+        Args: { _test_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_has_paid_for_test: {
         Args: { _test_id: string; _user_id: string }
         Returns: boolean
       }
