@@ -21,9 +21,7 @@ import AuthPage from "./pages/AuthPage";
 import StaffAuthPage from "./pages/StaffAuthPage";
 import Dashboard from "./pages/Dashboard";
 import TestLibrary from "./pages/TestLibrary";
-import PDFTestLibrary from "./pages/PDFTestLibrary";
 import NormalTestInterface from "./pages/NormalTestInterface";
-import PDFTestInterface from "./pages/PDFTestInterface";
 import NormalTestAnalysis from "./pages/NormalTestAnalysis";
 import DetailedAnalysis from "./pages/DetailedAnalysis";
 import QuestionWiseAnalysis from "./pages/QuestionWiseAnalysis";
@@ -48,9 +46,6 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSettings from "./pages/admin/AdminSettings";
 import TestCreator from "./pages/admin/TestCreator";
 import TestEditor from "./pages/admin/TestEditor";
-import PDFTestList from "./pages/admin/PDFTestList";
-import PDFTestCreate from "./pages/admin/PDFTestCreate";
-import PDFTestEditor from "./pages/admin/PDFTestEditor";
 import NormalTestAnalytics from "./pages/admin/NormalTestAnalytics";
 import TestManagement from "./pages/admin/TestManagement";
 import StaffCommunity from "./pages/admin/StaffCommunity";
@@ -107,12 +102,9 @@ const App = () => (
                 {/* Student Dashboard & Features */}
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/tests" element={<TestLibrary />} />
-                <Route path="/pdf-tests" element={<PDFTestLibrary />} />
                 <Route path="/question-bank" element={<QuestionBankPage />} />
                 <Route path="/test/:testId" element={<NormalTestInterface />} />
-                <Route path="/pdf-test/:testId" element={<PDFTestInterface />} />
                 <Route path="/test/:testId/analysis" element={<AnalysisPage />} />
-                <Route path="/pdf-test/:testId/analysis" element={<DetailedAnalysis />} />
                 <Route path="/analysis/:testId" element={<AnalysisPage />} />
                 <Route path="/solutions/:testId" element={<SolutionsPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
@@ -140,9 +132,6 @@ const App = () => (
                 <Route path="/admin/test-editor/:testId" element={<AdminRoute><TestEditor /></AdminRoute>} />
                 <Route path="/admin/test-analytics/:testId" element={<AdminRoute><NormalTestAnalytics /></AdminRoute>} />
                 <Route path="/admin/test-management/:testId" element={<AdminRoute><TestManagement /></AdminRoute>} />
-                <Route path="/admin/pdf-tests" element={<AdminRoute><PDFTestList /></AdminRoute>} />
-                <Route path="/admin/pdf-tests/create" element={<AdminRoute><PDFTestCreate /></AdminRoute>} />
-                <Route path="/admin/pdf-tests/:testId/edit" element={<AdminRoute><PDFTestEditor /></AdminRoute>} />
                 <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
                 <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
                 <Route path="/admin/community" element={<AdminRoute><StaffCommunity /></AdminRoute>} />
