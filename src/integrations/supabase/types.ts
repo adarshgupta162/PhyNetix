@@ -177,6 +177,7 @@ export type Database = {
           short_description: string | null
           start_date: string | null
           starts_at: string | null
+          syllabus: Json | null
           thumbnail_url: string | null
           updated_at: string
         }
@@ -208,6 +209,7 @@ export type Database = {
           short_description?: string | null
           start_date?: string | null
           starts_at?: string | null
+          syllabus?: Json | null
           thumbnail_url?: string | null
           updated_at?: string
         }
@@ -239,6 +241,7 @@ export type Database = {
           short_description?: string | null
           start_date?: string | null
           starts_at?: string | null
+          syllabus?: Json | null
           thumbnail_url?: string | null
           updated_at?: string
         }
@@ -488,27 +491,63 @@ export type Database = {
       }
       dpp_questions: {
         Row: {
+          correct_answer: Json | null
           created_at: string
+          difficulty: string | null
           dpp_id: string
           id: string
           marks: number | null
+          negative_marks: number | null
+          options: Json | null
           question_id: string | null
+          question_image_url: string | null
+          question_image_urls: string[] | null
+          question_number: number | null
+          question_text: string | null
+          question_type: string | null
+          solution_image_url: string | null
+          solution_image_urls: string[] | null
+          solution_text: string | null
           sort_order: number | null
         }
         Insert: {
+          correct_answer?: Json | null
           created_at?: string
+          difficulty?: string | null
           dpp_id: string
           id?: string
           marks?: number | null
+          negative_marks?: number | null
+          options?: Json | null
           question_id?: string | null
+          question_image_url?: string | null
+          question_image_urls?: string[] | null
+          question_number?: number | null
+          question_text?: string | null
+          question_type?: string | null
+          solution_image_url?: string | null
+          solution_image_urls?: string[] | null
+          solution_text?: string | null
           sort_order?: number | null
         }
         Update: {
+          correct_answer?: Json | null
           created_at?: string
+          difficulty?: string | null
           dpp_id?: string
           id?: string
           marks?: number | null
+          negative_marks?: number | null
+          options?: Json | null
           question_id?: string | null
+          question_image_url?: string | null
+          question_image_urls?: string[] | null
+          question_number?: number | null
+          question_text?: string | null
+          question_type?: string | null
+          solution_image_url?: string | null
+          solution_image_urls?: string[] | null
+          solution_text?: string | null
           sort_order?: number | null
         }
         Relationships: [
@@ -530,48 +569,66 @@ export type Database = {
       }
       dpps: {
         Row: {
+          access_type: string | null
           batch_id: string | null
+          chapter: string | null
           chapter_id: string | null
           created_at: string
           created_by: string | null
           description: string | null
           difficulty: string | null
+          duration_minutes: number | null
           exam_type: string | null
           id: string
           is_published: boolean
+          is_timed: boolean | null
+          publish_date: string | null
           scheduled_for: string | null
           subject: string | null
           title: string
+          topic: string | null
           updated_at: string
         }
         Insert: {
+          access_type?: string | null
           batch_id?: string | null
+          chapter?: string | null
           chapter_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           difficulty?: string | null
+          duration_minutes?: number | null
           exam_type?: string | null
           id?: string
           is_published?: boolean
+          is_timed?: boolean | null
+          publish_date?: string | null
           scheduled_for?: string | null
           subject?: string | null
           title: string
+          topic?: string | null
           updated_at?: string
         }
         Update: {
+          access_type?: string | null
           batch_id?: string | null
+          chapter?: string | null
           chapter_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           difficulty?: string | null
+          duration_minutes?: number | null
           exam_type?: string | null
           id?: string
           is_published?: boolean
+          is_timed?: boolean | null
+          publish_date?: string | null
           scheduled_for?: string | null
           subject?: string | null
           title?: string
+          topic?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1602,6 +1659,7 @@ export type Database = {
           id: string
           notes: string | null
           question_id: string
+          test_id: string | null
           user_id: string
         }
         Insert: {
@@ -1609,6 +1667,7 @@ export type Database = {
           id?: string
           notes?: string | null
           question_id: string
+          test_id?: string | null
           user_id: string
         }
         Update: {
@@ -1616,6 +1675,7 @@ export type Database = {
           id?: string
           notes?: string | null
           question_id?: string
+          test_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1624,6 +1684,13 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_bookmarks_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
             referencedColumns: ["id"]
           },
         ]
@@ -1773,14 +1840,19 @@ export type Database = {
           answers: Json | null
           awaiting_result: boolean | null
           completed_at: string | null
+          extra_time_minutes: number | null
           fullscreen_exit_count: number | null
           id: string
           percentile: number | null
           rank: number | null
+          result_available_at: string | null
+          result_release_delay_minutes: number | null
           roll_number: string | null
           score: number | null
           started_at: string
+          submit_disabled: boolean
           test_id: string
+          time_per_question: Json | null
           time_taken_seconds: number | null
           total_marks: number | null
           user_id: string
@@ -1789,14 +1861,19 @@ export type Database = {
           answers?: Json | null
           awaiting_result?: boolean | null
           completed_at?: string | null
+          extra_time_minutes?: number | null
           fullscreen_exit_count?: number | null
           id?: string
           percentile?: number | null
           rank?: number | null
+          result_available_at?: string | null
+          result_release_delay_minutes?: number | null
           roll_number?: string | null
           score?: number | null
           started_at?: string
+          submit_disabled?: boolean
           test_id: string
+          time_per_question?: Json | null
           time_taken_seconds?: number | null
           total_marks?: number | null
           user_id: string
@@ -1805,14 +1882,19 @@ export type Database = {
           answers?: Json | null
           awaiting_result?: boolean | null
           completed_at?: string | null
+          extra_time_minutes?: number | null
           fullscreen_exit_count?: number | null
           id?: string
           percentile?: number | null
           rank?: number | null
+          result_available_at?: string | null
+          result_release_delay_minutes?: number | null
           roll_number?: string | null
           score?: number | null
           started_at?: string
+          submit_disabled?: boolean
           test_id?: string
+          time_per_question?: Json | null
           time_taken_seconds?: number | null
           total_marks?: number | null
           user_id?: string
@@ -2078,6 +2160,7 @@ export type Database = {
           is_published: boolean | null
           name: string
           pdf_url: string | null
+          result_release_delay_minutes: number | null
           scheduled_at: string | null
           show_solutions: boolean | null
           solution_reopen_mode: boolean | null
@@ -2097,6 +2180,7 @@ export type Database = {
           is_published?: boolean | null
           name: string
           pdf_url?: string | null
+          result_release_delay_minutes?: number | null
           scheduled_at?: string | null
           show_solutions?: boolean | null
           solution_reopen_mode?: boolean | null
@@ -2116,6 +2200,7 @@ export type Database = {
           is_published?: boolean | null
           name?: string
           pdf_url?: string | null
+          result_release_delay_minutes?: number | null
           scheduled_at?: string | null
           show_solutions?: boolean | null
           solution_reopen_mode?: boolean | null
