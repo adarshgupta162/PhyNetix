@@ -161,9 +161,10 @@ export function ProctoringSettingsCard({ testId, compact = false }: Props) {
   };
 
   const updateOverride = async (override: UserOverride, updates: Partial<UserOverride>) => {
+    const { profile: _profile, ...dbUpdates } = updates as Partial<UserOverride> & { profile?: unknown };
     const { error } = await supabase
       .from('proctoring_user_overrides')
-      .update(updates)
+      .update(dbUpdates as never)
       .eq('test_id', testId)
       .eq('user_id', override.user_id);
     if (error) {

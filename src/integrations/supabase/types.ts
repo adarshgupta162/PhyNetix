@@ -47,6 +47,226 @@ export type Database = {
         }
         Relationships: []
       }
+      batch_enrollments: {
+        Row: {
+          batch_id: string
+          created_at: string
+          enrolled_at: string
+          enrolled_by: string | null
+          enrollment_type: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          payment_id: string | null
+          payment_status: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          enrolled_at?: string
+          enrolled_by?: string | null
+          enrollment_type?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          payment_id?: string | null
+          payment_status?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          enrolled_at?: string
+          enrolled_by?: string | null
+          enrollment_type?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          payment_id?: string | null
+          payment_status?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batch_enrollments_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      batch_tests: {
+        Row: {
+          batch_id: string
+          created_at: string
+          id: string
+          is_bonus: boolean
+          order_index: number | null
+          sort_order: number | null
+          test_id: string
+          unlock_date: string | null
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          id?: string
+          is_bonus?: boolean
+          order_index?: number | null
+          sort_order?: number | null
+          test_id: string
+          unlock_date?: string | null
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          id?: string
+          is_bonus?: boolean
+          order_index?: number | null
+          sort_order?: number | null
+          test_id?: string
+          unlock_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batch_tests_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "batch_tests_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      batches: {
+        Row: {
+          category: string | null
+          course_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          current_students: number | null
+          description: string | null
+          discount_price: number | null
+          duration_days: number | null
+          end_date: string | null
+          ends_at: string | null
+          enrollment_deadline: string | null
+          exam_type: string | null
+          features: Json | null
+          id: string
+          instructions: string | null
+          is_active: boolean
+          is_featured: boolean
+          is_free: boolean
+          is_published: boolean
+          join_code: string | null
+          max_students: number | null
+          name: string
+          original_price: number | null
+          price: number
+          short_description: string | null
+          start_date: string | null
+          starts_at: string | null
+          syllabus: Json | null
+          thumbnail_url: string | null
+          updated_at: string
+          welcome_message: string | null
+        }
+        Insert: {
+          category?: string | null
+          course_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          current_students?: number | null
+          description?: string | null
+          discount_price?: number | null
+          duration_days?: number | null
+          end_date?: string | null
+          ends_at?: string | null
+          enrollment_deadline?: string | null
+          exam_type?: string | null
+          features?: Json | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          is_featured?: boolean
+          is_free?: boolean
+          is_published?: boolean
+          join_code?: string | null
+          max_students?: number | null
+          name: string
+          original_price?: number | null
+          price?: number
+          short_description?: string | null
+          start_date?: string | null
+          starts_at?: string | null
+          syllabus?: Json | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Update: {
+          category?: string | null
+          course_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          current_students?: number | null
+          description?: string | null
+          discount_price?: number | null
+          duration_days?: number | null
+          end_date?: string | null
+          ends_at?: string | null
+          enrollment_deadline?: string | null
+          exam_type?: string | null
+          features?: Json | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          is_featured?: boolean
+          is_free?: boolean
+          is_published?: boolean
+          join_code?: string | null
+          max_students?: number | null
+          name?: string
+          original_price?: number | null
+          price?: number
+          short_description?: string | null
+          start_date?: string | null
+          starts_at?: string | null
+          syllabus?: Json | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batches_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chapters: {
         Row: {
           course_id: string
@@ -112,6 +332,77 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          applicable_batches: string[] | null
+          applies_to: string
+          batch_id: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          current_uses: number
+          description: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_purchase_amount: number | null
+          updated_at: string
+          used_count: number
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          applicable_batches?: string[] | null
+          applies_to?: string
+          batch_id?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          current_uses?: number
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_purchase_amount?: number | null
+          updated_at?: string
+          used_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          applicable_batches?: string[] | null
+          applies_to?: string
+          batch_id?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          current_uses?: number
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_purchase_amount?: number | null
+          updated_at?: string
+          used_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupons_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           color: string | null
@@ -163,6 +454,414 @@ export type Database = {
         }
         Relationships: []
       }
+      dpp_attempts: {
+        Row: {
+          answers: Json | null
+          completed_at: string | null
+          created_at: string
+          dpp_id: string
+          id: string
+          score: number | null
+          started_at: string
+          time_taken_seconds: number | null
+          total_marks: number | null
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          dpp_id: string
+          id?: string
+          score?: number | null
+          started_at?: string
+          time_taken_seconds?: number | null
+          total_marks?: number | null
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          dpp_id?: string
+          id?: string
+          score?: number | null
+          started_at?: string
+          time_taken_seconds?: number | null
+          total_marks?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dpp_attempts_dpp_id_fkey"
+            columns: ["dpp_id"]
+            isOneToOne: false
+            referencedRelation: "dpps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dpp_questions: {
+        Row: {
+          correct_answer: Json | null
+          created_at: string
+          difficulty: string | null
+          dpp_id: string
+          id: string
+          marks: number | null
+          negative_marks: number | null
+          options: Json | null
+          order_index: number | null
+          question_id: string | null
+          question_image_url: string | null
+          question_image_urls: string[] | null
+          question_number: number | null
+          question_text: string | null
+          question_type: string | null
+          solution_image_url: string | null
+          solution_image_urls: string[] | null
+          solution_text: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          correct_answer?: Json | null
+          created_at?: string
+          difficulty?: string | null
+          dpp_id: string
+          id?: string
+          marks?: number | null
+          negative_marks?: number | null
+          options?: Json | null
+          order_index?: number | null
+          question_id?: string | null
+          question_image_url?: string | null
+          question_image_urls?: string[] | null
+          question_number?: number | null
+          question_text?: string | null
+          question_type?: string | null
+          solution_image_url?: string | null
+          solution_image_urls?: string[] | null
+          solution_text?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          correct_answer?: Json | null
+          created_at?: string
+          difficulty?: string | null
+          dpp_id?: string
+          id?: string
+          marks?: number | null
+          negative_marks?: number | null
+          options?: Json | null
+          order_index?: number | null
+          question_id?: string | null
+          question_image_url?: string | null
+          question_image_urls?: string[] | null
+          question_number?: number | null
+          question_text?: string | null
+          question_type?: string | null
+          solution_image_url?: string | null
+          solution_image_urls?: string[] | null
+          solution_text?: string | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dpp_questions_dpp_id_fkey"
+            columns: ["dpp_id"]
+            isOneToOne: false
+            referencedRelation: "dpps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dpp_questions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dpps: {
+        Row: {
+          access_type: string | null
+          batch_id: string | null
+          chapter: string | null
+          chapter_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          difficulty: string | null
+          duration_minutes: number | null
+          exam_type: string | null
+          id: string
+          is_published: boolean
+          is_timed: boolean | null
+          publish_date: string | null
+          scheduled_for: string | null
+          subject: string | null
+          title: string
+          topic: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_type?: string | null
+          batch_id?: string | null
+          chapter?: string | null
+          chapter_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration_minutes?: number | null
+          exam_type?: string | null
+          id?: string
+          is_published?: boolean
+          is_timed?: boolean | null
+          publish_date?: string | null
+          scheduled_for?: string | null
+          subject?: string | null
+          title: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_type?: string | null
+          batch_id?: string | null
+          chapter?: string | null
+          chapter_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration_minutes?: number | null
+          exam_type?: string | null
+          id?: string
+          is_published?: boolean
+          is_timed?: boolean | null
+          publish_date?: string | null
+          scheduled_for?: string | null
+          subject?: string | null
+          title?: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dpps_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dpps_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      institution_members: {
+        Row: {
+          created_at: string
+          id: string
+          institution_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          institution_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          institution_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "institution_members_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      institutions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          slug: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          slug?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          slug?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      monitoring_events: {
+        Row: {
+          created_at: string
+          data: Json | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          session_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoring_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "monitoring_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monitoring_permissions: {
+        Row: {
+          attempt_id: string | null
+          camera_granted: boolean
+          created_at: string
+          id: string
+          microphone_granted: boolean
+          screen_granted: boolean
+          session_id: string | null
+        }
+        Insert: {
+          attempt_id?: string | null
+          camera_granted?: boolean
+          created_at?: string
+          id?: string
+          microphone_granted?: boolean
+          screen_granted?: boolean
+          session_id?: string | null
+        }
+        Update: {
+          attempt_id?: string | null
+          camera_granted?: boolean
+          created_at?: string
+          id?: string
+          microphone_granted?: boolean
+          screen_granted?: boolean
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoring_permissions_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "test_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monitoring_permissions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "proctoring_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monitoring_sessions: {
+        Row: {
+          attempt_id: string | null
+          created_at: string
+          data: Json | null
+          ended_at: string | null
+          id: string
+          metadata: Json | null
+          status: string
+          test_id: string | null
+          user_id: string
+        }
+        Insert: {
+          attempt_id?: string | null
+          created_at?: string
+          data?: Json | null
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string
+          test_id?: string | null
+          user_id: string
+        }
+        Update: {
+          attempt_id?: string | null
+          created_at?: string
+          data?: Json | null
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string
+          test_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoring_sessions_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "test_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monitoring_sessions_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -198,6 +897,545 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          batch_id: string | null
+          coupon_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json | null
+          payment_method: string | null
+          provider: string | null
+          provider_order_id: string | null
+          provider_payment_id: string | null
+          refund_amount: number | null
+          refund_reason: string | null
+          refunded_at: string | null
+          refunded_by: string | null
+          status: string
+          test_id: string | null
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          batch_id?: string | null
+          coupon_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          provider?: string | null
+          provider_order_id?: string | null
+          provider_payment_id?: string | null
+          refund_amount?: number | null
+          refund_reason?: string | null
+          refunded_at?: string | null
+          refunded_by?: string | null
+          status?: string
+          test_id?: string | null
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          batch_id?: string | null
+          coupon_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          provider?: string | null
+          provider_order_id?: string | null
+          provider_payment_id?: string | null
+          refund_amount?: number | null
+          refund_reason?: string | null
+          refunded_at?: string | null
+          refunded_by?: string | null
+          status?: string
+          test_id?: string | null
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      phynetix_library: {
+        Row: {
+          category: string | null
+          chapter: string | null
+          correct_answer: Json | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          difficulty: string | null
+          exam_type: string | null
+          file_size: number | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          is_active: boolean
+          is_published: boolean
+          library_id: string | null
+          marks: number | null
+          negative_marks: number | null
+          options: Json | null
+          question_image_url: string | null
+          question_text: string | null
+          question_type: string | null
+          solution_image_url: string | null
+          solution_text: string | null
+          subject: string | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          time_seconds: number | null
+          title: string | null
+          topic: string | null
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          category?: string | null
+          chapter?: string | null
+          correct_answer?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty?: string | null
+          exam_type?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          is_published?: boolean
+          library_id?: string | null
+          marks?: number | null
+          negative_marks?: number | null
+          options?: Json | null
+          question_image_url?: string | null
+          question_text?: string | null
+          question_type?: string | null
+          solution_image_url?: string | null
+          solution_text?: string | null
+          subject?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          time_seconds?: number | null
+          title?: string | null
+          topic?: string | null
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          category?: string | null
+          chapter?: string | null
+          correct_answer?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty?: string | null
+          exam_type?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          is_published?: boolean
+          library_id?: string | null
+          marks?: number | null
+          negative_marks?: number | null
+          options?: Json | null
+          question_image_url?: string | null
+          question_text?: string | null
+          question_type?: string | null
+          solution_image_url?: string | null
+          solution_text?: string | null
+          subject?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          time_seconds?: number | null
+          title?: string | null
+          topic?: string | null
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          description: string | null
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
+      proctoring_alerts: {
+        Row: {
+          alert_type: string
+          attempt_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          session_id: string | null
+          severity: string
+          status: string
+        }
+        Insert: {
+          alert_type: string
+          attempt_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          session_id?: string | null
+          severity?: string
+          status?: string
+        }
+        Update: {
+          alert_type?: string
+          attempt_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          session_id?: string | null
+          severity?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_alerts_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "test_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proctoring_alerts_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "proctoring_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proctoring_events: {
+        Row: {
+          attempt_id: string | null
+          created_at: string
+          data: Json | null
+          event_type: string
+          id: string
+          session_id: string | null
+        }
+        Insert: {
+          attempt_id?: string | null
+          created_at?: string
+          data?: Json | null
+          event_type: string
+          id?: string
+          session_id?: string | null
+        }
+        Update: {
+          attempt_id?: string | null
+          created_at?: string
+          data?: Json | null
+          event_type?: string
+          id?: string
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_events_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "test_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proctoring_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "proctoring_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proctoring_recordings: {
+        Row: {
+          attempt_id: string | null
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          provider: string | null
+          recording_url: string | null
+          session_id: string | null
+        }
+        Insert: {
+          attempt_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          provider?: string | null
+          recording_url?: string | null
+          session_id?: string | null
+        }
+        Update: {
+          attempt_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          provider?: string | null
+          recording_url?: string | null
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_recordings_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "test_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proctoring_recordings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "proctoring_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proctoring_sessions: {
+        Row: {
+          attempt_id: string | null
+          created_at: string
+          ended_at: string | null
+          id: string
+          last_heartbeat_at: string | null
+          metadata: Json | null
+          provider_room_name: string | null
+          started_at: string
+          status: string
+          test_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempt_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          last_heartbeat_at?: string | null
+          metadata?: Json | null
+          provider_room_name?: string | null
+          started_at?: string
+          status?: string
+          test_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempt_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          last_heartbeat_at?: string | null
+          metadata?: Json | null
+          provider_room_name?: string | null
+          started_at?: string
+          status?: string
+          test_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_sessions_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "test_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proctoring_sessions_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proctoring_test_settings: {
+        Row: {
+          allow_optional_device_fallback: boolean
+          allow_specific_users_only: boolean
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          id: string
+          instructions: string | null
+          recording_enabled: boolean
+          require_camera: boolean
+          require_microphone: boolean
+          require_screen: boolean
+          retention_days: number
+          screenshot_enabled: boolean
+          screenshot_interval_seconds: number
+          test_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          allow_optional_device_fallback?: boolean
+          allow_specific_users_only?: boolean
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          instructions?: string | null
+          recording_enabled?: boolean
+          require_camera?: boolean
+          require_microphone?: boolean
+          require_screen?: boolean
+          retention_days?: number
+          screenshot_enabled?: boolean
+          screenshot_interval_seconds?: number
+          test_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          allow_optional_device_fallback?: boolean
+          allow_specific_users_only?: boolean
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          instructions?: string | null
+          recording_enabled?: boolean
+          require_camera?: boolean
+          require_microphone?: boolean
+          require_screen?: boolean
+          retention_days?: number
+          screenshot_enabled?: boolean
+          screenshot_interval_seconds?: number
+          test_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_test_settings_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: true
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proctoring_user_overrides: {
+        Row: {
+          allow_optional_device_fallback: boolean | null
+          allowed: boolean
+          created_at: string
+          created_by: string | null
+          enabled: boolean | null
+          id: string
+          notes: string | null
+          require_camera: boolean | null
+          require_microphone: boolean | null
+          require_screen: boolean | null
+          test_id: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+        }
+        Insert: {
+          allow_optional_device_fallback?: boolean | null
+          allowed?: boolean
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean | null
+          id?: string
+          notes?: string | null
+          require_camera?: boolean | null
+          require_microphone?: boolean | null
+          require_screen?: boolean | null
+          test_id: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+        }
+        Update: {
+          allow_optional_device_fallback?: boolean | null
+          allowed?: boolean
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean | null
+          id?: string
+          notes?: string | null
+          require_camera?: boolean | null
+          require_microphone?: boolean | null
+          require_screen?: boolean | null
+          test_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_user_overrides_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -460,6 +1698,78 @@ export type Database = {
           },
         ]
       }
+      question_bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          question_id: string
+          test_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          question_id: string
+          test_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          question_id?: string
+          test_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_bookmarks_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_bookmarks_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_paragraphs: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          image_url: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       questions: {
         Row: {
           chapter_id: string
@@ -575,14 +1885,21 @@ export type Database = {
           answers: Json | null
           awaiting_result: boolean | null
           completed_at: string | null
+          extra_time_minutes: number | null
           fullscreen_exit_count: number | null
           id: string
+          last_submitted_at: string | null
           percentile: number | null
           rank: number | null
+          reopened_at: string | null
+          result_available_at: string | null
+          result_release_delay_minutes: number | null
           roll_number: string | null
           score: number | null
           started_at: string
+          submit_disabled: boolean
           test_id: string
+          time_per_question: Json | null
           time_taken_seconds: number | null
           total_marks: number | null
           user_id: string
@@ -591,14 +1908,21 @@ export type Database = {
           answers?: Json | null
           awaiting_result?: boolean | null
           completed_at?: string | null
+          extra_time_minutes?: number | null
           fullscreen_exit_count?: number | null
           id?: string
+          last_submitted_at?: string | null
           percentile?: number | null
           rank?: number | null
+          reopened_at?: string | null
+          result_available_at?: string | null
+          result_release_delay_minutes?: number | null
           roll_number?: string | null
           score?: number | null
           started_at?: string
+          submit_disabled?: boolean
           test_id: string
+          time_per_question?: Json | null
           time_taken_seconds?: number | null
           total_marks?: number | null
           user_id: string
@@ -607,14 +1931,21 @@ export type Database = {
           answers?: Json | null
           awaiting_result?: boolean | null
           completed_at?: string | null
+          extra_time_minutes?: number | null
           fullscreen_exit_count?: number | null
           id?: string
+          last_submitted_at?: string | null
           percentile?: number | null
           rank?: number | null
+          reopened_at?: string | null
+          result_available_at?: string | null
+          result_release_delay_minutes?: number | null
           roll_number?: string | null
           score?: number | null
           started_at?: string
+          submit_disabled?: boolean
           test_id?: string
+          time_per_question?: Json | null
           time_taken_seconds?: number | null
           total_marks?: number | null
           user_id?: string
@@ -667,12 +1998,14 @@ export type Database = {
       }
       test_section_questions: {
         Row: {
+          chapter: string | null
           correct_answer: Json
           created_at: string
           difficulty: string | null
           id: string
           image_url: string | null
           is_bonus: boolean | null
+          library_question_id: string | null
           marks: number | null
           negative_marks: number | null
           options: Json | null
@@ -680,20 +2013,24 @@ export type Database = {
           pdf_page: number | null
           question_number: number
           question_text: string | null
+          question_type: string | null
           section_id: string
           solution_image_url: string | null
           solution_text: string | null
           test_id: string
           time_seconds: number | null
+          topic: string | null
           updated_at: string
         }
         Insert: {
+          chapter?: string | null
           correct_answer: Json
           created_at?: string
           difficulty?: string | null
           id?: string
           image_url?: string | null
           is_bonus?: boolean | null
+          library_question_id?: string | null
           marks?: number | null
           negative_marks?: number | null
           options?: Json | null
@@ -701,20 +2038,24 @@ export type Database = {
           pdf_page?: number | null
           question_number: number
           question_text?: string | null
+          question_type?: string | null
           section_id: string
           solution_image_url?: string | null
           solution_text?: string | null
           test_id: string
           time_seconds?: number | null
+          topic?: string | null
           updated_at?: string
         }
         Update: {
+          chapter?: string | null
           correct_answer?: Json
           created_at?: string
           difficulty?: string | null
           id?: string
           image_url?: string | null
           is_bonus?: boolean | null
+          library_question_id?: string | null
           marks?: number | null
           negative_marks?: number | null
           options?: Json | null
@@ -722,14 +2063,23 @@ export type Database = {
           pdf_page?: number | null
           question_number?: number
           question_text?: string | null
+          question_type?: string | null
           section_id?: string
           solution_image_url?: string | null
           solution_text?: string | null
           test_id?: string
           time_seconds?: number | null
+          topic?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "test_section_questions_library_question_id_fkey"
+            columns: ["library_question_id"]
+            isOneToOne: false
+            referencedRelation: "phynetix_library"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "test_section_questions_section_id_fkey"
             columns: ["section_id"]
@@ -813,6 +2163,59 @@ export type Database = {
           },
         ]
       }
+      test_user_overrides: {
+        Row: {
+          allowed: boolean
+          created_at: string
+          created_by: string | null
+          extra_time_minutes: number | null
+          id: string
+          notes: string | null
+          result_release_delay_minutes: number | null
+          submit_disabled: boolean
+          test_id: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+        }
+        Insert: {
+          allowed?: boolean
+          created_at?: string
+          created_by?: string | null
+          extra_time_minutes?: number | null
+          id?: string
+          notes?: string | null
+          result_release_delay_minutes?: number | null
+          submit_disabled?: boolean
+          test_id: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+        }
+        Update: {
+          allowed?: boolean
+          created_at?: string
+          created_by?: string | null
+          extra_time_minutes?: number | null
+          id?: string
+          notes?: string | null
+          result_release_delay_minutes?: number | null
+          submit_disabled?: boolean
+          test_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_user_overrides_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tests: {
         Row: {
           answer_key_uploaded: boolean | null
@@ -827,6 +2230,7 @@ export type Database = {
           is_published: boolean | null
           name: string
           pdf_url: string | null
+          result_release_delay_minutes: number | null
           scheduled_at: string | null
           show_solutions: boolean | null
           solution_reopen_mode: boolean | null
@@ -846,6 +2250,7 @@ export type Database = {
           is_published?: boolean | null
           name: string
           pdf_url?: string | null
+          result_release_delay_minutes?: number | null
           scheduled_at?: string | null
           show_solutions?: boolean | null
           solution_reopen_mode?: boolean | null
@@ -865,6 +2270,7 @@ export type Database = {
           is_published?: boolean | null
           name?: string
           pdf_url?: string | null
+          result_release_delay_minutes?: number | null
           scheduled_at?: string | null
           show_solutions?: boolean | null
           solution_reopen_mode?: boolean | null
@@ -917,8 +2323,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_enrolled_in_batch: {
+        Args: { _batch_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      proctoring_schema_health: { Args: never; Returns: Json }
       user_completed_test: {
+        Args: { _test_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_has_paid_for_test: {
         Args: { _test_id: string; _user_id: string }
         Returns: boolean
       }
@@ -932,6 +2347,10 @@ export type Database = {
         | "teacher"
         | "data_manager"
         | "test_manager"
+        | "academic_admin"
+        | "operations_admin"
+        | "finance_admin"
+        | "marketing_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1067,6 +2486,10 @@ export const Constants = {
         "teacher",
         "data_manager",
         "test_manager",
+        "academic_admin",
+        "operations_admin",
+        "finance_admin",
+        "marketing_admin",
       ],
     },
   },
