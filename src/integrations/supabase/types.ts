@@ -52,9 +52,12 @@ export type Database = {
           batch_id: string
           created_at: string
           enrolled_at: string
+          enrollment_type: string | null
           expires_at: string | null
           id: string
+          is_active: boolean
           payment_id: string | null
+          payment_status: string | null
           status: string
           updated_at: string
           user_id: string
@@ -63,9 +66,12 @@ export type Database = {
           batch_id: string
           created_at?: string
           enrolled_at?: string
+          enrollment_type?: string | null
           expires_at?: string | null
           id?: string
+          is_active?: boolean
           payment_id?: string | null
+          payment_status?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -74,9 +80,12 @@ export type Database = {
           batch_id?: string
           created_at?: string
           enrolled_at?: string
+          enrollment_type?: string | null
           expires_at?: string | null
           id?: string
+          is_active?: boolean
           payment_id?: string | null
+          payment_status?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -96,22 +105,31 @@ export type Database = {
           batch_id: string
           created_at: string
           id: string
+          is_bonus: boolean
+          order_index: number | null
           sort_order: number | null
           test_id: string
+          unlock_date: string | null
         }
         Insert: {
           batch_id: string
           created_at?: string
           id?: string
+          is_bonus?: boolean
+          order_index?: number | null
           sort_order?: number | null
           test_id: string
+          unlock_date?: string | null
         }
         Update: {
           batch_id?: string
           created_at?: string
           id?: string
+          is_bonus?: boolean
+          order_index?: number | null
           sort_order?: number | null
           test_id?: string
+          unlock_date?: string | null
         }
         Relationships: [
           {
@@ -132,6 +150,7 @@ export type Database = {
       }
       batches: {
         Row: {
+          category: string | null
           course_id: string | null
           created_at: string
           created_by: string | null
@@ -139,20 +158,29 @@ export type Database = {
           description: string | null
           discount_price: number | null
           duration_days: number | null
+          end_date: string | null
           ends_at: string | null
+          enrollment_deadline: string | null
           exam_type: string | null
           features: Json | null
           id: string
+          is_active: boolean
+          is_featured: boolean
           is_free: boolean
           is_published: boolean
           join_code: string | null
+          max_students: number | null
           name: string
+          original_price: number | null
           price: number
+          short_description: string | null
+          start_date: string | null
           starts_at: string | null
           thumbnail_url: string | null
           updated_at: string
         }
         Insert: {
+          category?: string | null
           course_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -160,20 +188,29 @@ export type Database = {
           description?: string | null
           discount_price?: number | null
           duration_days?: number | null
+          end_date?: string | null
           ends_at?: string | null
+          enrollment_deadline?: string | null
           exam_type?: string | null
           features?: Json | null
           id?: string
+          is_active?: boolean
+          is_featured?: boolean
           is_free?: boolean
           is_published?: boolean
           join_code?: string | null
+          max_students?: number | null
           name: string
+          original_price?: number | null
           price?: number
+          short_description?: string | null
+          start_date?: string | null
           starts_at?: string | null
           thumbnail_url?: string | null
           updated_at?: string
         }
         Update: {
+          category?: string | null
           course_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -181,15 +218,23 @@ export type Database = {
           description?: string | null
           discount_price?: number | null
           duration_days?: number | null
+          end_date?: string | null
           ends_at?: string | null
+          enrollment_deadline?: string | null
           exam_type?: string | null
           features?: Json | null
           id?: string
+          is_active?: boolean
+          is_featured?: boolean
           is_free?: boolean
           is_published?: boolean
           join_code?: string | null
+          max_students?: number | null
           name?: string
+          original_price?: number | null
           price?: number
+          short_description?: string | null
+          start_date?: string | null
           starts_at?: string | null
           thumbnail_url?: string | null
           updated_at?: string
@@ -271,51 +316,60 @@ export type Database = {
       }
       coupons: {
         Row: {
+          applicable_batches: string[] | null
           applies_to: string
           batch_id: string | null
           code: string
           created_at: string
           created_by: string | null
+          current_uses: number
           description: string | null
           discount_type: string
           discount_value: number
           id: string
           is_active: boolean
           max_uses: number | null
+          min_purchase_amount: number | null
           updated_at: string
           used_count: number
           valid_from: string | null
           valid_until: string | null
         }
         Insert: {
+          applicable_batches?: string[] | null
           applies_to?: string
           batch_id?: string | null
           code: string
           created_at?: string
           created_by?: string | null
+          current_uses?: number
           description?: string | null
           discount_type?: string
           discount_value?: number
           id?: string
           is_active?: boolean
           max_uses?: number | null
+          min_purchase_amount?: number | null
           updated_at?: string
           used_count?: number
           valid_from?: string | null
           valid_until?: string | null
         }
         Update: {
+          applicable_batches?: string[] | null
           applies_to?: string
           batch_id?: string | null
           code?: string
           created_at?: string
           created_by?: string | null
+          current_uses?: number
           description?: string | null
           discount_type?: string
           discount_value?: number
           id?: string
           is_active?: boolean
           max_uses?: number | null
+          min_purchase_amount?: number | null
           updated_at?: string
           used_count?: number
           valid_from?: string | null
