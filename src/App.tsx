@@ -23,7 +23,7 @@ import Dashboard from "./pages/Dashboard";
 import TestLibrary from "./pages/TestLibrary";
 import NormalTestInterface from "./pages/NormalTestInterface";
 import NormalTestAnalysis from "./pages/NormalTestAnalysis";
-import DetailedAnalysis from "./pages/DetailedAnalysis";
+
 import QuestionWiseAnalysis from "./pages/QuestionWiseAnalysis";
 import MyAttempts from "./pages/MyAttempts";
 import Analytics from "./pages/Analytics";
