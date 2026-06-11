@@ -201,7 +201,7 @@ export default function MyAttempts() {
                   if (attempt.completed_at) {
                     navigate(`/test/${attempt.test_id}/analysis`);
                   } else {
-                    navigate(attempt.test?.test_type === 'pdf' ? `/pdf-test/${attempt.test_id}` : `/test/${attempt.test_id}`);
+                    navigate(`/test/${attempt.test_id}`);
                   }
                 }}
               >

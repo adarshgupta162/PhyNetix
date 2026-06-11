@@ -1449,6 +1449,7 @@ export type Database = {
           coaching_type: string | null
           created_at: string
           date_of_birth: string | null
+          district: string | null
           full_name: string | null
           gender: string | null
           id: string
@@ -1473,6 +1474,7 @@ export type Database = {
           coaching_type?: string | null
           created_at?: string
           date_of_birth?: string | null
+          district?: string | null
           full_name?: string | null
           gender?: string | null
           id: string
@@ -1497,6 +1499,7 @@ export type Database = {
           coaching_type?: string | null
           created_at?: string
           date_of_birth?: string | null
+          district?: string | null
           full_name?: string | null
           gender?: string | null
           id?: string
@@ -2004,12 +2007,14 @@ export type Database = {
           difficulty: string | null
           id: string
           image_url: string | null
+          image_urls: Json | null
           is_bonus: boolean | null
           library_question_id: string | null
           marks: number | null
           negative_marks: number | null
           options: Json | null
           order_index: number | null
+          paragraph_id: string | null
           pdf_page: number | null
           question_number: number
           question_text: string | null
@@ -2029,12 +2034,14 @@ export type Database = {
           difficulty?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: Json | null
           is_bonus?: boolean | null
           library_question_id?: string | null
           marks?: number | null
           negative_marks?: number | null
           options?: Json | null
           order_index?: number | null
+          paragraph_id?: string | null
           pdf_page?: number | null
           question_number: number
           question_text?: string | null
@@ -2054,12 +2061,14 @@ export type Database = {
           difficulty?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: Json | null
           is_bonus?: boolean | null
           library_question_id?: string | null
           marks?: number | null
           negative_marks?: number | null
           options?: Json | null
           order_index?: number | null
+          paragraph_id?: string | null
           pdf_page?: number | null
           question_number?: number
           question_text?: string | null
@@ -2078,6 +2087,13 @@ export type Database = {
             columns: ["library_question_id"]
             isOneToOne: false
             referencedRelation: "phynetix_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "test_section_questions_paragraph_id_fkey"
+            columns: ["paragraph_id"]
+            isOneToOne: false
+            referencedRelation: "question_paragraphs"
             referencedColumns: ["id"]
           },
           {
