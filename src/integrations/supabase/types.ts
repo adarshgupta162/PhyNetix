@@ -52,10 +52,12 @@ export type Database = {
           batch_id: string
           created_at: string
           enrolled_at: string
+          enrolled_by: string | null
           enrollment_type: string | null
           expires_at: string | null
           id: string
           is_active: boolean
+          notes: string | null
           payment_id: string | null
           payment_status: string | null
           status: string
@@ -66,10 +68,12 @@ export type Database = {
           batch_id: string
           created_at?: string
           enrolled_at?: string
+          enrolled_by?: string | null
           enrollment_type?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          notes?: string | null
           payment_id?: string | null
           payment_status?: string | null
           status?: string
@@ -80,10 +84,12 @@ export type Database = {
           batch_id?: string
           created_at?: string
           enrolled_at?: string
+          enrolled_by?: string | null
           enrollment_type?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          notes?: string | null
           payment_id?: string | null
           payment_status?: string | null
           status?: string
@@ -165,6 +171,7 @@ export type Database = {
           exam_type: string | null
           features: Json | null
           id: string
+          instructions: string | null
           is_active: boolean
           is_featured: boolean
           is_free: boolean
@@ -180,6 +187,7 @@ export type Database = {
           syllabus: Json | null
           thumbnail_url: string | null
           updated_at: string
+          welcome_message: string | null
         }
         Insert: {
           category?: string | null
@@ -197,6 +205,7 @@ export type Database = {
           exam_type?: string | null
           features?: Json | null
           id?: string
+          instructions?: string | null
           is_active?: boolean
           is_featured?: boolean
           is_free?: boolean
@@ -212,6 +221,7 @@ export type Database = {
           syllabus?: Json | null
           thumbnail_url?: string | null
           updated_at?: string
+          welcome_message?: string | null
         }
         Update: {
           category?: string | null
@@ -229,6 +239,7 @@ export type Database = {
           exam_type?: string | null
           features?: Json | null
           id?: string
+          instructions?: string | null
           is_active?: boolean
           is_featured?: boolean
           is_free?: boolean
@@ -244,6 +255,7 @@ export type Database = {
           syllabus?: Json | null
           thumbnail_url?: string | null
           updated_at?: string
+          welcome_message?: string | null
         }
         Relationships: [
           {
@@ -499,6 +511,7 @@ export type Database = {
           marks: number | null
           negative_marks: number | null
           options: Json | null
+          order_index: number | null
           question_id: string | null
           question_image_url: string | null
           question_image_urls: string[] | null
@@ -519,6 +532,7 @@ export type Database = {
           marks?: number | null
           negative_marks?: number | null
           options?: Json | null
+          order_index?: number | null
           question_id?: string | null
           question_image_url?: string | null
           question_image_urls?: string[] | null
@@ -539,6 +553,7 @@ export type Database = {
           marks?: number | null
           negative_marks?: number | null
           options?: Json | null
+          order_index?: number | null
           question_id?: string | null
           question_image_url?: string | null
           question_image_urls?: string[] | null
@@ -798,7 +813,9 @@ export type Database = {
           attempt_id: string | null
           created_at: string
           data: Json | null
+          ended_at: string | null
           id: string
+          metadata: Json | null
           status: string
           test_id: string | null
           user_id: string
@@ -807,7 +824,9 @@ export type Database = {
           attempt_id?: string | null
           created_at?: string
           data?: Json | null
+          ended_at?: string | null
           id?: string
+          metadata?: Json | null
           status?: string
           test_id?: string | null
           user_id: string
@@ -816,7 +835,9 @@ export type Database = {
           attempt_id?: string | null
           created_at?: string
           data?: Json | null
+          ended_at?: string | null
           id?: string
+          metadata?: Json | null
           status?: string
           test_id?: string | null
           user_id?: string
@@ -883,6 +904,7 @@ export type Database = {
           currency: string
           id: string
           metadata: Json | null
+          payment_method: string | null
           provider: string | null
           provider_order_id: string | null
           provider_payment_id: string | null
@@ -892,6 +914,7 @@ export type Database = {
           refunded_by: string | null
           status: string
           test_id: string | null
+          transaction_id: string | null
           updated_at: string
           user_id: string
         }
@@ -903,6 +926,7 @@ export type Database = {
           currency?: string
           id?: string
           metadata?: Json | null
+          payment_method?: string | null
           provider?: string | null
           provider_order_id?: string | null
           provider_payment_id?: string | null
@@ -912,6 +936,7 @@ export type Database = {
           refunded_by?: string | null
           status?: string
           test_id?: string | null
+          transaction_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -923,6 +948,7 @@ export type Database = {
           currency?: string
           id?: string
           metadata?: Json | null
+          payment_method?: string | null
           provider?: string | null
           provider_order_id?: string | null
           provider_payment_id?: string | null
@@ -932,6 +958,7 @@ export type Database = {
           refunded_by?: string | null
           status?: string
           test_id?: string | null
+          transaction_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -988,9 +1015,10 @@ export type Database = {
           tags: string[] | null
           thumbnail_url: string | null
           time_seconds: number | null
-          title: string
+          title: string | null
           topic: string | null
           updated_at: string
+          usage_count: number
         }
         Insert: {
           category?: string | null
@@ -1020,9 +1048,10 @@ export type Database = {
           tags?: string[] | null
           thumbnail_url?: string | null
           time_seconds?: number | null
-          title: string
+          title?: string | null
           topic?: string | null
           updated_at?: string
+          usage_count?: number
         }
         Update: {
           category?: string | null
@@ -1052,9 +1081,10 @@ export type Database = {
           tags?: string[] | null
           thumbnail_url?: string | null
           time_seconds?: number | null
-          title?: string
+          title?: string | null
           topic?: string | null
           updated_at?: string
+          usage_count?: number
         }
         Relationships: []
       }
@@ -1282,6 +1312,7 @@ export type Database = {
           allow_optional_device_fallback: boolean
           allow_specific_users_only: boolean
           created_at: string
+          created_by: string | null
           enabled: boolean
           id: string
           instructions: string | null
@@ -1294,11 +1325,13 @@ export type Database = {
           screenshot_interval_seconds: number
           test_id: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           allow_optional_device_fallback?: boolean
           allow_specific_users_only?: boolean
           created_at?: string
+          created_by?: string | null
           enabled?: boolean
           id?: string
           instructions?: string | null
@@ -1311,11 +1344,13 @@ export type Database = {
           screenshot_interval_seconds?: number
           test_id: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           allow_optional_device_fallback?: boolean
           allow_specific_users_only?: boolean
           created_at?: string
+          created_by?: string | null
           enabled?: boolean
           id?: string
           instructions?: string | null
@@ -1328,6 +1363,7 @@ export type Database = {
           screenshot_interval_seconds?: number
           test_id?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -1344,6 +1380,7 @@ export type Database = {
           allow_optional_device_fallback: boolean | null
           allowed: boolean
           created_at: string
+          created_by: string | null
           enabled: boolean | null
           id: string
           notes: string | null
@@ -1352,12 +1389,14 @@ export type Database = {
           require_screen: boolean | null
           test_id: string
           updated_at: string
+          updated_by: string | null
           user_id: string
         }
         Insert: {
           allow_optional_device_fallback?: boolean | null
           allowed?: boolean
           created_at?: string
+          created_by?: string | null
           enabled?: boolean | null
           id?: string
           notes?: string | null
@@ -1366,12 +1405,14 @@ export type Database = {
           require_screen?: boolean | null
           test_id: string
           updated_at?: string
+          updated_by?: string | null
           user_id: string
         }
         Update: {
           allow_optional_device_fallback?: boolean | null
           allowed?: boolean
           created_at?: string
+          created_by?: string | null
           enabled?: boolean | null
           id?: string
           notes?: string | null
@@ -1380,6 +1421,7 @@ export type Database = {
           require_screen?: boolean | null
           test_id?: string
           updated_at?: string
+          updated_by?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1947,12 +1989,14 @@ export type Database = {
       }
       test_section_questions: {
         Row: {
+          chapter: string | null
           correct_answer: Json
           created_at: string
           difficulty: string | null
           id: string
           image_url: string | null
           is_bonus: boolean | null
+          library_question_id: string | null
           marks: number | null
           negative_marks: number | null
           options: Json | null
@@ -1960,20 +2004,24 @@ export type Database = {
           pdf_page: number | null
           question_number: number
           question_text: string | null
+          question_type: string | null
           section_id: string
           solution_image_url: string | null
           solution_text: string | null
           test_id: string
           time_seconds: number | null
+          topic: string | null
           updated_at: string
         }
         Insert: {
+          chapter?: string | null
           correct_answer: Json
           created_at?: string
           difficulty?: string | null
           id?: string
           image_url?: string | null
           is_bonus?: boolean | null
+          library_question_id?: string | null
           marks?: number | null
           negative_marks?: number | null
           options?: Json | null
@@ -1981,20 +2029,24 @@ export type Database = {
           pdf_page?: number | null
           question_number: number
           question_text?: string | null
+          question_type?: string | null
           section_id: string
           solution_image_url?: string | null
           solution_text?: string | null
           test_id: string
           time_seconds?: number | null
+          topic?: string | null
           updated_at?: string
         }
         Update: {
+          chapter?: string | null
           correct_answer?: Json
           created_at?: string
           difficulty?: string | null
           id?: string
           image_url?: string | null
           is_bonus?: boolean | null
+          library_question_id?: string | null
           marks?: number | null
           negative_marks?: number | null
           options?: Json | null
@@ -2002,14 +2054,23 @@ export type Database = {
           pdf_page?: number | null
           question_number?: number
           question_text?: string | null
+          question_type?: string | null
           section_id?: string
           solution_image_url?: string | null
           solution_text?: string | null
           test_id?: string
           time_seconds?: number | null
+          topic?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "test_section_questions_library_question_id_fkey"
+            columns: ["library_question_id"]
+            isOneToOne: false
+            referencedRelation: "phynetix_library"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "test_section_questions_section_id_fkey"
             columns: ["section_id"]
