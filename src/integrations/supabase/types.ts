@@ -110,9 +110,11 @@ export type Database = {
         Row: {
           batch_id: string
           created_at: string
+          display_order: number
           id: string
           is_bonus: boolean
           order_index: number | null
+          section_id: string | null
           sort_order: number | null
           test_id: string
           unlock_date: string | null
@@ -120,9 +122,11 @@ export type Database = {
         Insert: {
           batch_id: string
           created_at?: string
+          display_order?: number
           id?: string
           is_bonus?: boolean
           order_index?: number | null
+          section_id?: string | null
           sort_order?: number | null
           test_id: string
           unlock_date?: string | null
@@ -130,9 +134,11 @@ export type Database = {
         Update: {
           batch_id?: string
           created_at?: string
+          display_order?: number
           id?: string
           is_bonus?: boolean
           order_index?: number | null
+          section_id?: string | null
           sort_order?: number | null
           test_id?: string
           unlock_date?: string | null
@@ -143,6 +149,13 @@ export type Database = {
             columns: ["batch_id"]
             isOneToOne: false
             referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "batch_tests_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "course_sections"
             referencedColumns: ["id"]
           },
           {
@@ -396,6 +409,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "coupons_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_sections: {
+        Row: {
+          batch_id: string
+          created_at: string
+          display_order: number
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_sections_batch_id_fkey"
             columns: ["batch_id"]
             isOneToOne: false
             referencedRelation: "batches"
@@ -1992,6 +2040,54 @@ export type Database = {
           },
           {
             foreignKeyName: "test_questions_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      test_reviews: {
+        Row: {
+          batch_id: string | null
+          created_at: string
+          id: string
+          rating: number
+          review: string | null
+          test_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batch_id?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          review?: string | null
+          test_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batch_id?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          review?: string | null
+          test_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_reviews_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "test_reviews_test_id_fkey"
             columns: ["test_id"]
             isOneToOne: false
             referencedRelation: "tests"
