@@ -12,6 +12,7 @@ import { useProctoring } from "@/hooks/useProctoring";
 import FullscreenGuard from "@/components/test/FullscreenGuard";
 import AccessibilityToolbar from "@/components/test/AccessibilityToolbar";
 import { LatexRenderer } from "@/components/ui/latex-renderer";
+import RatingDialog from "@/components/test/RatingDialog";
 
 /* ─── TYPES ─── */
 interface Question {
@@ -168,6 +169,8 @@ export default function NormalTestInterface() {
   const [currentScreen, setCurrentScreen]       = useState(1);
   const [agreedToTerms, setAgreedToTerms]       = useState(false);
   const [testDuration, setTestDuration]         = useState(0);
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
+  const [pendingNavState, setPendingNavState]   = useState<any>(null);
   const [hasExistingAttempt, setHasExistingAttempt] = useState(false);
   const [systemId, setSystemId]                 = useState("");
   const [studentName, setStudentName]           = useState("Student");
@@ -702,7 +705,9 @@ export default function NormalTestInterface() {
       });
       if (error || data?.error) throw new Error(data?.error || error?.message || "Failed to submit test");
       await proctoring.stop(fromMax ? "max_fullscreen_exits" : "submitted");
-      navigate(`/test/${testId}/analysis`, { state: { results: data, testName } });
+      // Show rating dialog before navigating to analysis
+      setPendingNavState({ results: data, testName });
+      setShowRatingDialog(true);
     } catch (e: any) {
       console.error(e);
       toast({ title: "Error", description: e.message || "Failed to submit test.", variant: "destructive" });
@@ -1380,12 +1385,25 @@ export default function NormalTestInterface() {
     </div>
   );
 
+  const ratingDialog = user && testId ? (
+    <RatingDialog
+      open={showRatingDialog}
+      testId={testId}
+      userId={user.id}
+      onClose={() => {
+        setShowRatingDialog(false);
+        navigate(`/test/${testId}/analysis`, { state: pendingNavState || undefined });
+      }}
+    />
+  ) : null;
+
   if (fullscreenEnabled) {
     return (
       <FullscreenGuard maxExits={7} onMaxExitsReached={handleMaxFullscreenExits} onExitCountChange={handleFullscreenExitCountChange} initialExitCount={fullscreenExitCount}>
         {testContent}
+        {ratingDialog}
       </FullscreenGuard>
     );
   }
-  return testContent;
+  return <>{testContent}{ratingDialog}</>;
 }
