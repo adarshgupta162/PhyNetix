@@ -205,27 +205,45 @@ export default function BatchDetailsPage() {
               {batchTests && batchTests.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <FileText className="w-5 h-5" />
-                      Tests Included ({batchTests.length})
-                    </CardTitle>
+                    <div className="flex items-center justify-between gap-4 flex-wrap">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <FileText className="w-5 h-5" />
+                        Tests Included ({filteredBatchTests.length}/{batchTests.length})
+                      </CardTitle>
+                      {(sections && sections.length > 0) && (
+                        <Select value={selectedSection} onValueChange={setSelectedSection}>
+                          <SelectTrigger className="w-48 h-9">
+                            <SelectValue placeholder="All sections" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All sections</SelectItem>
+                            {sections.map((s) => (
+                              <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                            ))}
+                            <SelectItem value="__none__">Unsectioned</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <ul className="space-y-2">
-                      {batchTests.slice(0, 5).map((bt: any) => (
-                        <li key={bt.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/50">
-                          <span>{bt.tests?.name || 'Unnamed Test'}</span>
-                          {bt.is_bonus && (
-                            <Badge variant="secondary" className="text-xs">Bonus</Badge>
-                          )}
-                        </li>
-                      ))}
-                      {batchTests.length > 5 && (
-                        <li className="text-sm text-muted-foreground text-center py-2">
-                          +{batchTests.length - 5} more tests
-                        </li>
-                      )}
-                    </ul>
+                    {filteredBatchTests.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">No tests in this section yet.</p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {filteredBatchTests.map((bt: any) => (
+                          <li key={bt.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/50">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="truncate">{bt.tests?.name || 'Unnamed Test'}</span>
+                              {bt.section?.name && (
+                                <Badge variant="outline" className="text-xs shrink-0">{bt.section.name}</Badge>
+                              )}
+                            </div>
+                            {bt.is_bonus && <Badge variant="secondary" className="text-xs">Bonus</Badge>}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </CardContent>
                 </Card>
               )}
