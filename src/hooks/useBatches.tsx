@@ -79,16 +79,34 @@ export function useBatchTests(batchId: string | undefined) {
     queryKey: ['batch-tests', batchId],
     queryFn: async () => {
       if (!batchId) return [];
-      
+
       const { data, error } = await supabase
         .from('batch_tests')
         .select(`
           *,
-          tests (*)
+          tests (*),
+          section:course_sections (id, name, display_order)
         `)
         .eq('batch_id', batchId)
         .order('order_index', { ascending: true });
 
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!batchId,
+  });
+}
+
+export function useCourseSections(batchId: string | undefined) {
+  return useQuery({
+    queryKey: ['course-sections', batchId],
+    queryFn: async () => {
+      if (!batchId) return [];
+      const { data, error } = await supabase
+        .from('course_sections')
+        .select('*')
+        .eq('batch_id', batchId)
+        .order('display_order', { ascending: true });
       if (error) throw error;
       return data;
     },
