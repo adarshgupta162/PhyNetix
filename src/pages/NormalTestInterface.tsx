@@ -58,18 +58,19 @@ const C = {
 };
 
 /* ─── PALETTE BUTTON ─── */
-function PaletteBtn({ num, status, onClick }: { num: number; status: string; onClick: () => void }) {
-  let bg = C.palGrey, color = "#555", borderRadius = "4px", border = "1px solid #aaa", outline = "none";
-  if (status === "current") {
-    bg = C.palRed2; color = "#fff"; borderRadius = "4px"; border = "none";
-    outline = `2px solid ${C.palRed2}`; 
-  } else if (status === "not-answered") {
+function PaletteBtn({ num, status, isCurrent, onClick }: { num: number; status: string; isCurrent?: boolean; onClick: () => void }) {
+  // Real status drives color. Current question is shown via outline + fade (only when
+  // the question isn't answered or marked — those keep their solid colours).
+  let bg = C.palGrey, color = "#555", borderRadius = "4px", border = "1px solid #aaa";
+  if (status === "not-answered") {
     bg = C.palRed; color = "#fff"; borderRadius = "50%"; border = "none";
   } else if (status === "answered") {
     bg = C.palGreen; color = "#fff"; borderRadius = "50%"; border = "none";
   } else if (status === "marked" || status === "answered-marked") {
     bg = C.palPurple; color = "#fff"; borderRadius = "50%"; border = "none";
   }
+  const showFade = isCurrent && (status === "not-visited" || status === "not-answered");
+  const outline = isCurrent ? `2px solid ${C.secActive}` : "none";
   return (
     <div onClick={onClick} style={{
       width: 36, height: 36, background: bg, color, borderRadius, border,
@@ -77,6 +78,8 @@ function PaletteBtn({ num, status, onClick }: { num: number; status: string; onC
       fontSize: 13, fontWeight: "bold", cursor: "pointer",
       fontFamily: "Arial,sans-serif", position: "relative", flexShrink: 0,
       outline, outlineOffset: "2px", boxSizing: "border-box", userSelect: "none",
+      opacity: showFade ? 0.45 : 1,
+      transition: "opacity .15s ease, outline-color .15s ease",
     }}>
       {num}
       {status === "answered-marked" && (
@@ -718,53 +721,11 @@ export default function NormalTestInterface() {
     handleSubmit(true, true);
   }, [handleSubmit]);
 
-  // AUTO-SUBMIT on page leave (close tab, refresh, navigate away)
-  const autoSubmitRefs = useRef({ attemptId, answers, timeLeft, testDuration, fullscreenExitCount, submitting });
-  useEffect(() => {
-    autoSubmitRefs.current = { attemptId, answers, timeLeft, testDuration, fullscreenExitCount, submitting };
-  }, [attemptId, answers, timeLeft, testDuration, fullscreenExitCount, submitting]);
-
-  useEffect(() => {
-    const fireAutoSubmit = () => {
-      const { attemptId: aid, answers: ans, timeLeft: tl, testDuration: td, fullscreenExitCount: fec, submitting: sub } = autoSubmitRefs.current;
-      if (!aid || sub) return;
-      try {
-        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-test`;
-        const token = (supabase as any)?.auth?.session?.()?.access_token;
-        // Use keepalive fetch so request survives page unload and can carry auth headers
-        supabase.auth.getSession().then(({ data }) => {
-          const accessToken = data.session?.access_token;
-          if (!accessToken) return;
-          fetch(url, {
-            method: "POST",
-            keepalive: true,
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${accessToken}`,
-              "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            },
-            body: JSON.stringify({
-              attempt_id: aid,
-              answers: ans,
-              time_taken_seconds: Math.max(1, (td * 60) - tl),
-              fullscreen_exit_count: fec,
-              force_submit: true,
-            }),
-          }).catch(() => {});
-        });
-      } catch {}
-    };
-
-    const handlePageHide = () => fireAutoSubmit();
-    const handleBeforeUnload = () => fireAutoSubmit();
-
-    window.addEventListener("pagehide", handlePageHide);
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => {
-      window.removeEventListener("pagehide", handlePageHide);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
+  // NOTE: page-leave / tab-close auto-submit was removed by request.
+  // The timer keeps running server-side. The `auto-submit-expired` edge function
+  // submits the attempt when started_at + duration has elapsed, and the
+  // FullscreenGuard force-submits after the 7th fullscreen exit. Closing the
+  // tab or navigating away on its own will NOT submit the test.
 
   const resumeMonitoring = useCallback(async () => {
     try {
@@ -776,7 +737,9 @@ export default function NormalTestInterface() {
   }, [proctoring]);
 
   const getQuestionStatus = (qid: string) => {
-    if (currentQuestion?.id === qid) return "current";
+    // Note: "current" is no longer encoded in the status — answered/marked
+    // colors should persist when the user is viewing the question. The
+    // PaletteBtn receives `isCurrent` separately and shows a faded outline.
     if (markedForReview.has(qid) && isAnswerPresent(answers[qid])) return "answered-marked";
     if (markedForReview.has(qid)) return "marked";
     if (isAnswerPresent(answers[qid])) return "answered";
@@ -1312,6 +1275,7 @@ export default function NormalTestInterface() {
                   key={q.id}
                   num={idx + 1}
                   status={getQuestionStatus(q.id)}
+                  isCurrent={currentQuestion?.id === q.id}
                   onClick={() => {
                     const nextVisited = new Set(visitedQuestions);
                     nextVisited.add(q.id);
