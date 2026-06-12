@@ -718,6 +718,54 @@ export default function NormalTestInterface() {
     handleSubmit(true, true);
   }, [handleSubmit]);
 
+  // AUTO-SUBMIT on page leave (close tab, refresh, navigate away)
+  const autoSubmitRefs = useRef({ attemptId, answers, timeLeft, testDuration, fullscreenExitCount, submitting });
+  useEffect(() => {
+    autoSubmitRefs.current = { attemptId, answers, timeLeft, testDuration, fullscreenExitCount, submitting };
+  }, [attemptId, answers, timeLeft, testDuration, fullscreenExitCount, submitting]);
+
+  useEffect(() => {
+    const fireAutoSubmit = () => {
+      const { attemptId: aid, answers: ans, timeLeft: tl, testDuration: td, fullscreenExitCount: fec, submitting: sub } = autoSubmitRefs.current;
+      if (!aid || sub) return;
+      try {
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-test`;
+        const token = (supabase as any)?.auth?.session?.()?.access_token;
+        // Use keepalive fetch so request survives page unload and can carry auth headers
+        supabase.auth.getSession().then(({ data }) => {
+          const accessToken = data.session?.access_token;
+          if (!accessToken) return;
+          fetch(url, {
+            method: "POST",
+            keepalive: true,
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${accessToken}`,
+              "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            },
+            body: JSON.stringify({
+              attempt_id: aid,
+              answers: ans,
+              time_taken_seconds: Math.max(1, (td * 60) - tl),
+              fullscreen_exit_count: fec,
+              force_submit: true,
+            }),
+          }).catch(() => {});
+        });
+      } catch {}
+    };
+
+    const handlePageHide = () => fireAutoSubmit();
+    const handleBeforeUnload = () => fireAutoSubmit();
+
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   const resumeMonitoring = useCallback(async () => {
     try {
       await proctoring.recover();
