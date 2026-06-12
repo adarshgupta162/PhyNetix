@@ -1,10 +1,12 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, BookOpen, CheckCircle, IndianRupee } from "lucide-react";
+import { Clock, Users, BookOpen, CheckCircle, IndianRupee, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Batch } from "@/hooks/useBatches";
 import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BatchCardProps {
   batch: Batch;
@@ -22,11 +24,27 @@ const categoryLabels: Record<string, string> = {
 };
 
 export function BatchCard({ batch, isEnrolled = false, showEnrollButton = true }: BatchCardProps) {
-  const discountPercent = batch.original_price 
+  const discountPercent = batch.original_price
     ? Math.round(((batch.original_price - batch.price) / batch.original_price) * 100)
     : 0;
 
   const features = (batch.features as string[]) || [];
+
+  const { data: rating } = useQuery({
+    queryKey: ["batch-rating", batch.id],
+    queryFn: async () => {
+      const { data: bts } = await supabase.from("batch_tests").select("test_id").eq("batch_id", batch.id);
+      const ids = (bts || []).map((b: any) => b.test_id);
+      if (!ids.length) return { avg: 0, count: 0 };
+      const { data: reviews } = await supabase.from("test_reviews").select("rating").in("test_id", ids);
+      const list = reviews || [];
+      if (!list.length) return { avg: 0, count: 0 };
+      const sum = list.reduce((a: number, r: any) => a + r.rating, 0);
+      return { avg: sum / list.length, count: list.length };
+    },
+    staleTime: 60_000,
+  });
+
 
   return (
     <Card className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
@@ -96,6 +114,12 @@ export function BatchCard({ batch, isEnrolled = false, showEnrollButton = true }
             <div className="flex items-center gap-1">
               <Clock className="w-4 h-4" />
               <span>Starts {format(new Date(batch.start_date), 'MMM d')}</span>
+            </div>
+          )}
+          {rating && rating.count > 0 && (
+            <div className="flex items-center gap-1">
+              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <span>{rating.avg.toFixed(1)} ({rating.count})</span>
             </div>
           )}
         </div>
