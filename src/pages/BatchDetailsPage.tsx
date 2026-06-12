@@ -31,10 +31,19 @@ export default function BatchDetailsPage() {
   const { user } = useAuth();
   const { data: batch, isLoading } = useBatch(batchId);
   const { data: batchTests } = useBatchTests(batchId);
+  const { data: sections } = useCourseSections(batchId);
   const { isEnrolled, enrollment } = useIsEnrolled(batchId);
+  const [selectedSection, setSelectedSection] = useState<string>("all");
 
   const features = (batch?.features as string[]) || [];
   const syllabus = (batch?.syllabus as { title: string; topics: string[] }[]) || [];
+
+  const filteredBatchTests = useMemo(() => {
+    if (!batchTests) return [];
+    if (selectedSection === "all") return batchTests;
+    if (selectedSection === "__none__") return batchTests.filter((bt: any) => !bt.section_id);
+    return batchTests.filter((bt: any) => bt.section_id === selectedSection);
+  }, [batchTests, selectedSection]);
 
   const discountPercent = batch?.original_price 
     ? Math.round(((batch.original_price - batch.price) / batch.original_price) * 100)
