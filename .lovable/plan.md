@@ -1,66 +1,88 @@
+## Scope
 
-# Finish Phynetix Schema in One Migration
+Eight changes across backend (schema + edge functions) and frontend (test interface, admin, my-tests, checkout).
 
-## Goal
+---
 
-Stop the batch-by-batch approach. Author **one** clean, idempotent SQL migration that contains every remaining table, enum, function, trigger, RLS policy and GRANT the frontend + edge functions require. Save it as a real file on disk under `supabase/migrations/` AND submit it through the migration tool so it actually runs against Lovable Cloud.
+## 1. Auto-submit cleanup
 
-## What's already in the DB (keep, don't recreate)
+- Remove the `pagehide` / `beforeunload` keepalive `fetch` to `submit-test` in `src/pages/NormalTestInterface.tsx`.
+- Keep the existing time-up timer-based auto-submit and the 7-fullscreen-exit force-submit.
+- Keep `auto-submit-expired` edge function (it's the server-side safety net that submits when `started_at + duration` has passed — that's exactly the "time keeps running in background" behavior).
+- Result: closing tab / leaving page does NOT submit; only timer expiry or 7th fullscreen exit does.
 
-`profiles`, `user_roles`, `courses`, `chapters`, `questions`, `tests`, `test_subjects`, `test_sections`, `test_section_questions`, `test_questions`, `test_attempts`, `qb_courses`, `qb_chapters`, `qb_questions`, `qb_attempts`, `qb_bookmarks`, `notifications`, `audit_logs`, `departments`, `staff_requests`, `community_messages`, plus the functions `has_role`, `handle_new_user`, `update_updated_at_column`, `generate_roll_number`, `user_completed_test`, `is_staff`.
+## 2. Question palette color rules (NormalTestInterface)
 
-## What's missing (this migration adds)
+In the OMR / QuestionPalette component, change the per-question box color logic:
 
-Tables the frontend / edge functions call but the DB doesn't have yet:
+- Answered + saved → **green**, even when currently viewing.
+- Marked for review (regardless of answer) → **purple**, even when currently viewing.
+- Currently viewing (and neither answered nor marked) → faded/dimmed style instead of solid highlight.
+- Not viewed  → existing neutral.
+-  not attempted → red
 
-- **Batches & enrollment**: `batches`, `batch_enrollments`, `batch_tests`
-- **Commerce**: `payments`, `coupons`
-- **Institutions**: `institutions`, `institution_members`
-- **Library**: `phynetix_library`
-- **Platform**: `platform_settings`
-- **DPP**: `dpps`, `dpp_questions`, `dpp_attempts`
-- **Question extras**: `question_bookmarks`, `question_paragraphs`
-- **Test overrides**: `test_user_overrides`
-- **Proctoring (full set)**: `proctoring_test_settings`, `proctoring_user_overrides`, `proctoring_sessions`, `proctoring_events`, `proctoring_alerts`, `proctoring_recordings`, `monitoring_permissions`
-- **Legacy aliases referenced in code**: `monitoring_sessions`, `monitoring_events` (created as compatibility tables)
+Edit: `src/components/test/OMRPanel.tsx` (and/or `EnhancedOMRPanel.tsx` whichever is wired in).
 
-Helper functions used by RLS and edge functions:
+## 3. Course sections (admin + student)
 
-- `is_enrolled_in_batch(_user_id, _batch_id)` — security definer
-- `user_has_paid_for_test(_user_id, _test_id)` — checks payments + batch enrollment
-- `proctoring_schema_health()` — used by `_shared/proctoring.ts`
+### Schema (one migration)
 
-Each table gets, in this order: `CREATE TABLE` → `GRANT` (authenticated + service_role; anon only where intentionally public like `platform_settings`) → `ENABLE ROW LEVEL SECURITY` → `CREATE POLICY` (admin via `has_role`, owner via `auth.uid()`, enrollment via `is_enrolled_in_batch`) → `updated_at` trigger where applicable.
+- New table `course_sections`:
+  - `id`, `batch_id` (FK batches), `name` (text, free-form), `display_order` (int), timestamps.
+  - GRANTs + RLS: staff manage; enrolled students read.
+- Add `section_id uuid NULL REFERENCES course_sections(id)` and `display_order int DEFAULT 0` to `batch_tests`.
 
-## Fixing the "bought course but test not visible / batch asks to buy again" bug
+### Admin UI
 
-This is the root issue the user reported. It's caused by missing `batch_enrollments` + `user_has_paid_for_test` plumbing. The migration fixes it by:
+- `src/components/admin/BatchTestsManager.tsx`: add "Sections" panel — create / rename / delete / reorder sections; assign each test to a section; drag-to-reorder tests within a section (use simple up/down buttons to keep scope tight).
 
-1. Creating `batch_enrollments(user_id, batch_id, status, enrolled_at, expires_at)` with a unique `(user_id, batch_id)` index.
-2. Creating `payments(user_id, batch_id?, test_id?, amount, status, …)` and on `status='completed'` having an AFTER trigger insert into `batch_enrollments` automatically.
-3. RLS on `tests` and `batch_tests` lets a student `SELECT` when `is_enrolled_in_batch(auth.uid(), batch_id)` returns true.
-4. Frontend hooks (`useEnrollment`, `useBatches`) already query these table names — no frontend changes needed once tables exist.
+### Student UI
 
-## File output
+- `src/pages/MyBatchesPage.tsx` / batch details: dropdown to filter by section; default "set by admin".
 
-- **Write to disk**: `supabase/migrations/20260611000000_phynetix_complete_schema.sql` containing the full SQL (idempotent with `CREATE TABLE IF NOT EXISTS`, `CREATE OR REPLACE FUNCTION`, `DROP POLICY IF EXISTS … ; CREATE POLICY …`).
-- **Also save** the 3 already-applied consolidated files I ran earlier as-is (they're already on disk: `20260610122636…`, `20260610122713…`, `20260610122750…`) — confirmed present.
-- **Apply** the new file through the migration tool in a single call so Lovable Cloud runs it and regenerates `src/integrations/supabase/types.ts`.
+## 4. My Tests card layout
 
-## Storage buckets (separate, after migration)
+- `src/pages/MyAttempts.tsx`: convert vertical card grid to horizontal row layout (thumbnail left, title/meta middle, actions right). One card per row, responsive (stacks on mobile).
+- Remove the "No. of attempts" field from the card.
 
-Storage buckets can't be created via SQL through the migration tool. After the migration runs, create the buckets the code references (`avatars`, `course-thumbnails`, `question-images`, `pdf-tests`, `library`, `proctoring-recordings`) via `supabase--storage_create_bucket` — public/private set per bucket.
+## 5. Student rating system
 
-## Out of scope for this step
+### Schema (same migration as #3)
 
-- Rewriting the 40 original broken migration files (kept on disk for reference only; not replayed).
-- Seeding data (courses, library items) — done later via the insert tool if needed.
-- Frontend code changes — none expected; if `types.ts` regen surfaces a type error after the migration, fix at that point.
+- New table `test_reviews`: `id`, `user_id`, `test_id`, `batch_id`, `rating int 1-5`, `review text`, unique (user_id, test_id), timestamps.
+- RLS: user can insert/update their own; everyone authenticated can read aggregate.
 
-## Order of operations
+### Submit-test flow
 
-1. Author the SQL (one file, ~700–900 lines).
-2. Save it to `supabase/migrations/20260611000000_phynetix_complete_schema.sql`.
-3. Submit identical SQL via the migration tool → user approves → runs.
-4. Create storage buckets.
-5. Smoke-test: open a batch page logged-in as a test student to confirm enrollment + tests are visible.
+- After successful submission in `NormalTestInterface.tsx`, show a rating dialog (1-5 stars + optional text) before redirecting to analysis. Skippable.
+
+### Display
+
+- Test card in My Tests: average rating + count.
+- Course/batch card (`BatchCard.tsx`): average rating across all tests in batch + count.
+
+## 6. Coupon: only allow checkout if final = ₹0
+
+- `src/pages/CheckoutPage.tsx`:
+  - Require a valid coupon application.
+  - "Pay" button disabled unless `final_amount === 0`.
+  - On submit with `final_amount === 0`: skip payment gateway, directly insert `payments` row with `status='completed'`, `amount=0`, coupon_id set → existing `auto_enroll_on_payment` trigger creates the enrollment.
+- Make sure coupon validation logic actually computes discount correctly (percent vs flat, max discount cap, expiry, usage limits). Fix any bugs found in `CouponManager` / checkout coupon application.
+
+## 7. Cleanup
+
+- Remove all UI references to "attempts count" on student-facing test cards (admin views unchanged).
+
+---
+
+## Technical notes
+
+- Migration order: 1 file with `course_sections`, `batch_tests.section_id`, `batch_tests.display_order`, `test_reviews`, plus all GRANTs/RLS.
+- Reuse existing `auto_enroll_on_payment` trigger for ₹0 coupon flow — no new server logic needed for free enrollment.
+- No edge function changes required beyond removing the client-side keepalive call.
+- Rating dialog: new component `src/components/test/RatingDialog.tsx`.
+
+## Out of scope
+
+- Drag-and-drop reordering library +using up/down arrow buttons .
+- Migrating historical attempts to compute "first rating prompt".
