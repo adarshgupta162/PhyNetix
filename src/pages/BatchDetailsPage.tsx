@@ -1,5 +1,6 @@
+import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useBatch, useBatchTests } from "@/hooks/useBatches";
+import { useBatch, useBatchTests, useCourseSections } from "@/hooks/useBatches";
 import { useIsEnrolled } from "@/hooks/useEnrollment";
 import { useAuth } from "@/hooks/useAuth";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -7,16 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EnrollmentBadge } from "@/components/batch/EnrollmentBadge";
-import { 
-  IndianRupee, 
-  Calendar, 
-  Users, 
-  Clock, 
-  BookOpen, 
-  CheckCircle,
-  ArrowLeft,
-  FileText
+import {
+  IndianRupee, Calendar, Users, Clock, BookOpen, CheckCircle, ArrowLeft, FileText,
 } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
