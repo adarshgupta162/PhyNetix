@@ -110,13 +110,12 @@ export default function CheckoutPage() {
       if (payErr) throw payErr;
 
       // Best-effort bump coupon usage; ignore failure (RLS may forbid for students)
-      await supabase.rpc as any; // placeholder, avoid unused warning if any
-      await supabase
-        .from("coupons")
-        .update({ current_uses: 0 /* will be ignored if not permitted */ })
-        .eq("id", coupon!.id)
-        .then(() => {})
-        .catch?.(() => {});
+      try {
+        await supabase
+          .from("coupons")
+          .update({ current_uses: (coupon as any).current_uses ? (coupon as any).current_uses + 1 : 1 })
+          .eq("id", coupon!.id);
+      } catch { /* noop */ }
 
       toast.success("Enrolled successfully!");
       queryClient.invalidateQueries({ queryKey: ["enrollments"] });
