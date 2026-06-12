@@ -757,17 +757,12 @@ export default function NormalTestInterface() {
 
     const handlePageHide = () => fireAutoSubmit();
     const handleBeforeUnload = () => fireAutoSubmit();
-    const handleVisibility = () => {
-      if (document.visibilityState === "hidden") fireAutoSubmit();
-    };
 
     window.addEventListener("pagehide", handlePageHide);
     window.addEventListener("beforeunload", handleBeforeUnload);
-    document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       window.removeEventListener("pagehide", handlePageHide);
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 
