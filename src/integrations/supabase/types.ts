@@ -2021,6 +2021,7 @@ export type Database = {
           question_type: string | null
           section_id: string
           solution_image_url: string | null
+          solution_image_urls: Json | null
           solution_text: string | null
           test_id: string
           time_seconds: number | null
@@ -2048,6 +2049,7 @@ export type Database = {
           question_type?: string | null
           section_id: string
           solution_image_url?: string | null
+          solution_image_urls?: Json | null
           solution_text?: string | null
           test_id: string
           time_seconds?: number | null
@@ -2075,6 +2077,7 @@ export type Database = {
           question_type?: string | null
           section_id?: string
           solution_image_url?: string | null
+          solution_image_urls?: Json | null
           solution_text?: string | null
           test_id?: string
           time_seconds?: number | null
