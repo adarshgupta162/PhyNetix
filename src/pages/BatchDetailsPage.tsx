@@ -230,19 +230,23 @@ export default function BatchDetailsPage() {
                     {filteredBatchTests.length === 0 ? (
                       <p className="text-sm text-muted-foreground text-center py-4">No tests in this section yet.</p>
                     ) : (
-                      <ul className="space-y-2">
-                        {filteredBatchTests.map((bt: any) => (
-                          <li key={bt.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/50">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className="truncate">{bt.tests?.name || 'Unnamed Test'}</span>
-                              {bt.section?.name && (
-                                <Badge variant="outline" className="text-xs shrink-0">{bt.section.name}</Badge>
-                              )}
-                            </div>
-                            {bt.is_bonus && <Badge variant="secondary" className="text-xs">Bonus</Badge>}
-                          </li>
+                      <div className="space-y-3">
+                        {filteredBatchTests.map((bt: any) => bt.tests && (
+                          <TestListCard
+                            key={bt.id}
+                            test={{
+                              id: bt.tests.id,
+                              name: bt.tests.name,
+                              syllabus: bt.tests.syllabus,
+                              syllabus_subtitle: bt.tests.syllabus_subtitle,
+                              duration_minutes: bt.tests.duration_minutes || 0,
+                              total_questions: bt.tests.total_questions ?? undefined,
+                              total_marks: bt.tests.total_marks ?? undefined,
+                              scheduled_at: bt.tests.scheduled_at,
+                            }}
+                          />
                         ))}
-                      </ul>
+                      </div>
                     )}
                   </CardContent>
                 </Card>
