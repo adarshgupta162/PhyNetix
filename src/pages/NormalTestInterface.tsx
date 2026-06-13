@@ -160,6 +160,7 @@ export default function NormalTestInterface() {
   const [markedForReview, setMarkedForReview]   = useState<Set<string>>(new Set());
   const [visitedQuestions, setVisitedQuestions] = useState<Set<string>>(new Set());
   const [timeLeft, setTimeLeft]                 = useState(0);
+  const expiresAtRef                            = useRef<number | null>(null);
   const [showSubmitModal, setShowSubmitModal]   = useState(false);
   const [loading, setLoading]                   = useState(true);
   const [submitting, setSubmitting]             = useState(false);
