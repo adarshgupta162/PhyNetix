@@ -1,88 +1,88 @@
-## Scope
+## 1. Fix auto-submit when time expires
 
-Eight changes across backend (schema + edge functions) and frontend (test interface, admin, my-tests, checkout).
+**Client-side hardening** (`NormalTestInterface.tsx`):
 
----
+- Store absolute `expiresAt = started_at + (duration + extra) * 60s` on mount.
+- Replace the drifty `setInterval` decrement with a recompute against `Date.now()` every second.
+- Add a `visibilitychange` listener that, on return to tab, recomputes `timeLeft`; if ≤ 0, immediately fire `handleSubmit(false, true)`.
+- Add a `pagehide`/`beforeunload` listener that does **not** submit (per earlier decision) but stamps `last_seen_at` so the server cron can find truly-expired attempts.
 
-## 1. Auto-submit cleanup
+**Server-side safety net (cron)**:
 
-- Remove the `pagehide` / `beforeunload` keepalive `fetch` to `submit-test` in `src/pages/NormalTestInterface.tsx`.
-- Keep the existing time-up timer-based auto-submit and the 7-fullscreen-exit force-submit.
-- Keep `auto-submit-expired` edge function (it's the server-side safety net that submits when `started_at + duration` has passed — that's exactly the "time keeps running in background" behavior).
-- Result: closing tab / leaving page does NOT submit; only timer expiry or 7th fullscreen exit does.
+- Enable `pg_cron` + `pg_net`.
+- Schedule `auto-submit-expired` edge function every 1 minute via `cron.schedule(...)` (run via `supabase--insert`, not migration, since it contains the project URL + anon key).
+- The existing `auto-submit-expired` function already grades and finalizes — no edge-function code changes needed.
+- Instead of running every minute try to submit test 3 hours(as per duration of test) after starting of test from server side + user side
 
-## 2. Question palette color rules (NormalTestInterface)
+## 2. "My Tests" sidebar dropdown (categorized across all batches)
 
-In the OMR / QuestionPalette component, change the per-question box color logic:
+New component `TestCategorySidebar.tsx` rendered on `MyAttempts.tsx` and `BatchDetailsPage.tsx`:
 
-- Answered + saved → **green**, even when currently viewing.
-- Marked for review (regardless of answer) → **purple**, even when currently viewing.
-- Currently viewing (and neither answered nor marked) → faded/dimmed style instead of solid highlight.
-- Not viewed  → existing neutral.
--  not attempted → red
+```text
+All Tests                       [x]
+─────────────────────────────────
+QUIZRR MOCK TESTS
+  Quizrr Part Test (QPT)     >
+  Quizrr Full Test (QFT)     >
+PYQS AS MOCK TESTS
+  2026 PYQs                  >
+  2024-25 PYQs               >
+TOPIC & CHAPTER-WISE TESTS
+  Physics                    >
+  Chemistry                  >
+  Mathematics                >
+```
 
-Edit: `src/components/test/OMRPanel.tsx` (and/or `EnhancedOMRPanel.tsx` whichever is wired in).
+- Source of categories: aggregate `course_sections.name` across the user's active `batch_enrollments` (de-duplicated). Group headers come from a simple mapping of section name → group (`Part Test`/`Full Test` → "Quizrr Mock Tests"; names ending with `PYQ`/`PYQs` → "PYQs as Mock Tests"; subject names → "Topic & Chapter-wise Tests"; anything else → "Other").
+- Selecting an item filters the right-side test list by `section_id`.
+- A search-bar + status filter chips (`All / Not Attempted / Attempted / Upcoming / Resume`) sit above the cards, matching the screenshot.
 
-## 3. Course sections (admin + student)
+## 3. New horizontal test-card layout
 
-### Schema (one migration)
+`TestListCard.tsx` (used in `MyAttempts` and `BatchDetailsPage`):
 
-- New table `course_sections`:
-  - `id`, `batch_id` (FK batches), `name` (text, free-form), `display_order` (int), timestamps.
-  - GRANTs + RLS: staff manage; enrolled students read.
-- Add `section_id uuid NULL REFERENCES course_sections(id)` and `display_order int DEFAULT 0` to `batch_tests`.
+```text
+┌────────────────────────────────────────────────────────────┐
+│ Quizrr Part Test (QPT) - 1                                 │
+│ Based on Reduced Syllabus (as per NTA)                     │
+│ ┌──────────────────┐  ┌──────────────────────────────────┐ │
+│ │  View Syllabus   │  │        Attempt Test              │ │
+│ └──────────────────┘  └──────────────────────────────────┘ │
+│ ⓘ 75 Qs   ⏱ 180 Min   A+ Total Marks: 300                 │
+└────────────────────────────────────────────────────────────┘
+```
 
-### Admin UI
+- If `release_at > now()` → attempt test buttons disabled, add marks line  along with `Releasing: 14 Jun (Sun), 09:00 am`.
+- `View Syllabus` opens a dialog rendering the test's `syllabus` rich text.
+- `Attempt Test` → `/test/:id` (or `Resume` if an in-progress attempt exists).
 
-- `src/components/admin/BatchTestsManager.tsx`: add "Sections" panel — create / rename / delete / reorder sections; assign each test to a section; drag-to-reorder tests within a section (use simple up/down buttons to keep scope tight).
+## 4. Syllabus rich-text on Test (Advanced Settings)
 
-### Student UI
+- Migration: add `tests.syllabus text NULL` and `tests.syllabus_subtitle text NULL` ("Based on Reduced Syllabus (as per NTA)").
+- `AdvancedTestSettingsPage.tsx`: add a "Syllabus" card with subtitle input + markdown textarea (reuse existing `Textarea`).
+- `TestListCard` reads these; modal renders subtitle + markdown content via `react-markdown` (already in deps) or a simple `whitespace-pre-wrap` block if not.
 
-- `src/pages/MyBatchesPage.tsx` / batch details: dropdown to filter by section; default "set by admin".
+## 5. Out of scope
 
-## 4. My Tests card layout
+- No new queue table — `auto-submit-expired` is already idempotent and finishes well within the edge-function time limit for the per-attempt workload, so a cron + the existing function is enough.
+- No changes to the test-taking OMR/proctoring logic beyond the visibility-change recompute.
 
-- `src/pages/MyAttempts.tsx`: convert vertical card grid to horizontal row layout (thumbnail left, title/meta middle, actions right). One card per row, responsive (stacks on mobile).
-- Remove the "No. of attempts" field from the card.
+## Files to create / edit
 
-## 5. Student rating system
+**Create**
 
-### Schema (same migration as #3)
+- `src/components/test/TestCategorySidebar.tsx`
+- `src/components/test/TestListCard.tsx`
+- `src/components/test/SyllabusDialog.tsx`
 
-- New table `test_reviews`: `id`, `user_id`, `test_id`, `batch_id`, `rating int 1-5`, `review text`, unique (user_id, test_id), timestamps.
-- RLS: user can insert/update their own; everyone authenticated can read aggregate.
+**Edit**
 
-### Submit-test flow
+- `src/pages/NormalTestInterface.tsx` — visibility recompute + absolute expiry.
+- `src/pages/MyAttempts.tsx` — adopt sidebar + new card.
+- `src/pages/BatchDetailsPage.tsx` — adopt sidebar + new card.
+- `src/components/admin/NormalTestEditor/AdvancedTestSettingsPage.tsx` — syllabus inputs.
 
-- After successful submission in `NormalTestInterface.tsx`, show a rating dialog (1-5 stars + optional text) before redirecting to analysis. Skippable.
+**DB**
 
-### Display
-
-- Test card in My Tests: average rating + count.
-- Course/batch card (`BatchCard.tsx`): average rating across all tests in batch + count.
-
-## 6. Coupon: only allow checkout if final = ₹0
-
-- `src/pages/CheckoutPage.tsx`:
-  - Require a valid coupon application.
-  - "Pay" button disabled unless `final_amount === 0`.
-  - On submit with `final_amount === 0`: skip payment gateway, directly insert `payments` row with `status='completed'`, `amount=0`, coupon_id set → existing `auto_enroll_on_payment` trigger creates the enrollment.
-- Make sure coupon validation logic actually computes discount correctly (percent vs flat, max discount cap, expiry, usage limits). Fix any bugs found in `CouponManager` / checkout coupon application.
-
-## 7. Cleanup
-
-- Remove all UI references to "attempts count" on student-facing test cards (admin views unchanged).
-
----
-
-## Technical notes
-
-- Migration order: 1 file with `course_sections`, `batch_tests.section_id`, `batch_tests.display_order`, `test_reviews`, plus all GRANTs/RLS.
-- Reuse existing `auto_enroll_on_payment` trigger for ₹0 coupon flow — no new server logic needed for free enrollment.
-- No edge function changes required beyond removing the client-side keepalive call.
-- Rating dialog: new component `src/components/test/RatingDialog.tsx`.
-
-## Out of scope
-
-- Drag-and-drop reordering library +using up/down arrow buttons .
-- Migrating historical attempts to compute "first rating prompt".
+- Migration: `ALTER TABLE tests ADD syllabus text, ADD syllabus_subtitle text;`
+- Insert (not migration): `cron.schedule('auto-submit-expired-every-min', '* * * * *', ...)`.
