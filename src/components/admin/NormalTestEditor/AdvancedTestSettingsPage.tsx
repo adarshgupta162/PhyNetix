@@ -22,6 +22,8 @@ interface Test {
   scheduled_at?: string | null;
   solution_reopen_mode?: boolean | null;
   result_release_delay_minutes?: number;
+  syllabus?: string | null;
+  syllabus_subtitle?: string | null;
 }
 
 interface AdvancedSettingsPageProps {
