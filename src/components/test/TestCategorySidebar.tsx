@@ -17,7 +17,7 @@ interface Props {
 }
 
 const GROUP_ORDER = [
-  "Quizrr Mock Tests",
+  "PhyNetix Mock Tests",
   "PYQs as Mock Tests",
   "Topic & Chapter-wise Tests",
   "Other",
@@ -25,7 +25,7 @@ const GROUP_ORDER = [
 
 export function classifyGroup(name: string): string {
   const n = name.toLowerCase();
-  if (/(qpt|qft|part test|full test|mock)/.test(n)) return "Quizrr Mock Tests";
+  if (/(qpt|qft|part test|full test|mock)/.test(n)) return "PhyNetix Mock Tests";
   if (/pyq/.test(n)) return "PYQs as Mock Tests";
   if (/^(physics|chemistry|mathematics|maths|biology)/.test(n)) return "Topic & Chapter-wise Tests";
   return "Other";
