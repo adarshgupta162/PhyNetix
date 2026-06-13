@@ -324,7 +324,9 @@ export default function NormalTestInterface() {
       if (startError || startData?.error) throw new Error(startData?.error || startError?.message || "Failed to start test");
       setAttemptId(startData.attempt_id); setTestName(startData.test_name);
       await proctoring.start(startData.attempt_id, { test_name: startData.test_name, interface: "normal" });
-      setTimeLeft(startData.remaining_seconds ?? startData.duration_minutes * 60);
+      const remaining = startData.remaining_seconds ?? startData.duration_minutes * 60;
+      expiresAtRef.current = Date.now() + remaining * 1000;
+      setTimeLeft(remaining);
       if (startData.fullscreen_exit_count) setFullscreenExitCount(startData.fullscreen_exit_count);
       if (startData.is_resume && startData.existing_answers) setAnswers(startData.existing_answers);
       setSubmitDisabled(Boolean(startData.submit_disabled));
