@@ -2349,6 +2349,8 @@ export type Database = {
           scheduled_at: string | null
           show_solutions: boolean | null
           solution_reopen_mode: boolean | null
+          syllabus: string | null
+          syllabus_subtitle: string | null
           test_type: string
           updated_at: string
         }
@@ -2369,6 +2371,8 @@ export type Database = {
           scheduled_at?: string | null
           show_solutions?: boolean | null
           solution_reopen_mode?: boolean | null
+          syllabus?: string | null
+          syllabus_subtitle?: string | null
           test_type?: string
           updated_at?: string
         }
@@ -2389,6 +2393,8 @@ export type Database = {
           scheduled_at?: string | null
           show_solutions?: boolean | null
           solution_reopen_mode?: boolean | null
+          syllabus?: string | null
+          syllabus_subtitle?: string | null
           test_type?: string
           updated_at?: string
         }

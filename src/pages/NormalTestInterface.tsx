@@ -160,6 +160,7 @@ export default function NormalTestInterface() {
   const [markedForReview, setMarkedForReview]   = useState<Set<string>>(new Set());
   const [visitedQuestions, setVisitedQuestions] = useState<Set<string>>(new Set());
   const [timeLeft, setTimeLeft]                 = useState(0);
+  const expiresAtRef                            = useRef<number | null>(null);
   const [showSubmitModal, setShowSubmitModal]   = useState(false);
   const [loading, setLoading]                   = useState(true);
   const [submitting, setSubmitting]             = useState(false);
@@ -323,7 +324,9 @@ export default function NormalTestInterface() {
       if (startError || startData?.error) throw new Error(startData?.error || startError?.message || "Failed to start test");
       setAttemptId(startData.attempt_id); setTestName(startData.test_name);
       await proctoring.start(startData.attempt_id, { test_name: startData.test_name, interface: "normal" });
-      setTimeLeft(startData.remaining_seconds ?? startData.duration_minutes * 60);
+      const remaining = startData.remaining_seconds ?? startData.duration_minutes * 60;
+      expiresAtRef.current = Date.now() + remaining * 1000;
+      setTimeLeft(remaining);
       if (startData.fullscreen_exit_count) setFullscreenExitCount(startData.fullscreen_exit_count);
       if (startData.is_resume && startData.existing_answers) setAnswers(startData.existing_answers);
       setSubmitDisabled(Boolean(startData.submit_disabled));
@@ -408,11 +411,24 @@ export default function NormalTestInterface() {
   };
 
   useEffect(() => {
-    if (timeLeft <= 0 || loading || currentScreen !== 4) return;
-    const t = setInterval(() => {
-      setTimeLeft(p => { if (p <= 1) { clearInterval(t); setTimeExpired(true); return 0; } return p - 1; });
-    }, 1000);
-    return () => clearInterval(t);
+    if (loading || currentScreen !== 4) return;
+    const recompute = () => {
+      const exp = expiresAtRef.current;
+      if (!exp) return;
+      const remaining = Math.max(0, Math.ceil((exp - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining <= 0) setTimeExpired(true);
+    };
+    recompute();
+    const t = setInterval(recompute, 1000);
+    const onVis = () => { if (document.visibilityState === "visible") recompute(); };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", recompute);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", recompute);
+    };
   }, [loading, currentScreen]);
 
   useEffect(() => { if (timeExpired && attemptId && !submitting) handleSubmit(false, true); }, [timeExpired]);

@@ -22,6 +22,8 @@ interface Test {
   scheduled_at?: string | null;
   solution_reopen_mode?: boolean | null;
   result_release_delay_minutes?: number;
+  syllabus?: string | null;
+  syllabus_subtitle?: string | null;
 }
 
 interface AdvancedSettingsPageProps {
@@ -146,6 +148,8 @@ export function AdvancedTestSettingsPage({
       scheduled_at: fromLocalDateTimeInputValue(scheduledAtLocal),
       instructions_json: localInstructions,
       result_release_delay_minutes: localTest.result_release_delay_minutes,
+      syllabus: localTest.syllabus ?? null,
+      syllabus_subtitle: localTest.syllabus_subtitle ?? null,
     });
   };
 
@@ -281,6 +285,33 @@ export function AdvancedTestSettingsPage({
           </div>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Syllabus</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Syllabus subtitle (shown on test card)</Label>
+            <Input
+              placeholder="e.g. Based on Reduced Syllabus (as per NTA)"
+              value={localTest.syllabus_subtitle ?? ""}
+              onChange={(e) => setLocalTest({ ...localTest, syllabus_subtitle: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Full syllabus (shown in "View Syllabus" dialog)</Label>
+            <Textarea
+              rows={10}
+              placeholder={"Physics:\n- Kinematics\n- Laws of Motion\n\nChemistry:\n- Some Basic Concepts of Chemistry\n..."}
+              value={localTest.syllabus ?? ""}
+              onChange={(e) => setLocalTest({ ...localTest, syllabus: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground">Plain text. Line breaks are preserved.</p>
+          </div>
+        </CardContent>
+      </Card>
+
 
       <Card>
         <CardHeader>

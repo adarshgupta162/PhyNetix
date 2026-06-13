@@ -1,0 +1,1 @@
+ALTER TABLE public.tests ADD COLUMN IF NOT EXISTS syllabus text, ADD COLUMN IF NOT EXISTS syllabus_subtitle text;
