@@ -411,11 +411,24 @@ export default function NormalTestInterface() {
   };
 
   useEffect(() => {
-    if (timeLeft <= 0 || loading || currentScreen !== 4) return;
-    const t = setInterval(() => {
-      setTimeLeft(p => { if (p <= 1) { clearInterval(t); setTimeExpired(true); return 0; } return p - 1; });
-    }, 1000);
-    return () => clearInterval(t);
+    if (loading || currentScreen !== 4) return;
+    const recompute = () => {
+      const exp = expiresAtRef.current;
+      if (!exp) return;
+      const remaining = Math.max(0, Math.ceil((exp - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining <= 0) setTimeExpired(true);
+    };
+    recompute();
+    const t = setInterval(recompute, 1000);
+    const onVis = () => { if (document.visibilityState === "visible") recompute(); };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", recompute);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", recompute);
+    };
   }, [loading, currentScreen]);
 
   useEffect(() => { if (timeExpired && attemptId && !submitting) handleSubmit(false, true); }, [timeExpired]);
