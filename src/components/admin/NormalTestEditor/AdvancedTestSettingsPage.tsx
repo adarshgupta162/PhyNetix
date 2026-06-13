@@ -288,6 +288,33 @@ export function AdvancedTestSettingsPage({
 
       <Card>
         <CardHeader>
+          <CardTitle>Syllabus</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Syllabus subtitle (shown on test card)</Label>
+            <Input
+              placeholder="e.g. Based on Reduced Syllabus (as per NTA)"
+              value={localTest.syllabus_subtitle ?? ""}
+              onChange={(e) => setLocalTest({ ...localTest, syllabus_subtitle: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Full syllabus (shown in "View Syllabus" dialog)</Label>
+            <Textarea
+              rows={10}
+              placeholder={"Physics:\n- Kinematics\n- Laws of Motion\n\nChemistry:\n- Some Basic Concepts of Chemistry\n..."}
+              value={localTest.syllabus ?? ""}
+              onChange={(e) => setLocalTest({ ...localTest, syllabus: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground">Plain text. Line breaks are preserved.</p>
+          </div>
+        </CardContent>
+      </Card>
+
+
+      <Card>
+        <CardHeader>
           <CardTitle>Navigation, Attempts & Randomization</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
