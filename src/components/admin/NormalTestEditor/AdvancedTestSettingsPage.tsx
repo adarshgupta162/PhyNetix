@@ -148,6 +148,8 @@ export function AdvancedTestSettingsPage({
       scheduled_at: fromLocalDateTimeInputValue(scheduledAtLocal),
       instructions_json: localInstructions,
       result_release_delay_minutes: localTest.result_release_delay_minutes,
+      syllabus: localTest.syllabus ?? null,
+      syllabus_subtitle: localTest.syllabus_subtitle ?? null,
     });
   };
 
