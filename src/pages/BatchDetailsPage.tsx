@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import TestListCard from "@/components/test/TestListCard";
 
 const categoryLabels: Record<string, string> = {
   jee_main: "JEE Main",
