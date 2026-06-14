@@ -440,6 +440,28 @@ export default function NormalTestInterface() {
 
   useEffect(() => { if (timeExpired && attemptId && !submitting) handleSubmit(false, true); }, [timeExpired]);
 
+  // Safety net: when the user closes / hides the tab, fire a beacon to the auto-submit
+  // edge function so the server submits this attempt immediately if time has expired.
+  useEffect(() => {
+    if (!attemptId || currentScreen !== 4) return;
+    const url = `https://iwzejchcrqddwgosmjsj.supabase.co/functions/v1/auto-submit-expired`;
+    const onLeave = () => {
+      try {
+        const body = new Blob(
+          [JSON.stringify({ attempt_id: attemptId, ts: Date.now() })],
+          { type: "application/json" }
+        );
+        navigator.sendBeacon?.(url, body);
+      } catch {}
+    };
+    window.addEventListener("pagehide", onLeave);
+    window.addEventListener("beforeunload", onLeave);
+    return () => {
+      window.removeEventListener("pagehide", onLeave);
+      window.removeEventListener("beforeunload", onLeave);
+    };
+  }, [attemptId, currentScreen]);
+
   const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
   const currentSection  = sections.find(s => s.id === activeSection);
