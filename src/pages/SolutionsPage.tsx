@@ -431,9 +431,9 @@ export default function SolutionsPage() {
           <div className="hidden lg:block">
             <div className="sticky top-32">
               <QuestionPalettePanel
-                questions={filteredQuestions.map((q) => ({
+                questions={filteredQuestions.map((q, idx) => ({
                   id: q.id,
-                  number: q.number,
+                  number: idx + 1,
                   status: q.status,
                   subject: q.subject,
                 }))}
