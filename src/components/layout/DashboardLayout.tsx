@@ -29,7 +29,7 @@ const navItems = [
   { icon: Library, label: "Browse Batches", path: "/batches" },
   { icon: FileText, label: "Test Library", path: "/tests" },
   { icon: BookOpen, label: "DPPs", path: "/dpps" },
-  { icon: ClipboardList, label: "My Attempts", path: "/attempts" },
+  
   { icon: BarChart3, label: "Analytics", path: "/analytics" },
   { icon: User, label: "Profile", path: "/profile" },
   { icon: Settings, label: "Settings", path: "/settings" },

@@ -25,7 +25,7 @@ import NormalTestInterface from "./pages/NormalTestInterface";
 import NormalTestAnalysis from "./pages/NormalTestAnalysis";
 
 import QuestionWiseAnalysis from "./pages/QuestionWiseAnalysis";
-import MyAttempts from "./pages/MyAttempts";
+
 import Analytics from "./pages/Analytics";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -108,7 +108,7 @@ const App = () => (
                 <Route path="/analysis/:testId" element={<AnalysisPage />} />
                 <Route path="/solutions/:testId" element={<SolutionsPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/attempts" element={<MyAttempts />} />
+                <Route path="/attempts" element={<Navigate to="/tests" replace />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 {/* DPP Routes */}
