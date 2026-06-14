@@ -449,9 +449,9 @@ export default function SolutionsPage() {
 
       {/* Question Palette - Mobile (handled inside component) */}
       <QuestionPalettePanel
-        questions={filteredQuestions.map((q) => ({
+        questions={filteredQuestions.map((q, idx) => ({
           id: q.id,
-          number: q.number,
+          number: idx + 1,
           status: q.status,
           subject: q.subject,
         }))}
