@@ -235,6 +235,7 @@ export default function BatchDetailsPage() {
                         {filteredBatchTests.map((bt: any) => bt.tests && (
                           <TestListCard
                             key={bt.id}
+                            hideAttempt
                             test={{
                               id: bt.tests.id,
                               name: bt.tests.name,
