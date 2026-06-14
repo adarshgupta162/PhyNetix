@@ -22,9 +22,11 @@ interface Props {
   test: TestCardData;
   onAttempt?: () => void;
   primaryLabel?: string;
+  /** Hide the Attempt/Resume/Analysis CTA — used on Batch Details (read-only). */
+  hideAttempt?: boolean;
 }
 
-export default function TestListCard({ test, onAttempt, primaryLabel }: Props) {
+export default function TestListCard({ test, onAttempt, primaryLabel, hideAttempt }: Props) {
   const navigate = useNavigate();
   const [syllabusOpen, setSyllabusOpen] = useState(false);
 
@@ -48,23 +50,25 @@ export default function TestListCard({ test, onAttempt, primaryLabel }: Props) {
               <p className="text-xs text-muted-foreground mt-0.5">{test.syllabus_subtitle}</p>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className={hideAttempt ? "" : "grid grid-cols-2 gap-2"}>
             <Button
               variant="outline"
               size="sm"
-              className="rounded-full"
+              className="rounded-full w-full"
               onClick={() => setSyllabusOpen(true)}
             >
               View Syllabus
             </Button>
-            <Button
-              size="sm"
-              className="rounded-full"
-              disabled={!!isUpcoming}
-              onClick={handleAttempt}
-            >
-              {ctaLabel}
-            </Button>
+            {!hideAttempt && (
+              <Button
+                size="sm"
+                className="rounded-full"
+                disabled={!!isUpcoming}
+                onClick={handleAttempt}
+              >
+                {ctaLabel}
+              </Button>
+            )}
           </div>
         </div>
         <div className="px-4 py-2.5 bg-background/40 border-t border-border/50 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">

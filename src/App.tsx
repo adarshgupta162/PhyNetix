@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { StaffRolesProvider } from "@/hooks/useStaffRoles";
 import AdminRoute from "@/components/AdminRoute";
@@ -25,7 +25,7 @@ import NormalTestInterface from "./pages/NormalTestInterface";
 import NormalTestAnalysis from "./pages/NormalTestAnalysis";
 
 import QuestionWiseAnalysis from "./pages/QuestionWiseAnalysis";
-import MyAttempts from "./pages/MyAttempts";
+
 import Analytics from "./pages/Analytics";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -108,7 +108,7 @@ const App = () => (
                 <Route path="/analysis/:testId" element={<AnalysisPage />} />
                 <Route path="/solutions/:testId" element={<SolutionsPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/attempts" element={<MyAttempts />} />
+                <Route path="/attempts" element={<Navigate to="/tests" replace />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 {/* DPP Routes */}

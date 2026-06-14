@@ -346,18 +346,25 @@ export default function NormalTestInterface() {
       const allQ: Question[] = qData.questions;
       setQuestions(allQ);
       const secMap = new Map<string, { section: Section; questions: Question[] }>();
+      const verboseLabel = (qt: string) =>
+        qt === "single_choice" ? "Single Choice Question"
+        : qt === "multiple_choice" || qt === "multi" ? "Multiple Choice Question"
+        : qt === "integer" || qt === "numerical" ? "Integer Question"
+        : "Single Choice Question";
       allQ.forEach((q: Question) => {
         const subj = q.subject || "General";
         const qt = q.question_type || q.section_type || "single_choice";
-        const label = qt === "single_choice" ? "SCQ" : qt === "multiple_choice" || qt === "multi" ? "MCQ" : qt === "integer" || qt === "numerical" ? "Integer" : "SCQ";
-        const key = q.section_id ? `section-${q.section_id}` : `${subj}(${label})`;
+        const label = verboseLabel(qt);
+        // Group by subject + question type so duplicate question numbers across sections
+        // get split into distinct sections instead of overlapping.
+        const key = `${subj}__${qt}`;
         if (!secMap.has(key)) {
           secMap.set(key, {
             section: {
-              id: q.section_id ? `section-${q.section_id}` : key.toLowerCase().replace(/[^a-z0-9]/g, "-"),
-              name: q.section_id ? (q.chapter || `${subj} (${label})`) : `${subj}(${label})`,
+              id: key.toLowerCase().replace(/[^a-z0-9]/g, "-"),
+              name: `${subj} (${label})`,
               questions: [],
-              section_type: q.section_type || q.question_type || "single_choice",
+              section_type: qt,
             },
             questions: [],
           });
@@ -432,6 +439,28 @@ export default function NormalTestInterface() {
   }, [loading, currentScreen]);
 
   useEffect(() => { if (timeExpired && attemptId && !submitting) handleSubmit(false, true); }, [timeExpired]);
+
+  // Safety net: when the user closes / hides the tab, fire a beacon to the auto-submit
+  // edge function so the server submits this attempt immediately if time has expired.
+  useEffect(() => {
+    if (!attemptId || currentScreen !== 4) return;
+    const url = `https://iwzejchcrqddwgosmjsj.supabase.co/functions/v1/auto-submit-expired`;
+    const onLeave = () => {
+      try {
+        const body = new Blob(
+          [JSON.stringify({ attempt_id: attemptId, ts: Date.now() })],
+          { type: "application/json" }
+        );
+        navigator.sendBeacon?.(url, body);
+      } catch {}
+    };
+    window.addEventListener("pagehide", onLeave);
+    window.addEventListener("beforeunload", onLeave);
+    return () => {
+      window.removeEventListener("pagehide", onLeave);
+      window.removeEventListener("beforeunload", onLeave);
+    };
+  }, [attemptId, currentScreen]);
 
   const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
