@@ -32,7 +32,7 @@ serve(async (req) => {
       .from("test_attempts")
       .select("id, test_id, user_id, started_at, answers, time_per_question, extra_time_minutes, result_release_delay_minutes")
       .is("completed_at", null)
-      .eq("awaiting_result", false);
+      .or("awaiting_result.is.false,awaiting_result.is.null");
 
     if (requestedAttemptId) {
       attemptsQuery = attemptsQuery.eq("id", requestedAttemptId);
