@@ -1469,25 +1469,12 @@ export default function NormalTestInterface() {
     </div>
   );
 
-  const ratingDialog = user && testId ? (
-    <RatingDialog
-      open={showRatingDialog}
-      testId={testId}
-      userId={user.id}
-      onClose={() => {
-        setShowRatingDialog(false);
-        navigate(`/test/${testId}/analysis`, { state: pendingNavState || undefined });
-      }}
-    />
-  ) : null;
-
   if (fullscreenEnabled) {
     return (
       <FullscreenGuard maxExits={7} onMaxExitsReached={handleMaxFullscreenExits} onExitCountChange={handleFullscreenExitCountChange} initialExitCount={fullscreenExitCount}>
         {testContent}
-        {ratingDialog}
       </FullscreenGuard>
     );
   }
-  return <>{testContent}{ratingDialog}</>;
+  return testContent;
 }
