@@ -773,14 +773,16 @@ export default function NormalTestInterface() {
     }
     setSubmitting(true);
     try {
+      const submittedAnswers = buildCommittedAnswers();
       const nextTimeMap = buildCurrentTimeSnapshot();
       setTimePerQuestion(nextTimeMap);
-      await enqueueAttemptUpdate({ time_per_question: buildPersistedTimePayload(nextTimeMap, visitedQuestions) });
+      setAnswers(submittedAnswers);
+      await enqueueAttemptUpdate({ answers: submittedAnswers, time_per_question: buildPersistedTimePayload(nextTimeMap, visitedQuestions) });
 
       const { data, error } = await supabase.functions.invoke("submit-test", {
         body: {
           attempt_id: attemptId,
-          answers,
+          answers: submittedAnswers,
           time_taken_seconds: Math.max(1, (testDuration * 60) - timeLeft),
           fullscreen_exit_count: fullscreenExitCount,
           force_submit: forceSubmit,
@@ -795,7 +797,7 @@ export default function NormalTestInterface() {
       toast({ title: "Error", description: e.message || "Failed to submit test.", variant: "destructive" });
       setSubmitting(false);
     }
-  }, [attemptId, answers, timeLeft, testId, testName, navigate, submitting, fullscreenExitCount, buildCurrentTimeSnapshot, enqueueAttemptUpdate, testDuration, buildPersistedTimePayload, visitedQuestions]);
+  }, [attemptId, timeLeft, testId, testName, navigate, submitting, fullscreenExitCount, buildCommittedAnswers, buildCurrentTimeSnapshot, enqueueAttemptUpdate, testDuration, buildPersistedTimePayload, visitedQuestions]);
 
   useEffect(() => { if (timeExpired && attemptId && !submitting) handleSubmit(false, true); }, [timeExpired, attemptId, submitting, handleSubmit]);
 
