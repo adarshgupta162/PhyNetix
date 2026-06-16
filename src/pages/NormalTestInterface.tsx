@@ -12,7 +12,6 @@ import { useProctoring } from "@/hooks/useProctoring";
 import FullscreenGuard from "@/components/test/FullscreenGuard";
 import AccessibilityToolbar from "@/components/test/AccessibilityToolbar";
 import { LatexRenderer } from "@/components/ui/latex-renderer";
-import RatingDialog from "@/components/test/RatingDialog";
 
 /* ─── TYPES ─── */
 interface Question {
@@ -31,6 +30,8 @@ type AttemptProgressPayload = {
 };
 
 const VISITED_QUESTIONS_META_KEY = "__visited_questions__";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const SUPABASE_PUBLISHABLE_KEY = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY) as string | undefined;
 
 /* ─── EXACT COLOURS FROM SCREENSHOT ─── */
 const C = {
@@ -170,8 +171,6 @@ export default function NormalTestInterface() {
   const [currentScreen, setCurrentScreen]       = useState(1);
   const [agreedToTerms, setAgreedToTerms]       = useState(false);
   const [testDuration, setTestDuration]         = useState(0);
-  const [showRatingDialog, setShowRatingDialog] = useState(false);
-  const [pendingNavState, setPendingNavState]   = useState<any>(null);
   const [hasExistingAttempt, setHasExistingAttempt] = useState(false);
   const [systemId, setSystemId]                 = useState("");
   const [studentName, setStudentName]           = useState("Student");
@@ -189,6 +188,8 @@ export default function NormalTestInterface() {
   const [integerCursorPosition, setIntegerCursorPosition] = useState(0);
   const persistQueueRef = useRef<Promise<void>>(Promise.resolve());
   const persistSequenceRef = useRef(0);
+  const submittedRef = useRef(false);
+  const sessionAccessTokenRef = useRef<string | null>(null);
 
   // tooltip hover state
   const [hoveredSectionTooltip, setHoveredSectionTooltip] = useState<string | null>(null);
@@ -204,6 +205,16 @@ export default function NormalTestInterface() {
     window.addEventListener("offline", goOffline);
     window.addEventListener("online", goOnline);
     return () => { window.removeEventListener("offline", goOffline); window.removeEventListener("online", goOnline); };
+  }, []);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      sessionAccessTokenRef.current = data.session?.access_token ?? null;
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      sessionAccessTokenRef.current = session?.access_token ?? null;
+    });
+    return () => listener.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -322,6 +333,11 @@ export default function NormalTestInterface() {
       if (td) setFullscreenEnabled(td.fullscreen_enabled ?? true);
       const { data: startData, error: startError } = await supabase.functions.invoke("start-test", { body: { test_id: testId } });
       if (startError || startData?.error) throw new Error(startData?.error || startError?.message || "Failed to start test");
+      if (startData?.expired_submitted) {
+        toast({ title: "Test auto-submitted", description: "Time was already over, so your attempt has been submitted." });
+        navigate(`/test/${testId}/analysis`);
+        return;
+      }
       setAttemptId(startData.attempt_id); setTestName(startData.test_name);
       await proctoring.start(startData.attempt_id, { test_name: startData.test_name, interface: "normal" });
       const remaining = startData.remaining_seconds ?? startData.duration_minutes * 60;
@@ -438,20 +454,37 @@ export default function NormalTestInterface() {
     };
   }, [loading, currentScreen]);
 
-  useEffect(() => { if (timeExpired && attemptId && !submitting) handleSubmit(false, true); }, [timeExpired]);
+  const triggerExpiredSubmit = useCallback((reason: string, keepalive = false) => {
+    if (!attemptId || !SUPABASE_URL || submittedRef.current) return;
+    const payload = JSON.stringify({ attempt_id: attemptId, reason, ts: Date.now() });
+    const functionUrl = `${SUPABASE_URL}/functions/v1/auto-submit-expired`;
+
+    if (keepalive && navigator.sendBeacon && !sessionAccessTokenRef.current) {
+      navigator.sendBeacon(functionUrl, new Blob([payload], { type: "application/json" }));
+      return;
+    }
+
+    void fetch(functionUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(SUPABASE_PUBLISHABLE_KEY ? { apikey: SUPABASE_PUBLISHABLE_KEY } : {}),
+        ...(sessionAccessTokenRef.current ? { Authorization: `Bearer ${sessionAccessTokenRef.current}` } : {}),
+      },
+      body: payload,
+      keepalive,
+    }).catch((error) => console.error("Failed to trigger expired auto-submit:", error));
+  }, [attemptId]);
 
   // Safety net: when the user closes / hides the tab, fire a beacon to the auto-submit
   // edge function so the server submits this attempt immediately if time has expired.
   useEffect(() => {
     if (!attemptId || currentScreen !== 4) return;
-    const url = `https://iwzejchcrqddwgosmjsj.supabase.co/functions/v1/auto-submit-expired`;
     const onLeave = () => {
       try {
-        const body = new Blob(
-          [JSON.stringify({ attempt_id: attemptId, ts: Date.now() })],
-          { type: "application/json" }
-        );
-        navigator.sendBeacon?.(url, body);
+        if (expiresAtRef.current && Date.now() >= expiresAtRef.current) {
+          triggerExpiredSubmit("page_leave_after_expiry", true);
+        }
       } catch {}
     };
     window.addEventListener("pagehide", onLeave);
@@ -460,7 +493,7 @@ export default function NormalTestInterface() {
       window.removeEventListener("pagehide", onLeave);
       window.removeEventListener("beforeunload", onLeave);
     };
-  }, [attemptId, currentScreen]);
+  }, [attemptId, currentScreen, triggerExpiredSubmit]);
 
   const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
@@ -735,14 +768,16 @@ export default function NormalTestInterface() {
     }
     setSubmitting(true);
     try {
+      const submittedAnswers = buildCommittedAnswers();
       const nextTimeMap = buildCurrentTimeSnapshot();
       setTimePerQuestion(nextTimeMap);
-      await enqueueAttemptUpdate({ time_per_question: buildPersistedTimePayload(nextTimeMap, visitedQuestions) });
+      setAnswers(submittedAnswers);
+      await enqueueAttemptUpdate({ answers: submittedAnswers, time_per_question: buildPersistedTimePayload(nextTimeMap, visitedQuestions) });
 
       const { data, error } = await supabase.functions.invoke("submit-test", {
         body: {
           attempt_id: attemptId,
-          answers,
+          answers: submittedAnswers,
           time_taken_seconds: Math.max(1, (testDuration * 60) - timeLeft),
           fullscreen_exit_count: fullscreenExitCount,
           force_submit: forceSubmit,
@@ -750,15 +785,16 @@ export default function NormalTestInterface() {
       });
       if (error || data?.error) throw new Error(data?.error || error?.message || "Failed to submit test");
       await proctoring.stop(fromMax ? "max_fullscreen_exits" : "submitted");
-      // Show rating dialog before navigating to analysis
-      setPendingNavState({ results: data, testName });
-      setShowRatingDialog(true);
+      submittedRef.current = true;
+      navigate(`/test/${testId}/analysis`, { state: { results: data, testName } });
     } catch (e: any) {
       console.error(e);
       toast({ title: "Error", description: e.message || "Failed to submit test.", variant: "destructive" });
       setSubmitting(false);
     }
-  }, [attemptId, answers, timeLeft, testId, testName, navigate, submitting, fullscreenExitCount, buildCurrentTimeSnapshot, enqueueAttemptUpdate, testDuration, buildPersistedTimePayload, visitedQuestions]);
+  }, [attemptId, timeLeft, testId, testName, navigate, submitting, fullscreenExitCount, buildCommittedAnswers, buildCurrentTimeSnapshot, enqueueAttemptUpdate, testDuration, buildPersistedTimePayload, visitedQuestions]);
+
+  useEffect(() => { if (timeExpired && attemptId && !submitting) handleSubmit(false, true); }, [timeExpired, attemptId, submitting, handleSubmit]);
 
   const handleFullscreenExitCountChange = useCallback((count: number) => {
     setFullscreenExitCount(count);
@@ -1430,25 +1466,12 @@ export default function NormalTestInterface() {
     </div>
   );
 
-  const ratingDialog = user && testId ? (
-    <RatingDialog
-      open={showRatingDialog}
-      testId={testId}
-      userId={user.id}
-      onClose={() => {
-        setShowRatingDialog(false);
-        navigate(`/test/${testId}/analysis`, { state: pendingNavState || undefined });
-      }}
-    />
-  ) : null;
-
   if (fullscreenEnabled) {
     return (
       <FullscreenGuard maxExits={7} onMaxExitsReached={handleMaxFullscreenExits} onExitCountChange={handleFullscreenExitCountChange} initialExitCount={fullscreenExitCount}>
         {testContent}
-        {ratingDialog}
       </FullscreenGuard>
     );
   }
-  return <>{testContent}{ratingDialog}</>;
+  return testContent;
 }
