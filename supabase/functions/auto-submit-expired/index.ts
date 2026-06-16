@@ -7,14 +7,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const indexToLetter = (index: any): string => {
-  const num = parseInt(String(index));
-  if (!isNaN(num) && num >= 0 && num <= 25) {
-    return String.fromCharCode(65 + num);
-  }
-  return String(index).toUpperCase();
-};
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -26,13 +18,27 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
-    // Find all uncompleted attempts where time has expired
-    // Join with tests to get duration_minutes, then check if started_at + duration has passed
-    const { data: expiredAttempts, error: fetchError } = await supabaseAdmin
+    let requestedAttemptId: string | null = null;
+    if (req.method !== "GET") {
+      try {
+        const body = await req.json();
+        requestedAttemptId = typeof body?.attempt_id === "string" ? body.attempt_id : null;
+      } catch {
+        requestedAttemptId = null;
+      }
+    }
+
+    let attemptsQuery = supabaseAdmin
       .from("test_attempts")
       .select("id, test_id, user_id, started_at, answers, time_per_question, extra_time_minutes, result_release_delay_minutes")
       .is("completed_at", null)
       .eq("awaiting_result", false);
+
+    if (requestedAttemptId) {
+      attemptsQuery = attemptsQuery.eq("id", requestedAttemptId);
+    }
+
+    const { data: expiredAttempts, error: fetchError } = await attemptsQuery;
 
     if (fetchError) {
       console.error("[auto-submit] Failed to fetch attempts:", fetchError);
@@ -40,8 +46,8 @@ serve(async (req) => {
     }
 
     if (!expiredAttempts || expiredAttempts.length === 0) {
-      console.log("[auto-submit] No uncompleted attempts found");
-      return new Response(JSON.stringify({ submitted: 0 }), {
+      console.log(`[auto-submit] No uncompleted attempts found${requestedAttemptId ? ` for attempt=${requestedAttemptId}` : ""}`);
+      return new Response(JSON.stringify({ submitted: 0, checked: 0 }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -66,8 +72,7 @@ serve(async (req) => {
       const expiresAt = startedAt + (test.duration_minutes + extraMinutes) * 60 * 1000;
       const now = Date.now();
 
-      // Add 30s grace period
-      if (now < expiresAt + 30000) continue;
+      if (now < expiresAt) continue;
 
       console.log(`[auto-submit] Auto-submitting attempt=${attempt.id} test=${attempt.test_id} user=${attempt.user_id}`);
 
