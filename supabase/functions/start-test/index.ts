@@ -66,6 +66,23 @@ serve(async (req) => {
       const totalSeconds = (test.duration_minutes + extraMinutes) * 60;
       const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
 
+      if (remainingSeconds <= 0) {
+        await fetch(`${Deno.env.get("SUPABASE_URL") ?? ""}/functions/v1/auto-submit-expired`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+            "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""}`,
+          },
+          body: JSON.stringify({ attempt_id: existingAttempt.id, reason: "resume_after_expiry" }),
+        });
+
+        return new Response(
+          JSON.stringify({ expired_submitted: true, attempt_id: existingAttempt.id }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       return new Response(
         JSON.stringify({
           attempt_id: existingAttempt.id,
