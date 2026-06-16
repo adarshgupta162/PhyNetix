@@ -2450,6 +2450,10 @@ export type Database = {
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       proctoring_schema_health: { Args: never; Returns: Json }
+      recompute_batch_current_students: {
+        Args: { _batch_id: string }
+        Returns: undefined
+      }
       user_completed_test: {
         Args: { _test_id: string; _user_id: string }
         Returns: boolean
