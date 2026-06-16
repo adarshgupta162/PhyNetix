@@ -459,7 +459,7 @@ export default function NormalTestInterface() {
     const payload = JSON.stringify({ attempt_id: attemptId, reason, ts: Date.now() });
     const functionUrl = `${SUPABASE_URL}/functions/v1/auto-submit-expired`;
 
-    if (keepalive && navigator.sendBeacon) {
+    if (keepalive && navigator.sendBeacon && !sessionAccessTokenRef.current) {
       navigator.sendBeacon(functionUrl, new Blob([payload], { type: "application/json" }));
       return;
     }
