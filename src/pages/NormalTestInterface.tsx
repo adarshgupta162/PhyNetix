@@ -12,7 +12,6 @@ import { useProctoring } from "@/hooks/useProctoring";
 import FullscreenGuard from "@/components/test/FullscreenGuard";
 import AccessibilityToolbar from "@/components/test/AccessibilityToolbar";
 import { LatexRenderer } from "@/components/ui/latex-renderer";
-import RatingDialog from "@/components/test/RatingDialog";
 
 /* ─── TYPES ─── */
 interface Question {
@@ -31,6 +30,8 @@ type AttemptProgressPayload = {
 };
 
 const VISITED_QUESTIONS_META_KEY = "__visited_questions__";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const SUPABASE_PUBLISHABLE_KEY = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY) as string | undefined;
 
 /* ─── EXACT COLOURS FROM SCREENSHOT ─── */
 const C = {
@@ -170,8 +171,6 @@ export default function NormalTestInterface() {
   const [currentScreen, setCurrentScreen]       = useState(1);
   const [agreedToTerms, setAgreedToTerms]       = useState(false);
   const [testDuration, setTestDuration]         = useState(0);
-  const [showRatingDialog, setShowRatingDialog] = useState(false);
-  const [pendingNavState, setPendingNavState]   = useState<any>(null);
   const [hasExistingAttempt, setHasExistingAttempt] = useState(false);
   const [systemId, setSystemId]                 = useState("");
   const [studentName, setStudentName]           = useState("Student");
@@ -189,6 +188,8 @@ export default function NormalTestInterface() {
   const [integerCursorPosition, setIntegerCursorPosition] = useState(0);
   const persistQueueRef = useRef<Promise<void>>(Promise.resolve());
   const persistSequenceRef = useRef(0);
+  const submittedRef = useRef(false);
+  const sessionAccessTokenRef = useRef<string | null>(null);
 
   // tooltip hover state
   const [hoveredSectionTooltip, setHoveredSectionTooltip] = useState<string | null>(null);
@@ -204,6 +205,16 @@ export default function NormalTestInterface() {
     window.addEventListener("offline", goOffline);
     window.addEventListener("online", goOnline);
     return () => { window.removeEventListener("offline", goOffline); window.removeEventListener("online", goOnline); };
+  }, []);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      sessionAccessTokenRef.current = data.session?.access_token ?? null;
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      sessionAccessTokenRef.current = session?.access_token ?? null;
+    });
+    return () => listener.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -322,6 +333,11 @@ export default function NormalTestInterface() {
       if (td) setFullscreenEnabled(td.fullscreen_enabled ?? true);
       const { data: startData, error: startError } = await supabase.functions.invoke("start-test", { body: { test_id: testId } });
       if (startError || startData?.error) throw new Error(startData?.error || startError?.message || "Failed to start test");
+      if (startData?.expired_submitted) {
+        toast({ title: "Test auto-submitted", description: "Time was already over, so your attempt has been submitted." });
+        navigate(`/test/${testId}/analysis`);
+        return;
+      }
       setAttemptId(startData.attempt_id); setTestName(startData.test_name);
       await proctoring.start(startData.attempt_id, { test_name: startData.test_name, interface: "normal" });
       const remaining = startData.remaining_seconds ?? startData.duration_minutes * 60;
