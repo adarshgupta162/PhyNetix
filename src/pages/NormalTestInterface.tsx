@@ -476,8 +476,6 @@ export default function NormalTestInterface() {
     }).catch((error) => console.error("Failed to trigger expired auto-submit:", error));
   }, [attemptId]);
 
-  useEffect(() => { if (timeExpired && attemptId && !submitting) handleSubmit(false, true); }, [timeExpired, attemptId, submitting, handleSubmit]);
-
   useEffect(() => {
     if (!attemptId || currentScreen !== 4 || timeLeft > 0 || submitting || submittedRef.current) return;
     triggerExpiredSubmit("timer_elapsed");
@@ -790,15 +788,16 @@ export default function NormalTestInterface() {
       });
       if (error || data?.error) throw new Error(data?.error || error?.message || "Failed to submit test");
       await proctoring.stop(fromMax ? "max_fullscreen_exits" : "submitted");
-      // Show rating dialog before navigating to analysis
-      setPendingNavState({ results: data, testName });
-      setShowRatingDialog(true);
+      submittedRef.current = true;
+      navigate(`/test/${testId}/analysis`, { state: { results: data, testName } });
     } catch (e: any) {
       console.error(e);
       toast({ title: "Error", description: e.message || "Failed to submit test.", variant: "destructive" });
       setSubmitting(false);
     }
   }, [attemptId, answers, timeLeft, testId, testName, navigate, submitting, fullscreenExitCount, buildCurrentTimeSnapshot, enqueueAttemptUpdate, testDuration, buildPersistedTimePayload, visitedQuestions]);
+
+  useEffect(() => { if (timeExpired && attemptId && !submitting) handleSubmit(false, true); }, [timeExpired, attemptId, submitting, handleSubmit]);
 
   const handleFullscreenExitCountChange = useCallback((count: number) => {
     setFullscreenExitCount(count);
