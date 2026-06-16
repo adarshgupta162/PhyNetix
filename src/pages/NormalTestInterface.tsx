@@ -476,11 +476,6 @@ export default function NormalTestInterface() {
     }).catch((error) => console.error("Failed to trigger expired auto-submit:", error));
   }, [attemptId]);
 
-  useEffect(() => {
-    if (!attemptId || currentScreen !== 4 || timeLeft > 0 || submitting || submittedRef.current) return;
-    triggerExpiredSubmit("timer_elapsed");
-  }, [attemptId, currentScreen, timeLeft, submitting, triggerExpiredSubmit]);
-
   // Safety net: when the user closes / hides the tab, fire a beacon to the auto-submit
   // edge function so the server submits this attempt immediately if time has expired.
   useEffect(() => {
