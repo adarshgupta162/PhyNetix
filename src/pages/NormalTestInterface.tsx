@@ -454,20 +454,44 @@ export default function NormalTestInterface() {
     };
   }, [loading, currentScreen]);
 
-  useEffect(() => { if (timeExpired && attemptId && !submitting) handleSubmit(false, true); }, [timeExpired]);
+  const triggerExpiredSubmit = useCallback((reason: string, keepalive = false) => {
+    if (!attemptId || !SUPABASE_URL || submittedRef.current) return;
+    const payload = JSON.stringify({ attempt_id: attemptId, reason, ts: Date.now() });
+    const functionUrl = `${SUPABASE_URL}/functions/v1/auto-submit-expired`;
+
+    if (keepalive && navigator.sendBeacon) {
+      navigator.sendBeacon(functionUrl, new Blob([payload], { type: "application/json" }));
+      return;
+    }
+
+    void fetch(functionUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(SUPABASE_PUBLISHABLE_KEY ? { apikey: SUPABASE_PUBLISHABLE_KEY } : {}),
+        ...(sessionAccessTokenRef.current ? { Authorization: `Bearer ${sessionAccessTokenRef.current}` } : {}),
+      },
+      body: payload,
+      keepalive,
+    }).catch((error) => console.error("Failed to trigger expired auto-submit:", error));
+  }, [attemptId]);
+
+  useEffect(() => { if (timeExpired && attemptId && !submitting) handleSubmit(false, true); }, [timeExpired, attemptId, submitting, handleSubmit]);
+
+  useEffect(() => {
+    if (!attemptId || currentScreen !== 4 || timeLeft > 0 || submitting || submittedRef.current) return;
+    triggerExpiredSubmit("timer_elapsed");
+  }, [attemptId, currentScreen, timeLeft, submitting, triggerExpiredSubmit]);
 
   // Safety net: when the user closes / hides the tab, fire a beacon to the auto-submit
   // edge function so the server submits this attempt immediately if time has expired.
   useEffect(() => {
     if (!attemptId || currentScreen !== 4) return;
-    const url = `https://iwzejchcrqddwgosmjsj.supabase.co/functions/v1/auto-submit-expired`;
     const onLeave = () => {
       try {
-        const body = new Blob(
-          [JSON.stringify({ attempt_id: attemptId, ts: Date.now() })],
-          { type: "application/json" }
-        );
-        navigator.sendBeacon?.(url, body);
+        if (expiresAtRef.current && Date.now() >= expiresAtRef.current) {
+          triggerExpiredSubmit("page_leave_after_expiry", true);
+        }
       } catch {}
     };
     window.addEventListener("pagehide", onLeave);
@@ -476,7 +500,7 @@ export default function NormalTestInterface() {
       window.removeEventListener("pagehide", onLeave);
       window.removeEventListener("beforeunload", onLeave);
     };
-  }, [attemptId, currentScreen]);
+  }, [attemptId, currentScreen, triggerExpiredSubmit]);
 
   const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
