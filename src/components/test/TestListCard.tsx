@@ -16,6 +16,7 @@ export interface TestCardData {
   scheduled_at?: string | null;
   isCompleted?: boolean;
   isInProgress?: boolean;
+  attemptId?: string;
 }
 
 interface Props {

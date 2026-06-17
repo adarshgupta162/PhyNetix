@@ -12,16 +12,19 @@ import TestListCard, { TestCardData } from "@/components/test/TestListCard";
 interface BatchTestRow {
   test_id: string;
   section_id: string | null;
-  section: { id: string; name: string } | null;
+  section: { id: string; name: string; display_order: number | null } | null;
   tests: any;
   batch_id: string;
   unlock_date: string | null;
+  display_order: number | null;
+  order_index: number | null;
 }
 
 interface AttemptRow {
   id: string;
   test_id: string;
   completed_at: string | null;
+  started_at: string | null;
 }
 
 const FILTERS = ["all", "not-attempted", "attempted", "upcoming", "resume"] as const;
@@ -34,6 +37,7 @@ export default function TestLibrary() {
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("__all__");
+  const [categoryInitialized, setCategoryInitialized] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -51,8 +55,9 @@ export default function TestLibrary() {
     if (batchIds.length) {
       const { data: bt } = await supabase
         .from("batch_tests")
-        .select(`test_id, section_id, batch_id, unlock_date, section:course_sections(id, name), tests(*)`)
-        .in("batch_id", batchIds);
+        .select(`test_id, section_id, batch_id, unlock_date, display_order, order_index, section:course_sections(id, name, display_order), tests(*)`)
+        .in("batch_id", batchIds)
+        .order("display_order", { ascending: true });
       setRows((bt as any) || []);
     } else {
       setRows([]);
@@ -60,31 +65,36 @@ export default function TestLibrary() {
 
     const { data: att } = await supabase
       .from("test_attempts")
-      .select("id, test_id, completed_at")
+      .select("id, test_id, completed_at, started_at")
       .eq("user_id", user!.id);
     setAttempts((att as any) || []);
-
-    // Load admin-configured default category (best-effort)
-    const { data: defaultSetting } = await supabase
-      .from("platform_settings")
-      .select("value")
-      .eq("key", "test_library_default_category")
-      .maybeSingle();
-    const def = (defaultSetting?.value as any) as string | undefined;
-    if (def && def !== "__all__") setSelectedCategory(def);
 
     setLoading(false);
   };
 
   const categories: CategoryItem[] = useMemo(() => {
-    const seen = new Map<string, CategoryItem>();
+    const seen = new Map<string, CategoryItem & { order: number }>();
     for (const r of rows) {
       if (r.section?.id && r.section.name) {
-        seen.set(r.section.id, { id: r.section.id, name: r.section.name, group: classifyGroup(r.section.name) });
+        if (!seen.has(r.section.id)) {
+          seen.set(r.section.id, {
+            id: r.section.id,
+            name: r.section.name,
+            group: classifyGroup(r.section.name),
+            order: r.section.display_order ?? 9999,
+          });
+        }
       }
     }
-    return Array.from(seen.values());
+    return Array.from(seen.values()).sort((a, b) => a.order - b.order);
   }, [rows]);
+
+  // Default to the top section (lowest display_order) once data loads
+  useEffect(() => {
+    if (categoryInitialized || loading) return;
+    if (categories.length > 0) setSelectedCategory(categories[0].id);
+    setCategoryInitialized(true);
+  }, [loading, categories, categoryInitialized]);
 
   const selectedName = useMemo(() => {
     if (selectedCategory === "__all__") return "All Tests";
@@ -94,22 +104,31 @@ export default function TestLibrary() {
   const visibleTests = useMemo(() => {
     const seen = new Set<string>();
     const list: TestCardData[] = [];
-    for (const r of rows) {
+    const now = Date.now();
+    const ordered = [...rows].sort((a, b) => (a.display_order ?? a.order_index ?? 9999) - (b.display_order ?? b.order_index ?? 9999));
+    for (const r of ordered) {
       if (selectedCategory !== "__all__" && r.section_id !== selectedCategory) continue;
       if (!r.tests || seen.has(r.test_id)) continue;
       seen.add(r.test_id);
       const att = attempts.find(a => a.test_id === r.test_id);
+      const duration = r.tests.duration_minutes || 0;
+      let expired = false;
+      if (att && !att.completed_at && att.started_at && duration > 0) {
+        const endMs = new Date(att.started_at).getTime() + duration * 60 * 1000;
+        if (endMs <= now) expired = true;
+      }
       list.push({
         id: r.test_id,
         name: r.tests.name,
         syllabus: r.tests.syllabus,
         syllabus_subtitle: r.tests.syllabus_subtitle,
-        duration_minutes: r.tests.duration_minutes || 0,
+        duration_minutes: duration,
         total_questions: r.tests.total_questions ?? undefined,
         total_marks: r.tests.total_marks ?? undefined,
         scheduled_at: r.tests.scheduled_at || r.unlock_date,
-        isCompleted: !!att?.completed_at,
-        isInProgress: !!att && !att.completed_at,
+        isCompleted: !!att?.completed_at || expired,
+        isInProgress: !!att && !att.completed_at && !expired,
+        attemptId: att?.id,
       });
     }
     const q = search.trim().toLowerCase();
