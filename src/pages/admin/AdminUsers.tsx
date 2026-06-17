@@ -57,7 +57,7 @@ type SortKey = "name" | "joined" | "attempts" | "enrollments" | "last_active";
 type SortDir = "asc" | "desc";
 type Density = "comfortable" | "compact";
 
-const COLUMNS = [
+const COLUMNS: { key: string; label: string; required?: boolean }[] = [
   { key: "user", label: "User", required: true },
   { key: "role", label: "Role" },
   { key: "exam", label: "Exam" },
@@ -66,7 +66,7 @@ const COLUMNS = [
   { key: "last_active", label: "Last Active" },
   { key: "status", label: "Status" },
   { key: "joined", label: "Joined" },
-] as const;
+];
 
 export default function AdminUsers() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
