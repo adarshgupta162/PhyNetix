@@ -1164,16 +1164,16 @@ export default function NormalTestInterface() {
               <div style={{ marginBottom: 14, padding: "10px 14px", background: "#fffde7", border: "1px solid #f0c040", fontSize: 13, lineHeight: 1.7 }}>
                 <div style={{ fontSize: 10, fontWeight: "bold", color: "#9a6500", marginBottom: 5, textTransform: "uppercase" }}>Paragraph</div>
                 <LatexRenderer content={currentQuestion.paragraph_text} />
-                {currentQuestion.paragraph_image_urls?.map((img, i) => (
-                  <img key={i} src={img} alt="" style={{ maxWidth: "100%", marginTop: 6, border: "none", display: "block" }} />
-                ))}
-              </div>
-            )}
+              {currentQuestion.paragraph_image_urls?.map((img, i) => (
+                <img key={i} src={img} alt="" style={{ maxWidth: "min(100%, 420px)", maxHeight: 260, width: "auto", height: "auto", objectFit: "contain", marginTop: 6, border: "none", display: "block" }} />
+              ))}
+            </div>
+          )}
 
-            {(() => {
-              const imgs = currentQuestion?.image_urls?.length ? currentQuestion.image_urls : currentQuestion?.image_url ? [currentQuestion.image_url] : [];
-              return imgs.length > 0 && <div style={{ marginBottom: 10 }}>{imgs.map((u, i) => <img key={i} src={u} alt="" style={{ maxWidth: "100%", border: "none", marginBottom: 0, display: "block" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />)}</div>;
-            })()}
+          {(() => {
+            const imgs = currentQuestion?.image_urls?.length ? currentQuestion.image_urls : currentQuestion?.image_url ? [currentQuestion.image_url] : [];
+            return imgs.length > 0 && <div style={{ marginBottom: 10 }}>{imgs.map((u, i) => <img key={i} src={u} alt="" style={{ maxWidth: "min(100%, 480px)", maxHeight: 320, width: "auto", height: "auto", objectFit: "contain", border: "none", marginBottom: 6, display: "block" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />)}</div>;
+          })()}
 
             {currentQuestion?.question_text && (
               <div style={{ fontSize: 14, lineHeight: 1.85, color: "#000", marginBottom: 16 }}>
