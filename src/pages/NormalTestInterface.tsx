@@ -1157,7 +1157,7 @@ export default function NormalTestInterface() {
           <div style={{ flex: 1, overflowY: "auto", padding: "14px 18px", background: "#fff" }}>
 
             <div style={{ fontWeight: "bold", fontSize: 13, marginBottom: 12, color: "#000" }}>
-              Question No. {currentQuestionIndex + 1}
+              Question No. {currentQuestionIndex + 1 + sectionOffset}
             </div>
 
             {currentQuestion?.paragraph_text && (
