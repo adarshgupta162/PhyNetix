@@ -1127,9 +1127,7 @@ export default function NormalTestInterface() {
               {sections.map(sec => {
                 const secCounts = getStatusCounts(sec);
                 return (
-                  <div key={sec.id} style={{ position: "relative", flexShrink: 0 }}
-                    onMouseEnter={() => setHoveredSectionTooltip(sec.id)}
-                    onMouseLeave={() => setHoveredSectionTooltip(null)}>
+                  <div key={sec.id} style={{ position: "relative", flexShrink: 0 }}>
                     <button
                       onClick={() => {
                         const firstQ = sec.questions[0];
@@ -1143,7 +1141,10 @@ export default function NormalTestInterface() {
                       }}
                       style={{ display: "flex", alignItems: "center", gap: 3, padding: "4px 12px", border: "1px solid", borderColor: activeSection === sec.id ? "#1a60b0" : "#b0c8e0", borderRadius: 3, background: activeSection === sec.id ? C.secActive : C.secInactive, color: activeSection === sec.id ? "#fff" : "#1a1a1a", fontSize: 12, fontWeight: "bold", cursor: "pointer", whiteSpace: "nowrap" }}>
                       {sec.name}
-                      <span style={{ width: 14, height: 14, background: activeSection === sec.id ? "rgba(255,255,255,.3)" : C.secActive, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 9, fontWeight: "bold" }}>i</span>
+                      <span
+                        onMouseEnter={(e) => { e.stopPropagation(); setHoveredSectionTooltip(sec.id); }}
+                        onMouseLeave={() => setHoveredSectionTooltip(null)}
+                        style={{ width: 14, height: 14, background: activeSection === sec.id ? "rgba(255,255,255,.3)" : C.secActive, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 9, fontWeight: "bold", cursor: "help" }}>i</span>
                     </button>
                     <StatusTooltip counts={{ answered: secCounts.answered, notAnswered: secCounts.notAnswered, notVisited: secCounts.notVisited, marked: secCounts.markedCount, answeredMarked: secCounts.answeredMarked }} visible={hoveredSectionTooltip === sec.id} />
                   </div>
