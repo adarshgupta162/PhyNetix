@@ -1079,7 +1079,12 @@ export default function NormalTestInterface() {
 
       {/* ── ROW 1: Full-width dark top bar ── */}
       <div style={{ background: C.topbarDark, color: "#fff", height: 32, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 12px", flexShrink: 0, zIndex: 10 }}>
-        <span style={{ fontSize: 13, fontWeight: "bold", color: "#fff" }}>PHYNETIX</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ width: 22, height: 22, background: "#16a34a", borderRadius: 5, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Atom style={{ width: 14, height: 14, color: "#fff" }} />
+          </span>
+          <span style={{ fontSize: 14, fontWeight: "bold", color: "#fff", letterSpacing: 0.3 }}>Phynetix</span>
+        </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <button style={{ background: "transparent", border: "none", color: "#aaccee", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
             <span style={{ width: 15, height: 15, background: C.secActive, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 9, fontWeight: "bold", flexShrink: 0 }}>i</span>
