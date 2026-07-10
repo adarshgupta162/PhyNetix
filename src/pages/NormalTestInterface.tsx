@@ -1072,7 +1072,11 @@ export default function NormalTestInterface() {
   /* ════════════════════════════════════════════
      SCREEN 4 — MAIN TEST
   ════════════════════════════════════════════ */
-  const sc = getStatusCounts();
+  const sc = getStatusCounts(currentSection ?? undefined);
+  const activeSectionIndex = sections.findIndex(s => s.id === activeSection);
+  const sectionOffset = activeSectionIndex > 0
+    ? sections.slice(0, activeSectionIndex).reduce((sum, s) => sum + s.questions.length, 0)
+    : 0;
 
   const testContent = (
     <div data-test-content style={{ height: "100vh", display: "flex", flexDirection: "column", fontFamily: "Arial,sans-serif", fontSize: 13, overflow: "hidden", background: "#f5f5f5" }}>
@@ -1123,9 +1127,7 @@ export default function NormalTestInterface() {
               {sections.map(sec => {
                 const secCounts = getStatusCounts(sec);
                 return (
-                  <div key={sec.id} style={{ position: "relative", flexShrink: 0 }}
-                    onMouseEnter={() => setHoveredSectionTooltip(sec.id)}
-                    onMouseLeave={() => setHoveredSectionTooltip(null)}>
+                  <div key={sec.id} style={{ position: "relative", flexShrink: 0 }}>
                     <button
                       onClick={() => {
                         const firstQ = sec.questions[0];
@@ -1139,7 +1141,10 @@ export default function NormalTestInterface() {
                       }}
                       style={{ display: "flex", alignItems: "center", gap: 3, padding: "4px 12px", border: "1px solid", borderColor: activeSection === sec.id ? "#1a60b0" : "#b0c8e0", borderRadius: 3, background: activeSection === sec.id ? C.secActive : C.secInactive, color: activeSection === sec.id ? "#fff" : "#1a1a1a", fontSize: 12, fontWeight: "bold", cursor: "pointer", whiteSpace: "nowrap" }}>
                       {sec.name}
-                      <span style={{ width: 14, height: 14, background: activeSection === sec.id ? "rgba(255,255,255,.3)" : C.secActive, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 9, fontWeight: "bold" }}>i</span>
+                      <span
+                        onMouseEnter={(e) => { e.stopPropagation(); setHoveredSectionTooltip(sec.id); }}
+                        onMouseLeave={() => setHoveredSectionTooltip(null)}
+                        style={{ width: 14, height: 14, background: activeSection === sec.id ? "rgba(255,255,255,.3)" : C.secActive, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 9, fontWeight: "bold", cursor: "help" }}>i</span>
                     </button>
                     <StatusTooltip counts={{ answered: secCounts.answered, notAnswered: secCounts.notAnswered, notVisited: secCounts.notVisited, marked: secCounts.markedCount, answeredMarked: secCounts.answeredMarked }} visible={hoveredSectionTooltip === sec.id} />
                   </div>
@@ -1153,23 +1158,23 @@ export default function NormalTestInterface() {
           <div style={{ flex: 1, overflowY: "auto", padding: "14px 18px", background: "#fff" }}>
 
             <div style={{ fontWeight: "bold", fontSize: 13, marginBottom: 12, color: "#000" }}>
-              Question No. {currentQuestionIndex + 1}
+              Question No. {currentQuestionIndex + 1 + sectionOffset}
             </div>
 
             {currentQuestion?.paragraph_text && (
               <div style={{ marginBottom: 14, padding: "10px 14px", background: "#fffde7", border: "1px solid #f0c040", fontSize: 13, lineHeight: 1.7 }}>
                 <div style={{ fontSize: 10, fontWeight: "bold", color: "#9a6500", marginBottom: 5, textTransform: "uppercase" }}>Paragraph</div>
                 <LatexRenderer content={currentQuestion.paragraph_text} />
-                {currentQuestion.paragraph_image_urls?.map((img, i) => (
-                  <img key={i} src={img} alt="" style={{ maxWidth: "100%", marginTop: 6, border: "none", display: "block" }} />
-                ))}
-              </div>
-            )}
+              {currentQuestion.paragraph_image_urls?.map((img, i) => (
+                <img key={i} src={img} alt="" style={{ maxWidth: "min(100%, 420px)", maxHeight: 260, width: "auto", height: "auto", objectFit: "contain", marginTop: 6, border: "none", display: "block" }} />
+              ))}
+            </div>
+          )}
 
-            {(() => {
-              const imgs = currentQuestion?.image_urls?.length ? currentQuestion.image_urls : currentQuestion?.image_url ? [currentQuestion.image_url] : [];
-              return imgs.length > 0 && <div style={{ marginBottom: 10 }}>{imgs.map((u, i) => <img key={i} src={u} alt="" style={{ maxWidth: "100%", border: "none", marginBottom: 0, display: "block" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />)}</div>;
-            })()}
+          {(() => {
+            const imgs = currentQuestion?.image_urls?.length ? currentQuestion.image_urls : currentQuestion?.image_url ? [currentQuestion.image_url] : [];
+            return imgs.length > 0 && <div style={{ marginBottom: 10 }}>{imgs.map((u, i) => <img key={i} src={u} alt="" style={{ maxWidth: "min(100%, 480px)", maxHeight: 320, width: "auto", height: "auto", objectFit: "contain", border: "none", marginBottom: 6, display: "block" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />)}</div>;
+          })()}
 
             {currentQuestion?.question_text && (
               <div style={{ fontSize: 14, lineHeight: 1.85, color: "#000", marginBottom: 16 }}>
@@ -1257,7 +1262,7 @@ export default function NormalTestInterface() {
                       <div style={{ flex: 1, fontSize: 14, lineHeight: 1.75, color: "#000" }} onClick={() => handleAnswer(idx)}>
                         <LatexRenderer content={opt.text} />
                         {opt.image_url && (
-                          <img src={opt.image_url} alt="" style={{ maxWidth: "100%", marginTop: 6, border: "none", display: "block" }}
+                          <img src={opt.image_url} alt="" style={{ maxWidth: "min(100%, 360px)", maxHeight: 220, width: "auto", height: "auto", objectFit: "contain", marginTop: 6, border: "none", display: "block" }}
                             onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
                         )}
                       </div>
@@ -1364,7 +1369,7 @@ export default function NormalTestInterface() {
               {currentSection?.questions.map((q, idx) => (
                 <PaletteBtn
                   key={q.id}
-                  num={idx + 1}
+                  num={idx + 1 + sectionOffset}
                   status={getQuestionStatus(q.id)}
                   isCurrent={currentQuestion?.id === q.id}
                   onClick={() => {
