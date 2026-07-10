@@ -1368,7 +1368,7 @@ export default function NormalTestInterface() {
               {currentSection?.questions.map((q, idx) => (
                 <PaletteBtn
                   key={q.id}
-                  num={idx + 1}
+                  num={idx + 1 + sectionOffset}
                   status={getQuestionStatus(q.id)}
                   isCurrent={currentQuestion?.id === q.id}
                   onClick={() => {
