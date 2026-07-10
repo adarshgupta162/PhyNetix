@@ -1261,7 +1261,7 @@ export default function NormalTestInterface() {
                       <div style={{ flex: 1, fontSize: 14, lineHeight: 1.75, color: "#000" }} onClick={() => handleAnswer(idx)}>
                         <LatexRenderer content={opt.text} />
                         {opt.image_url && (
-                          <img src={opt.image_url} alt="" style={{ maxWidth: "100%", marginTop: 6, border: "none", display: "block" }}
+                          <img src={opt.image_url} alt="" style={{ maxWidth: "min(100%, 360px)", maxHeight: 220, width: "auto", height: "auto", objectFit: "contain", marginTop: 6, border: "none", display: "block" }}
                             onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
                         )}
                       </div>
