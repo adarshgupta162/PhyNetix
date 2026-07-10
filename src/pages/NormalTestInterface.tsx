@@ -1072,7 +1072,11 @@ export default function NormalTestInterface() {
   /* ════════════════════════════════════════════
      SCREEN 4 — MAIN TEST
   ════════════════════════════════════════════ */
-  const sc = getStatusCounts();
+  const sc = getStatusCounts(currentSection ?? undefined);
+  const activeSectionIndex = sections.findIndex(s => s.id === activeSection);
+  const sectionOffset = activeSectionIndex > 0
+    ? sections.slice(0, activeSectionIndex).reduce((sum, s) => sum + s.questions.length, 0)
+    : 0;
 
   const testContent = (
     <div data-test-content style={{ height: "100vh", display: "flex", flexDirection: "column", fontFamily: "Arial,sans-serif", fontSize: 13, overflow: "hidden", background: "#f5f5f5" }}>
