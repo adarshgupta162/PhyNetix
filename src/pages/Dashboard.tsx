@@ -61,18 +61,9 @@ export default function Dashboard() {
   }, [user]);
 
   const fetchData = async () => {
-    // Check if user has any active enrollments
-    const { count: enrollmentCount } = await supabase
-      .from("batch_enrollments")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user!.id)
-      .eq("is_active", true);
-    
-    // Redirect to batch catalog if no enrollments
-    if (enrollmentCount === 0) {
-      navigate("/batches");
-      return;
-    }
+    // Note: we no longer force-redirect users without enrollments away from
+    // the dashboard. Redirecting caused a race after a fresh purchase where
+    // enrollment rows hadn't propagated yet, bouncing users back to /batches.
 
     // Fetch profile
     const { data: profileData } = await supabase
