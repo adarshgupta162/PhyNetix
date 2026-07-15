@@ -38,18 +38,45 @@ export function useEnrollmentForBatch(batchId: string | undefined) {
     queryFn: async () => {
       if (!user || !batchId) return null;
 
-      const { data, error } = await supabase
+      // Look up any enrollment row for this (user, batch). We treat rows with
+      // status='active' OR is_active=true OR a completed payment as enrolled,
+      // so a stale is_active flag never re-shows "Enroll Now" after purchase.
+      const { data: enrollment, error } = await supabase
         .from('batch_enrollments')
         .select('*')
         .eq('user_id', user.id)
         .eq('batch_id', batchId)
-        .eq('is_active', true)
+        .order('enrolled_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error) throw error;
-      return data;
+      if (enrollment) return enrollment;
+
+      // Fallback: if the auto-enroll trigger hasn't landed yet, check payments.
+      const { data: payment } = await supabase
+        .from('payments')
+        .select('id, status, batch_id, user_id')
+        .eq('user_id', user.id)
+        .eq('batch_id', batchId)
+        .eq('status', 'completed')
+        .limit(1)
+        .maybeSingle();
+      if (payment) {
+        return {
+          id: payment.id,
+          user_id: user.id,
+          batch_id: batchId,
+          status: 'active',
+          is_active: true,
+          payment_status: 'completed',
+        } as any;
+      }
+      return null;
     },
     enabled: !!user && !!batchId,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 }
 

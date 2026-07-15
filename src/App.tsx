@@ -65,6 +65,7 @@ import RoleSelectorPage from "./pages/admin/RoleSelectorPage";
 import BulkImportPage from "./pages/admin/BulkImportPage";
 import InstitutionsManager from "./pages/admin/InstitutionsManager";
 import LiveMonitoring from "./pages/admin/LiveMonitoring";
+import DevPortfolio from "./pages/DevPortfolio";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -80,6 +81,7 @@ const App = () => (
             <ProfileGuard>
               <Routes>
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/dev" element={<DevPortfolio />} />
                 {/* Marketing/Pre-Login Pages */}
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
