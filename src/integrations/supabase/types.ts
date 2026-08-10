@@ -21,6 +21,7 @@ export type Database = {
           entity_id: string | null
           entity_type: string
           id: string
+          institution_id: string | null
           new_value: Json | null
           old_value: Json | null
           user_id: string
@@ -31,6 +32,7 @@ export type Database = {
           entity_id?: string | null
           entity_type: string
           id?: string
+          institution_id?: string | null
           new_value?: Json | null
           old_value?: Json | null
           user_id: string
@@ -41,11 +43,20 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string
           id?: string
+          institution_id?: string | null
           new_value?: Json | null
           old_value?: Json | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       batch_enrollments: {
         Row: {
@@ -184,6 +195,7 @@ export type Database = {
           exam_type: string | null
           features: Json | null
           id: string
+          institution_id: string | null
           instructions: string | null
           is_active: boolean
           is_featured: boolean
@@ -218,6 +230,7 @@ export type Database = {
           exam_type?: string | null
           features?: Json | null
           id?: string
+          institution_id?: string | null
           instructions?: string | null
           is_active?: boolean
           is_featured?: boolean
@@ -252,6 +265,7 @@ export type Database = {
           exam_type?: string | null
           features?: Json | null
           id?: string
+          institution_id?: string | null
           instructions?: string | null
           is_active?: boolean
           is_featured?: boolean
@@ -276,6 +290,13 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "batches_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
         ]
@@ -643,6 +664,7 @@ export type Database = {
           duration_minutes: number | null
           exam_type: string | null
           id: string
+          institution_id: string | null
           is_published: boolean
           is_timed: boolean | null
           publish_date: string | null
@@ -664,6 +686,7 @@ export type Database = {
           duration_minutes?: number | null
           exam_type?: string | null
           id?: string
+          institution_id?: string | null
           is_published?: boolean
           is_timed?: boolean | null
           publish_date?: string | null
@@ -685,6 +708,7 @@ export type Database = {
           duration_minutes?: number | null
           exam_type?: string | null
           id?: string
+          institution_id?: string | null
           is_published?: boolean
           is_timed?: boolean | null
           publish_date?: string | null
@@ -709,28 +733,53 @@ export type Database = {
             referencedRelation: "chapters"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "dpps_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
         ]
       }
       institution_members: {
         Row: {
           created_at: string
+          email: string | null
+          full_name: string | null
           id: string
           institution_id: string
+          is_primary: boolean
+          permissions: Json
           role: string
+          status: string
+          updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          email?: string | null
+          full_name?: string | null
           id?: string
           institution_id: string
+          is_primary?: boolean
+          permissions?: Json
           role?: string
+          status?: string
+          updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          email?: string | null
+          full_name?: string | null
           id?: string
           institution_id?: string
+          is_primary?: boolean
+          permissions?: Json
           role?: string
+          status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -745,37 +794,85 @@ export type Database = {
       }
       institutions: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
+          city: string | null
+          code: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          country: string | null
           created_at: string
           created_by: string | null
           description: string | null
           id: string
           is_active: boolean
+          last_activity_at: string
           logo_url: string | null
           name: string
+          owner_user_id: string | null
+          primary_color: string | null
+          rejection_reason: string | null
+          secondary_color: string | null
           slug: string | null
+          state: string | null
+          status: Database["public"]["Enums"]["institution_status"]
           updated_at: string
+          website: string | null
+          welcome_message: string | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          city?: string | null
+          code?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
+          last_activity_at?: string
           logo_url?: string | null
           name: string
+          owner_user_id?: string | null
+          primary_color?: string | null
+          rejection_reason?: string | null
+          secondary_color?: string | null
           slug?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["institution_status"]
           updated_at?: string
+          website?: string | null
+          welcome_message?: string | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          city?: string | null
+          code?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
+          last_activity_at?: string
           logo_url?: string | null
           name?: string
+          owner_user_id?: string | null
+          primary_color?: string | null
+          rejection_reason?: string | null
+          secondary_color?: string | null
           slug?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["institution_status"]
           updated_at?: string
+          website?: string | null
+          welcome_message?: string | null
         }
         Relationships: []
       }
@@ -1051,6 +1148,7 @@ export type Database = {
           file_type: string | null
           file_url: string | null
           id: string
+          institution_id: string | null
           is_active: boolean
           is_published: boolean
           library_id: string | null
@@ -1084,6 +1182,7 @@ export type Database = {
           file_type?: string | null
           file_url?: string | null
           id?: string
+          institution_id?: string | null
           is_active?: boolean
           is_published?: boolean
           library_id?: string | null
@@ -1117,6 +1216,7 @@ export type Database = {
           file_type?: string | null
           file_url?: string | null
           id?: string
+          institution_id?: string | null
           is_active?: boolean
           is_published?: boolean
           library_id?: string | null
@@ -1137,7 +1237,15 @@ export type Database = {
           updated_at?: string
           usage_count?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "phynetix_library_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       platform_settings: {
         Row: {
@@ -2341,6 +2449,7 @@ export type Database = {
           exam_type: string | null
           fullscreen_enabled: boolean | null
           id: string
+          institution_id: string | null
           instructions_json: Json | null
           is_published: boolean | null
           name: string
@@ -2363,6 +2472,7 @@ export type Database = {
           exam_type?: string | null
           fullscreen_enabled?: boolean | null
           id?: string
+          institution_id?: string | null
           instructions_json?: Json | null
           is_published?: boolean | null
           name: string
@@ -2385,6 +2495,7 @@ export type Database = {
           exam_type?: string | null
           fullscreen_enabled?: boolean | null
           id?: string
+          institution_id?: string | null
           instructions_json?: Json | null
           is_published?: boolean | null
           name?: string
@@ -2398,7 +2509,15 @@ export type Database = {
           test_type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tests_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -2437,6 +2556,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_write_institution: {
+        Args: { _institution_id: string }
+        Returns: boolean
+      }
+      gen_readable_code: { Args: { _len?: number }; Returns: string }
+      get_user_institution_id: { Args: never; Returns: string }
+      has_institution_permission: {
+        Args: { _institution_id: string; _perm: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2444,16 +2573,81 @@ export type Database = {
         }
         Returns: boolean
       }
+      institution_dashboard_stats: { Args: never; Returns: Json }
+      institution_is_active: {
+        Args: { _institution_id: string }
+        Returns: boolean
+      }
+      institution_students: {
+        Args: {
+          _batch_id?: string
+          _limit?: number
+          _offset?: number
+          _search?: string
+        }
+        Returns: {
+          attempts: number
+          batches: string[]
+          full_name: string
+          joined_at: string
+          phone: string
+          roll_number: string
+          total_count: number
+          user_id: string
+        }[]
+      }
+      institution_summaries: {
+        Args: never
+        Returns: {
+          attempts: number
+          batches: number
+          city: string
+          code: string
+          contact_email: string
+          contact_phone: string
+          created_at: string
+          id: string
+          last_activity_at: string
+          logo_url: string
+          name: string
+          owner_email: string
+          owner_name: string
+          owner_user_id: string
+          rejection_reason: string
+          slug: string
+          state: string
+          status: Database["public"]["Enums"]["institution_status"]
+          students: number
+          tests: number
+          website: string
+        }[]
+      }
       is_enrolled_in_batch: {
         Args: { _batch_id: string; _user_id: string }
         Returns: boolean
       }
+      is_institution_admin: {
+        Args: { _institution_id: string }
+        Returns: boolean
+      }
+      is_institution_member: {
+        Args: { _institution_id: string }
+        Returns: boolean
+      }
+      is_institution_student: {
+        Args: { _institution_id: string }
+        Returns: boolean
+      }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      join_batch_with_code: { Args: { _code: string }; Returns: Json }
+      platform_institute_stats: { Args: never; Returns: Json }
+      preview_batch_code: { Args: { _code: string }; Returns: Json }
       proctoring_schema_health: { Args: never; Returns: Json }
       recompute_batch_current_students: {
         Args: { _batch_id: string }
         Returns: undefined
       }
+      regenerate_batch_code: { Args: { _batch_id: string }; Returns: Json }
       user_completed_test: {
         Args: { _test_id: string; _user_id: string }
         Returns: boolean
@@ -2476,6 +2670,7 @@ export type Database = {
         | "operations_admin"
         | "finance_admin"
         | "marketing_admin"
+      institution_status: "pending" | "active" | "rejected" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2616,6 +2811,7 @@ export const Constants = {
         "finance_admin",
         "marketing_admin",
       ],
+      institution_status: ["pending", "active", "rejected", "suspended"],
     },
   },
 } as const
