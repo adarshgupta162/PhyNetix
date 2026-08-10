@@ -66,7 +66,12 @@ import BulkImportPage from "./pages/admin/BulkImportPage";
 import InstitutionsManager from "./pages/admin/InstitutionsManager";
 import LiveMonitoring from "./pages/admin/LiveMonitoring";
 import DevPortfolio from "./pages/DevPortfolio";
+import RegisterInstitutePage from "./pages/RegisterInstitutePage";
+import InstituteRoute from "@/components/institute/InstituteRoute";
+import InstituteDashboard from "./pages/institute/InstituteDashboard";
+import InstituteBatches from "./pages/institute/InstituteBatches";
 import NotFound from "./pages/NotFound";
+
 
 const queryClient = new QueryClient();
 
