@@ -104,6 +104,11 @@ const App = () => (
                 <Route path="/login" element={<AuthPage />} />
                 <Route path="/signup" element={<AuthPage />} />
                 <Route path="/staff-login" element={<StaffAuthPage />} />
+                {/* Institute Management */}
+                <Route path="/register-institute" element={<RegisterInstitutePage />} />
+                <Route path="/institute" element={<InstituteRoute><InstituteDashboard /></InstituteRoute>} />
+                <Route path="/institute/batches" element={<InstituteRoute><InstituteBatches /></InstituteRoute>} />
+
                 {/* Role Selector */}
                 <Route path="/admin/select-role" element={<AdminRoute><RoleSelectorPage /></AdminRoute>} />
                 {/* Student Dashboard & Features */}
