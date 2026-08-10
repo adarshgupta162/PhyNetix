@@ -66,7 +66,12 @@ import BulkImportPage from "./pages/admin/BulkImportPage";
 import InstitutionsManager from "./pages/admin/InstitutionsManager";
 import LiveMonitoring from "./pages/admin/LiveMonitoring";
 import DevPortfolio from "./pages/DevPortfolio";
+import RegisterInstitutePage from "./pages/RegisterInstitutePage";
+import InstituteRoute from "@/components/institute/InstituteRoute";
+import InstituteDashboard from "./pages/institute/InstituteDashboard";
+import InstituteBatches from "./pages/institute/InstituteBatches";
 import NotFound from "./pages/NotFound";
+
 
 const queryClient = new QueryClient();
 
@@ -99,6 +104,11 @@ const App = () => (
                 <Route path="/login" element={<AuthPage />} />
                 <Route path="/signup" element={<AuthPage />} />
                 <Route path="/staff-login" element={<StaffAuthPage />} />
+                {/* Institute Management */}
+                <Route path="/register-institute" element={<RegisterInstitutePage />} />
+                <Route path="/institute" element={<InstituteRoute><InstituteDashboard /></InstituteRoute>} />
+                <Route path="/institute/batches" element={<InstituteRoute><InstituteBatches /></InstituteRoute>} />
+
                 {/* Role Selector */}
                 <Route path="/admin/select-role" element={<AdminRoute><RoleSelectorPage /></AdminRoute>} />
                 {/* Student Dashboard & Features */}
