@@ -70,6 +70,11 @@ import RegisterInstitutePage from "./pages/RegisterInstitutePage";
 import InstituteRoute from "@/components/institute/InstituteRoute";
 import InstituteDashboard from "./pages/institute/InstituteDashboard";
 import InstituteBatches from "./pages/institute/InstituteBatches";
+import InstituteStudents from "./pages/institute/InstituteStudents";
+import InstituteTests from "./pages/institute/InstituteTests";
+import InstituteResults from "./pages/institute/InstituteResults";
+import InstituteStaff from "./pages/institute/InstituteStaff";
+import InstituteSettings from "./pages/institute/InstituteSettings";
 import NotFound from "./pages/NotFound";
 
 
@@ -108,6 +113,11 @@ const App = () => (
                 <Route path="/register-institute" element={<RegisterInstitutePage />} />
                 <Route path="/institute" element={<InstituteRoute><InstituteDashboard /></InstituteRoute>} />
                 <Route path="/institute/batches" element={<InstituteRoute><InstituteBatches /></InstituteRoute>} />
+                <Route path="/institute/students" element={<InstituteRoute><InstituteStudents /></InstituteRoute>} />
+                <Route path="/institute/tests" element={<InstituteRoute><InstituteTests /></InstituteRoute>} />
+                <Route path="/institute/results" element={<InstituteRoute><InstituteResults /></InstituteRoute>} />
+                <Route path="/institute/staff" element={<InstituteRoute><InstituteStaff /></InstituteRoute>} />
+                <Route path="/institute/settings" element={<InstituteRoute><InstituteSettings /></InstituteRoute>} />
 
                 {/* Role Selector */}
                 <Route path="/admin/select-role" element={<AdminRoute><RoleSelectorPage /></AdminRoute>} />
