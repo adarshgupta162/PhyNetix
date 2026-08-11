@@ -70,6 +70,11 @@ import RegisterInstitutePage from "./pages/RegisterInstitutePage";
 import InstituteRoute from "@/components/institute/InstituteRoute";
 import InstituteDashboard from "./pages/institute/InstituteDashboard";
 import InstituteBatches from "./pages/institute/InstituteBatches";
+import InstituteStudents from "./pages/institute/InstituteStudents";
+import InstituteTests from "./pages/institute/InstituteTests";
+import InstituteResults from "./pages/institute/InstituteResults";
+import InstituteStaff from "./pages/institute/InstituteStaff";
+import InstituteSettings from "./pages/institute/InstituteSettings";
 import NotFound from "./pages/NotFound";
 
 
