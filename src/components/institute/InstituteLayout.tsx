@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Users, Layers, ClipboardList, BarChart3, Library,
-  Video, UserCog, Settings, LogOut, Building2, ShieldAlert,
+  LayoutDashboard, Users, Layers, ClipboardList, BarChart3,
+  UserCog, Settings, LogOut, Building2, ShieldAlert,
 } from "lucide-react";
 import { useInstitute } from "@/hooks/useInstitute";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,10 +16,7 @@ const NAV = [
   { to: "/institute/students", label: "Students", icon: Users },
   { to: "/institute/batches", label: "Batches", icon: Layers },
   { to: "/institute/tests", label: "Tests", icon: ClipboardList },
-  { to: "/institute/questions", label: "Questions", icon: Library },
   { to: "/institute/results", label: "Results", icon: BarChart3 },
-  { to: "/institute/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/institute/proctoring", label: "Proctoring", icon: Video },
   { to: "/institute/staff", label: "Staff", icon: UserCog },
   { to: "/institute/settings", label: "Settings", icon: Settings },
 ];
