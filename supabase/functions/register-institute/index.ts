@@ -62,7 +62,7 @@ serve(async (req) => {
     if (!str(country)) errors.country = "Country is required";
     if (str(password).length < 8) errors.password = "Password must be at least 8 characters";
     if (str(website) && !/^https?:\/\/.+/.test(str(website))) errors.website = "Website must start with http(s)://";
-    if (acceptedTerms !== true) errors.acceptedTerms = "You must accept the terms";
+    if (acceptedTerms !== true && !isPlatformAdmin) errors.acceptedTerms = "You must accept the terms";
     if (Object.keys(errors).length) return json({ error: "Validation failed", fields: errors }, 400);
 
     const email = str(adminEmail).toLowerCase();
