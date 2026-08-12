@@ -128,8 +128,9 @@ serve(async (req) => {
         state: str(state),
         country: str(country),
         website: str(website) || null,
-        status: "pending",
-        is_active: false,
+        status: approveNow ? "active" : "pending",
+        is_active: approveNow,
+        approved_at: approveNow ? new Date().toISOString() : null,
         owner_user_id: userId,
         created_by: userId,
       })
