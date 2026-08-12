@@ -31,8 +31,24 @@ serve(async (req) => {
 
     const {
       instituteName, adminFullName, adminEmail, phone, city, state, country,
-      website, password, description, logoUrl, acceptedTerms,
+      website, password, description, logoUrl, acceptedTerms, autoApprove,
     } = body as Record<string, string | boolean>;
+
+    // Only a platform admin may create an already-approved institute manually.
+    let isPlatformAdmin = false;
+    const authHeader = req.headers.get("Authorization") ?? "";
+    if (authHeader.startsWith("Bearer ")) {
+      const token = authHeader.slice(7);
+      const { data: userData } = await admin.auth.getUser(token);
+      if (userData?.user) {
+        const { data: roleOk } = await admin.rpc("has_role", { _user_id: userData.user.id, _role: "admin" });
+        isPlatformAdmin = roleOk === true;
+      }
+    }
+    const approveNow = autoApprove === true && isPlatformAdmin;
+    if (autoApprove === true && !isPlatformAdmin) {
+      return json({ error: "Only platform administrators can create approved institutes" }, 403);
+    }
 
     const errors: Record<string, string> = {};
     const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
@@ -46,7 +62,7 @@ serve(async (req) => {
     if (!str(country)) errors.country = "Country is required";
     if (str(password).length < 8) errors.password = "Password must be at least 8 characters";
     if (str(website) && !/^https?:\/\/.+/.test(str(website))) errors.website = "Website must start with http(s)://";
-    if (acceptedTerms !== true) errors.acceptedTerms = "You must accept the terms";
+    if (acceptedTerms !== true && !isPlatformAdmin) errors.acceptedTerms = "You must accept the terms";
     if (Object.keys(errors).length) return json({ error: "Validation failed", fields: errors }, 400);
 
     const email = str(adminEmail).toLowerCase();
@@ -112,8 +128,9 @@ serve(async (req) => {
         state: str(state),
         country: str(country),
         website: str(website) || null,
-        status: "pending",
-        is_active: false,
+        status: approveNow ? "active" : "pending",
+        is_active: approveNow,
+        approved_at: approveNow ? new Date().toISOString() : null,
         owner_user_id: userId,
         created_by: userId,
       })
@@ -153,11 +170,13 @@ serve(async (req) => {
     return json({
       success: true,
       institutionId: institution.id,
-      status: "pending",
+      status: approveNow ? "active" : "pending",
       accountCreated: createdUser,
-      message: createdUser
-        ? "Institute registered. Sign in with your new admin account once approved."
-        : "Institute registered against your existing PhyNetix account.",
+      message: approveNow
+        ? "Institute created and activated."
+        : createdUser
+          ? "Institute registered. Sign in with your new admin account once approved."
+          : "Institute registered against your existing PhyNetix account.",
     });
   } catch (e) {
     console.error("register-institute error", e);

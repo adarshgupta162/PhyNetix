@@ -206,6 +206,11 @@ export default function LandingPage() {
 
           {/* Actions */}
           <div className="flex items-center gap-3">
+            <Link to="/register-institute" className="hidden md:block">
+              <Button variant="outline" size="sm">
+                Register as Institute
+              </Button>
+            </Link>
             <Link to="/auth" className="hidden md:block">
               <Button variant="ghost" size="sm">
                 Login
@@ -261,6 +266,11 @@ export default function LandingPage() {
                 <Link to="/auth">
                   <Button size="sm" className="w-full">
                     Sign Up
+                  </Button>
+                </Link>
+                <Link to="/register-institute">
+                  <Button variant="ghost" size="sm" className="w-full">
+                    Register as Institute
                   </Button>
                 </Link>
               </div>
