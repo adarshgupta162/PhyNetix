@@ -295,3 +295,81 @@ function MembersDialog({ institutionId, onClose }: { institutionId: string; onCl
     </Dialog>
   );
 }
+
+function AddInstituteDialog({ open, onClose, onCreated }: { open: boolean; onClose: () => void; onCreated: () => void }) {
+  const empty = {
+    instituteName: "", adminFullName: "", adminEmail: "", phone: "", city: "",
+    state: "", country: "India", website: "", password: "", description: "", logoUrl: "",
+  };
+  const [form, setForm] = useState(empty);
+  const [approve, setApprove] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const set = (k: keyof typeof empty, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const submit = async () => {
+    setSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("register-institute", {
+        body: { ...form, acceptedTerms: true, autoApprove: approve },
+      });
+      const payload: any = data;
+      if (error || payload?.error) throw new Error(payload?.error || error?.message || "Could not create institute");
+      toast.success(payload?.message ?? "Institute created");
+      setForm(empty);
+      onCreated();
+      onClose();
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>Add institute manually</DialogTitle></DialogHeader>
+        <div className="grid md:grid-cols-2 gap-3">
+          <Row label="Institute name"><Input value={form.instituteName} onChange={(e) => set("instituteName", e.target.value)} /></Row>
+          <Row label="Logo URL (optional)"><Input value={form.logoUrl} onChange={(e) => set("logoUrl", e.target.value)} /></Row>
+          <Row label="Admin full name"><Input value={form.adminFullName} onChange={(e) => set("adminFullName", e.target.value)} /></Row>
+          <Row label="Admin email"><Input type="email" value={form.adminEmail} onChange={(e) => set("adminEmail", e.target.value)} /></Row>
+          <Row label="Admin password"><Input type="password" value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="min 8 characters" /></Row>
+          <Row label="Phone"><Input value={form.phone} onChange={(e) => set("phone", e.target.value)} /></Row>
+          <Row label="City"><Input value={form.city} onChange={(e) => set("city", e.target.value)} /></Row>
+          <Row label="State">
+            <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={form.state} onChange={(e) => set("state", e.target.value)}>
+              <option value="">Select state</option>
+              {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </Row>
+          <Row label="Country"><Input value={form.country} onChange={(e) => set("country", e.target.value)} /></Row>
+          <Row label="Website (optional)"><Input value={form.website} onChange={(e) => set("website", e.target.value)} /></Row>
+        </div>
+        <Row label="Description (optional)">
+          <Textarea rows={3} value={form.description} onChange={(e) => set("description", e.target.value)} />
+        </Row>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={approve} onChange={(e) => setApprove(e.target.checked)} />
+          Activate immediately (skip approval queue)
+        </label>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={submit} disabled={saving}>
+            {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Create institute
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
+      {children}
+    </div>
+  );
+}
