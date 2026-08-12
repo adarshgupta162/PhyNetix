@@ -268,6 +268,11 @@ export default function LandingPage() {
                     Sign Up
                   </Button>
                 </Link>
+                <Link to="/register-institute">
+                  <Button variant="ghost" size="sm" className="w-full">
+                    Register as Institute
+                  </Button>
+                </Link>
               </div>
             </nav>
           </motion.div>
