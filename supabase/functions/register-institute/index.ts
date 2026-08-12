@@ -31,8 +31,24 @@ serve(async (req) => {
 
     const {
       instituteName, adminFullName, adminEmail, phone, city, state, country,
-      website, password, description, logoUrl, acceptedTerms,
+      website, password, description, logoUrl, acceptedTerms, autoApprove,
     } = body as Record<string, string | boolean>;
+
+    // Only a platform admin may create an already-approved institute manually.
+    let isPlatformAdmin = false;
+    const authHeader = req.headers.get("Authorization") ?? "";
+    if (authHeader.startsWith("Bearer ")) {
+      const token = authHeader.slice(7);
+      const { data: userData } = await admin.auth.getUser(token);
+      if (userData?.user) {
+        const { data: roleOk } = await admin.rpc("has_role", { _user_id: userData.user.id, _role: "admin" });
+        isPlatformAdmin = roleOk === true;
+      }
+    }
+    const approveNow = autoApprove === true && isPlatformAdmin;
+    if (autoApprove === true && !isPlatformAdmin) {
+      return json({ error: "Only platform administrators can create approved institutes" }, 403);
+    }
 
     const errors: Record<string, string> = {};
     const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
