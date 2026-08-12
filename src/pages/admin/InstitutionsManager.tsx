@@ -72,9 +72,12 @@ export default function InstitutionsManager() {
   return (
     <AdminLayout>
       <div className="p-6 space-y-6 max-w-6xl mx-auto">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2"><Building2 className="w-6 h-6" /> Institutes</h1>
-          <p className="text-sm text-muted-foreground">Approve registrations and oversee every institute workspace on PhyNetix.</p>
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2"><Building2 className="w-6 h-6" /> Institutes</h1>
+            <p className="text-sm text-muted-foreground">Approve registrations and oversee every institute workspace on PhyNetix.</p>
+          </div>
+          <Button onClick={() => setAddOpen(true)}><Plus className="w-4 h-4 mr-2" />Add institute</Button>
         </div>
 
         <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
