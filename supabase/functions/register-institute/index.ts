@@ -170,11 +170,13 @@ serve(async (req) => {
     return json({
       success: true,
       institutionId: institution.id,
-      status: "pending",
+      status: approveNow ? "active" : "pending",
       accountCreated: createdUser,
-      message: createdUser
-        ? "Institute registered. Sign in with your new admin account once approved."
-        : "Institute registered against your existing PhyNetix account.",
+      message: approveNow
+        ? "Institute created and activated."
+        : createdUser
+          ? "Institute registered. Sign in with your new admin account once approved."
+          : "Institute registered against your existing PhyNetix account.",
     });
   } catch (e) {
     console.error("register-institute error", e);
