@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Building2, Copy, Loader2, Search, CheckCircle2, XCircle, PauseCircle, PlayCircle, Users } from "lucide-react";
+import { Building2, Copy, Loader2, Search, CheckCircle2, XCircle, PauseCircle, PlayCircle, Users, Plus } from "lucide-react";
+import { INDIAN_STATES } from "@/lib/indiaGeo";
 
 const STATUS_TABS = ["all", "pending", "active", "suspended", "rejected"] as const;
 type Tab = (typeof STATUS_TABS)[number];
