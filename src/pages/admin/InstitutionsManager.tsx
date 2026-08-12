@@ -23,6 +23,7 @@ export default function InstitutionsManager() {
   const [rejectFor, setRejectFor] = useState<any | null>(null);
   const [reason, setReason] = useState("");
   const [membersFor, setMembersFor] = useState<string | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
 
   const { data: stats } = useQuery({
     queryKey: ["platform-institute-stats"],
