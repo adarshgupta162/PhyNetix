@@ -208,6 +208,15 @@ export default function InstitutionsManager() {
         </Dialog>
 
         {membersFor && <MembersDialog institutionId={membersFor} onClose={() => setMembersFor(null)} />}
+
+        <AddInstituteDialog
+          open={addOpen}
+          onClose={() => setAddOpen(false)}
+          onCreated={() => {
+            qc.invalidateQueries({ queryKey: ["institution-summaries"] });
+            qc.invalidateQueries({ queryKey: ["platform-institute-stats"] });
+          }}
+        />
       </div>
     </AdminLayout>
   );
