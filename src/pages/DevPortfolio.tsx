@@ -40,8 +40,8 @@ const socials = [
   {
     icon: Instagram,
     label: "Instagram",
-    handle: "@_adarxh.in_",
-    href: "https://instagram.com/_adarxh.in_",
+    handle: "@_adarsh.in_",
+    href: "https://instagram.com/_adarsh.in_",
   },
 ];
 
