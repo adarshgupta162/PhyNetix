@@ -89,7 +89,7 @@ export default function DevPortfolio() {
             Adarsh <span className="gradient-text">Gupta</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-xl mb-8 leading-relaxed">
-            Incoming B.Tech (CSE) student at IIEST Shibpur, building
+            B.Tech (CSE) student at IIEST Shibpur, building
             AI-powered products that solve real-world problems — starting with
             how India prepares for JEE.
           </p>
