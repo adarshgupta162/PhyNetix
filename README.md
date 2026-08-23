@@ -10,7 +10,7 @@ It combines online test delivery, question attempting, performance analytics, au
 
 ---
 
-## ✨ Features
+##  Features
 
 ### 📝 Online Test Platform
 
