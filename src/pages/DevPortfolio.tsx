@@ -188,7 +188,7 @@ export default function DevPortfolio() {
             B.Tech, Computer Science & Engineering
           </div>
           <div className="text-muted-foreground">
-            National Institute of Technology, Andhra Pradesh · Incoming
+            Indian Institute of Engineering Science and Technology, Shibpur 
           </div>
         </motion.div>
 
