@@ -315,7 +315,7 @@ Add an appropriate open-source license to the repository if you intend to allow 
 
 Building PhyNetix as a full-stack examination platform focused on competitive exam preparation.
 
-GitHub: https://github.com/adarshgupta
+GitHub: https://github.com/adarshgupta162
 
 ---
 
