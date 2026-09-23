@@ -2354,6 +2354,85 @@ export type Database = {
           },
         ]
       }
+      test_similar_questions: {
+        Row: {
+          correct_answer: Json | null
+          created_at: string
+          created_by: string | null
+          difficulty: string | null
+          id: string
+          image_urls: Json
+          library_question_id: string | null
+          options: Json | null
+          order_index: number
+          parent_question_id: string
+          question_text: string | null
+          question_type: string
+          solution_image_urls: Json
+          solution_text: string | null
+          test_id: string
+          updated_at: string
+        }
+        Insert: {
+          correct_answer?: Json | null
+          created_at?: string
+          created_by?: string | null
+          difficulty?: string | null
+          id?: string
+          image_urls?: Json
+          library_question_id?: string | null
+          options?: Json | null
+          order_index?: number
+          parent_question_id: string
+          question_text?: string | null
+          question_type?: string
+          solution_image_urls?: Json
+          solution_text?: string | null
+          test_id: string
+          updated_at?: string
+        }
+        Update: {
+          correct_answer?: Json | null
+          created_at?: string
+          created_by?: string | null
+          difficulty?: string | null
+          id?: string
+          image_urls?: Json
+          library_question_id?: string | null
+          options?: Json | null
+          order_index?: number
+          parent_question_id?: string
+          question_text?: string | null
+          question_type?: string
+          solution_image_urls?: Json
+          solution_text?: string | null
+          test_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_similar_questions_library_question_id_fkey"
+            columns: ["library_question_id"]
+            isOneToOne: false
+            referencedRelation: "phynetix_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "test_similar_questions_parent_question_id_fkey"
+            columns: ["parent_question_id"]
+            isOneToOne: false
+            referencedRelation: "test_section_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "test_similar_questions_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       test_subjects: {
         Row: {
           created_at: string
