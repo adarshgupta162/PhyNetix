@@ -39,13 +39,12 @@ export default function CheckoutPage() {
   const basePrice = batch?.price ?? 0;
   const discount = coupon?.computed_discount ?? 0;
   const finalPrice = Math.max(0, basePrice - discount);
-  const canEnroll = !!coupon && finalPrice === 0;
+  const canEnroll = true;
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim() || !batchId) return;
     setApplying(true);
     setCoupon(null);
-
     try {
       const code = couponCode.trim().toUpperCase();
       const { data: c, error } = await supabase
@@ -54,35 +53,25 @@ export default function CheckoutPage() {
         .eq("code", code)
         .eq("is_active", true)
         .maybeSingle();
-
       if (error) throw error;
       if (!c) { toast.error("Invalid coupon code"); return; }
-
       const now = new Date();
       if (c.valid_from && new Date(c.valid_from) > now) { toast.error("Coupon not yet valid"); return; }
       if (c.valid_until && new Date(c.valid_until) < now) { toast.error("Coupon has expired"); return; }
       if (c.max_uses != null && c.current_uses >= c.max_uses) { toast.error("Coupon usage limit reached"); return; }
       if (c.min_purchase_amount && basePrice < Number(c.min_purchase_amount)) { toast.error(`Minimum purchase ₹${c.min_purchase_amount} required`); return; }
-
       const applies = c.applies_to;
       const okBatch =
         applies === "all" ||
         (applies === "batch" && (c.batch_id === batchId || (c.applicable_batches || []).includes(batchId))) ||
         (Array.isArray(c.applicable_batches) && c.applicable_batches.includes(batchId));
       if (!okBatch) { toast.error("Coupon not valid for this course"); return; }
-
-      let computed = 0;
-      if (c.discount_type === "percentage") computed = Math.round((basePrice * Number(c.discount_value)) / 100);
-      else computed = Number(c.discount_value);
+      let computed = c.discount_type === "percentage"
+        ? Math.round((basePrice * Number(c.discount_value)) / 100)
+        : Number(c.discount_value);
       computed = Math.min(computed, basePrice);
-
       setCoupon({ id: c.id, code: c.code, discount_type: c.discount_type, discount_value: Number(c.discount_value), computed_discount: computed });
-
-      if (basePrice - computed > 0) {
-        toast.warning(`Coupon applied. ₹${basePrice - computed} remaining — only fully-discounted enrollments are allowed.`);
-      } else {
-        toast.success("Coupon applied — course is free!");
-      }
+      toast.success("Coupon applied");
     } catch (e: any) {
       toast.error(e?.message || "Could not apply coupon");
     } finally {
@@ -90,39 +79,61 @@ export default function CheckoutPage() {
     }
   };
 
+  const loadRazorpay = () =>
+    new Promise<boolean>((resolve) => {
+      if ((window as any).Razorpay) return resolve(true);
+      const s = document.createElement("script");
+      s.src = "https://checkout.razorpay.com/v1/checkout.js";
+      s.onload = () => resolve(true);
+      s.onerror = () => resolve(false);
+      document.body.appendChild(s);
+    });
+
+  const done = () => {
+    queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+    queryClient.invalidateQueries({ queryKey: ["payment-history"] });
+    toast.success("Enrolled successfully!");
+    navigate("/my-batches");
+  };
+
   const handleEnroll = async () => {
     if (!user || !batchId || !batch) { toast.error("Please log in"); return; }
-    if (!canEnroll) { toast.error("Apply a coupon that makes the price ₹0 to enroll."); return; }
     setSubmitting(true);
     try {
-      // Insert a completed payment for ₹0. The auto_enroll_on_payment trigger
-      // creates the batch_enrollments row.
-      const { error: payErr } = await supabase.from("payments").insert({
-        user_id: user.id,
-        batch_id: batchId,
-        coupon_id: coupon!.id,
-        amount: 0,
-        currency: "INR",
-        status: "completed",
-        provider: "coupon",
-        metadata: { coupon_code: coupon!.code, original_price: basePrice },
+      const { data, error } = await supabase.functions.invoke("razorpay-create-order", {
+        body: { batch_id: batchId, coupon_code: coupon?.code ?? null },
       });
-      if (payErr) throw payErr;
+      if (error) {
+        let msg = error.message;
+        try { msg = (await (error as any).context.json()).error || msg; } catch { /* noop */ }
+        throw new Error(msg);
+      }
+      if (data?.error) throw new Error(data.error);
+      if (data.free) { done(); setSubmitting(false); return; }
 
-      // Best-effort bump coupon usage; ignore failure (RLS may forbid for students)
-      try {
-        await supabase
-          .from("coupons")
-          .update({ current_uses: (coupon as any).current_uses ? (coupon as any).current_uses + 1 : 1 })
-          .eq("id", coupon!.id);
-      } catch { /* noop */ }
-
-      toast.success("Enrolled successfully!");
-      queryClient.invalidateQueries({ queryKey: ["enrollments"] });
-      navigate("/my-batches");
+      if (!(await loadRazorpay())) throw new Error("Could not load payment window");
+      const rzp = new (window as any).Razorpay({
+        key: data.key_id,
+        amount: data.amount,
+        currency: data.currency,
+        order_id: data.order_id,
+        name: "PhyNetix",
+        description: data.batch_name,
+        prefill: data.prefill,
+        handler: async (resp: any) => {
+          const { data: v, error: vErr } = await supabase.functions.invoke("razorpay-verify-payment", {
+            body: { ...resp, payment_id: data.payment_id },
+          });
+          setSubmitting(false);
+          if (vErr || !v?.success) { toast.error("Payment verification failed"); return; }
+          done();
+        },
+        modal: { ondismiss: () => { setSubmitting(false); toast.info("Payment cancelled"); } },
+      });
+      rzp.on("payment.failed", (r: any) => toast.error(r?.error?.description || "Payment failed"));
+      rzp.open();
     } catch (e: any) {
       toast.error(e?.message || "Enrollment failed");
-    } finally {
       setSubmitting(false);
     }
   };
@@ -198,11 +209,11 @@ export default function CheckoutPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Payment</CardTitle>
-                <CardDescription>Enrollment requires a coupon that makes the price ₹0</CardDescription>
+                <CardDescription>Pay securely with Razorpay (UPI, cards, netbanking)</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="coupon">Coupon code</Label>
+                  <Label htmlFor="coupon">Coupon code (optional)</Label>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -215,29 +226,15 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {coupon && finalPrice > 0 && (
-                  <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
-                    <AlertTriangle className="w-4 h-4 text-warning mt-0.5" />
-                    <div>
-                      Coupon applied but ₹{finalPrice.toLocaleString('en-IN')} is still due.
-                      Paid checkout is currently disabled — only 100%-off coupons are accepted.
-                    </div>
-                  </div>
-                )}
-
                 <Separator />
                 <div className="bg-secondary/30 rounded-lg p-4 space-y-3">
-                  <div className="flex items-center gap-2 text-sm"><Shield className="w-4 h-4 text-primary" />Secure enrollment</div>
-                  <div className="flex items-center gap-2 text-sm"><CheckCircle className="w-4 h-4 text-primary" />Instant access after enrollment</div>
+                  <div className="flex items-center gap-2 text-sm"><Shield className="w-4 h-4 text-primary" />Secure payment via Razorpay</div>
+                  <div className="flex items-center gap-2 text-sm"><CheckCircle className="w-4 h-4 text-primary" />Instant access after payment</div>
                 </div>
-
-                <Badge variant="outline" className="w-full justify-center py-2">
-                  Coupon-only checkout
-                </Badge>
               </CardContent>
               <CardFooter>
                 <Button className="w-full" size="lg" onClick={handleEnroll} disabled={!canEnroll || submitting}>
-                  {submitting ? "Processing..." : canEnroll ? "Enroll Now (Free)" : `Apply a 100% coupon to continue`}
+                  {submitting ? "Processing..." : finalPrice === 0 ? "Enroll Now (Free)" : `Pay ₹${finalPrice.toLocaleString('en-IN')}`}
                 </Button>
               </CardFooter>
             </Card>

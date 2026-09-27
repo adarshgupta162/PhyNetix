@@ -31,6 +31,7 @@ const navItems = [
   { icon: BookOpen, label: "DPPs", path: "/dpps" },
   
   { icon: BarChart3, label: "Analytics", path: "/analytics" },
+  { icon: BarChart3, label: "Payments", path: "/payments" },
   { icon: User, label: "Profile", path: "/profile" },
   { icon: Settings, label: "Settings", path: "/settings" },
 ];
