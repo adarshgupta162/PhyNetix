@@ -38,6 +38,7 @@ import { ImageUrlInput } from "@/components/admin/ImageUrlInput";
 import { LibraryPickerModal } from "@/components/admin/LibraryPickerModal";
 import { cn } from "@/lib/utils";
 import { getChaptersForSubject, getTopicsForChapter } from "@/lib/jeeData";
+import { SimilarQuestionsEditor } from "@/components/admin/SimilarQuestionsEditor";
 
 interface Test {
   id: string;
@@ -1250,6 +1251,15 @@ export default function FullscreenTestEditor() {
                         Paste URL
                       </Button>
                     </div>
+
+                    {testId && localQuestion.id && !String(localQuestion.id).startsWith('temp') && (
+                      <SimilarQuestionsEditor
+                        testId={testId}
+                        parentQuestionId={localQuestion.id}
+                        defaultType={sections.find(s => s.id === activeSectionId)?.section_type}
+                      />
+                    )}
+                    
                     
                     {/* Migrate to Library Button */}
                     {!localQuestion.library_question_id && (
