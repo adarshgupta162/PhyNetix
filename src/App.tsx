@@ -37,6 +37,7 @@ import TestSeriesEnrollment from "./pages/TestSeriesEnrollment";
 import BatchCatalogPage from "./pages/BatchCatalogPage";
 import BatchDetailsPage from "./pages/BatchDetailsPage";
 import MyBatchesPage from "./pages/MyBatchesPage";
+import PaymentHistoryPage from "./pages/PaymentHistoryPage";
 import CheckoutPage from "./pages/CheckoutPage";
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -141,6 +142,7 @@ const App = () => (
                 <Route path="/batches/:batchId" element={<BatchDetailsPage />} />
                 <Route path="/my-batches" element={<MyBatchesPage />} />
                 <Route path="/checkout/:batchId" element={<CheckoutPage />} />
+                <Route path="/payments" element={<PaymentHistoryPage />} />
                 {/* Admin Routes - All protected with AdminRoute */}
                 <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                 <Route path="/admin/finance" element={<AdminRoute><FinanceDashboard /></AdminRoute>} />
