@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { QuestionDisplay } from "@/components/analysis/QuestionDisplay";
 import { SolutionSection } from "@/components/analysis/SolutionSection";
+import { SimilarQuestionsPractice } from "@/components/analysis/SimilarQuestionsPractice";
 import { QuestionPalettePanel } from "@/components/analysis/QuestionPalettePanel";
 import { BottomNavigation } from "@/components/analysis/BottomNavigation";
 import { supabase } from "@/integrations/supabase/client";
@@ -415,6 +416,8 @@ export default function SolutionsPage() {
                   isAttemptMode={attemptMode && !showSolution}
                   onShowSolution={() => setShowSolution(true)}
                 />
+
+                <SimilarQuestionsPractice key={currentQuestion.id} questionId={currentQuestion.id} />
               </>
             ) : (
               <motion.div
