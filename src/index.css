@@ -1,63 +1,60 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Solid black + dark green system */
-    --background: 0 0% 0%;
-    --foreground: 140 25% 95%;
+    --background: 0 0% 100%;
+    --foreground: 214 73% 16%;
 
-    --card: 0 0% 4%;
-    --card-foreground: 140 25% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 214 73% 16%;
 
-    --popover: 0 0% 4%;
-    --popover-foreground: 140 25% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 214 73% 16%;
 
-    --primary: 142 70% 35%;
+    --primary: 215 80% 48%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 8%;
-    --secondary-foreground: 140 25% 95%;
+    --secondary: 216 100% 98%;
+    --secondary-foreground: 214 73% 16%;
 
-    --muted: 0 0% 10%;
-    --muted-foreground: 140 10% 65%;
+    --muted: 216 100% 98%;
+    --muted-foreground: 215 22% 43%;
 
-    --accent: 142 70% 35%;
+    --accent: 215 80% 48%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 142 20% 14%;
-    --input: 0 0% 10%;
-    --ring: 142 70% 40%;
+    --border: 216 35% 90%;
+    --input: 216 35% 90%;
+    --ring: 215 80% 48%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     /* Custom design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(142, 70%, 28%) 0%, hsl(142, 70%, 40%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(142, 70%, 35%) 0%, hsl(160, 70%, 40%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsla(142, 70%, 40%, 0.05) 0%, hsla(142, 70%, 40%, 0.02) 100%);
-    --gradient-radial: radial-gradient(ellipse at top, hsla(142, 70%, 40%, 0.08) 0%, transparent 60%);
+    --gradient-primary: linear-gradient(135deg, hsl(215 80% 48%) 0%, hsl(207 88% 56%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(215 80% 48%) 0%, hsl(188 82% 42%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(215 80% 48% / 0.06) 0%, hsl(207 88% 56% / 0.02) 100%);
+    --gradient-radial: radial-gradient(ellipse at top, hsl(215 80% 48% / 0.07) 0%, transparent 60%);
 
-    --glass-bg: hsla(0, 0%, 4%, 0.85);
-    --glass-border: hsla(142, 70%, 40%, 0.18);
-    --glass-shadow: 0 8px 32px hsla(0, 0%, 0%, 0.6);
+    --glass-bg: hsl(0 0% 100% / 0.9);
+    --glass-border: hsl(216 35% 86% / 0.9);
+    --glass-shadow: 0 16px 40px hsl(214 73% 16% / 0.08);
 
-    --glow-primary: 0 0 40px hsla(142, 70%, 40%, 0.20);
-    --glow-accent: 0 0 40px hsla(142, 70%, 40%, 0.15);
+    --glow-primary: 0 18px 42px hsl(215 80% 48% / 0.18);
+    --glow-accent: 0 18px 42px hsl(188 82% 42% / 0.14);
 
-    --sidebar-background: 0 0% 0%;
-    --sidebar-foreground: 140 25% 95%;
-    --sidebar-primary: 142 70% 35%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 214 73% 16%;
+    --sidebar-primary: 215 80% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 8%;
-    --sidebar-accent-foreground: 140 25% 95%;
-    --sidebar-border: 142 20% 14%;
-    --sidebar-ring: 142 70% 40%;
+    --sidebar-accent: 216 100% 98%;
+    --sidebar-accent-foreground: 214 73% 16%;
+    --sidebar-border: 216 35% 90%;
+    --sidebar-ring: 215 80% 48%;
 
     /* Subject colors (kept distinct so analysis charts stay readable) */
     --physics: 142 70% 50%;
@@ -66,33 +63,33 @@
   }
 
   .dark {
-    --background: 0 0% 0%;
-    --foreground: 140 25% 95%;
+    --background: 214 73% 8%;
+    --foreground: 216 100% 98%;
 
-    --card: 0 0% 4%;
-    --card-foreground: 140 25% 95%;
+    --card: 214 65% 11%;
+    --card-foreground: 216 100% 98%;
 
-    --popover: 0 0% 4%;
-    --popover-foreground: 140 25% 95%;
+    --popover: 214 65% 11%;
+    --popover-foreground: 216 100% 98%;
 
-    --primary: 142 70% 35%;
+    --primary: 211 93% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 8%;
-    --secondary-foreground: 140 25% 95%;
+    --secondary: 214 45% 17%;
+    --secondary-foreground: 216 100% 98%;
 
-    --muted: 0 0% 10%;
-    --muted-foreground: 140 10% 65%;
+    --muted: 214 45% 17%;
+    --muted-foreground: 215 25% 70%;
 
-    --accent: 142 70% 35%;
+    --accent: 211 93% 58%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 142 20% 14%;
-    --input: 0 0% 10%;
-    --ring: 142 70% 40%;
+    --border: 214 36% 23%;
+    --input: 214 36% 23%;
+    --ring: 211 93% 58%;
 
     --gradient-primary: linear-gradient(135deg, hsl(142, 70%, 28%) 0%, hsl(142, 70%, 40%) 100%);
     --gradient-secondary: linear-gradient(135deg, hsl(142, 70%, 35%) 0%, hsl(160, 70%, 40%) 100%);
@@ -106,14 +103,14 @@
     --glow-primary: 0 0 40px hsla(142, 70%, 40%, 0.25);
     --glow-accent: 0 0 40px hsla(142, 70%, 40%, 0.18);
 
-    --sidebar-background: 0 0% 0%;
-    --sidebar-foreground: 140 25% 95%;
-    --sidebar-primary: 142 70% 35%;
+    --sidebar-background: 214 73% 8%;
+    --sidebar-foreground: 216 100% 98%;
+    --sidebar-primary: 211 93% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 8%;
-    --sidebar-accent-foreground: 140 25% 95%;
-    --sidebar-border: 142 20% 14%;
-    --sidebar-ring: 142 70% 40%;
+    --sidebar-accent: 214 45% 17%;
+    --sidebar-accent-foreground: 216 100% 98%;
+    --sidebar-border: 214 36% 23%;
+    --sidebar-ring: 211 93% 58%;
 
     --physics: 142 70% 50%;
     --chemistry: 280 70% 60%;
@@ -128,8 +125,8 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', sans-serif;
-    background-color: #000;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background-color: hsl(var(--background));
     background-image: var(--gradient-radial);
     background-attachment: fixed;
     -webkit-user-select: none;
@@ -139,7 +136,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
   .admin-layout {
