@@ -1603,7 +1603,6 @@ export type Database = {
           city: string | null
           coaching_name: string | null
           coaching_type: string | null
-          country: string | null
           created_at: string
           date_of_birth: string | null
           district: string | null
@@ -1629,7 +1628,6 @@ export type Database = {
           city?: string | null
           coaching_name?: string | null
           coaching_type?: string | null
-          country?: string | null
           created_at?: string
           date_of_birth?: string | null
           district?: string | null
@@ -1655,7 +1653,6 @@ export type Database = {
           city?: string | null
           coaching_name?: string | null
           coaching_type?: string | null
-          country?: string | null
           created_at?: string
           date_of_birth?: string | null
           district?: string | null

@@ -7,7 +7,7 @@ import { maybeRedirectToCanonical } from "@/lib/canonical";
 maybeRedirectToCanonical();
 
 createRoot(document.getElementById("root")!).render(
-  <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+  <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
     <App />
   </ThemeProvider>
 );
