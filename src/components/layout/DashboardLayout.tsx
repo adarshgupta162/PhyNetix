@@ -21,7 +21,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { AtomIcon } from "@/components/icons/AtomIcon";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -86,9 +86,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <Link to="/dashboard" className="flex items-center gap-3 px-4 py-5 border-b border-border">
-        <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-          <AtomIcon className="w-5 h-5 text-primary-foreground" />
-        </div>
+        <BrandLogo compact={collapsed && !mobileOpen} />
         <AnimatePresence mode="wait">
           {(!collapsed || mobileOpen) && (
             <motion.span
@@ -97,7 +95,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               exit={{ opacity: 0, width: 0 }}
               className="text-lg font-bold tracking-wider uppercase text-primary whitespace-nowrap overflow-hidden"
             >
-              PhyNetix
+              <span className="sr-only">PhyNetix</span>
             </motion.span>
           )}
         </AnimatePresence>
@@ -214,10 +212,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <Menu className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
-            <AtomIcon className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <span className="font-bold text-sm uppercase tracking-wider text-primary">PhyNetix</span>
+          <BrandLogo />
         </div>
       </div>
 
