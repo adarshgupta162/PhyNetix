@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -97,10 +98,6 @@ export default function StaffAuthPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
       {/* Background Effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="floating-orb w-96 h-96 bg-primary/30 top-20 -left-48" />
-        <div className="floating-orb w-80 h-80 bg-accent/30 bottom-20 -right-40" style={{ animationDelay: '2s' }} />
-      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -110,11 +107,8 @@ export default function StaffAuthPage() {
       >
         {/* Logo */}
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 flex items-center justify-center">
-            <Shield className="w-8 h-8 text-white" />
-          </div>
+          <BrandLogo />
           <div className="text-center">
-            <span className="text-2xl font-bold font-display gradient-text block">PhyNetix</span>
             <span className="text-xs text-muted-foreground">Staff Portal</span>
           </div>
         </Link>

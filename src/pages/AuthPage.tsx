@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -206,9 +207,9 @@ export default function AuthPage() {
   };
 
   const benefits = [
-    "Access to 10,000+ practice questions",
+    "Practice questions and tests",
     "Detailed performance analytics",
-    "AI-powered study recommendations",
+    "Review your solutions",
     "Track progress across subjects"
   ];
 
@@ -222,7 +223,7 @@ export default function AuthPage() {
 
   const getSubtitle = () => {
     switch (mode) {
-      case 'signup': return 'Start your free trial today';
+      case 'signup': return 'Create your PhyNetix account';
       case 'forgot': return 'Enter your email to receive a reset link';
       default: return 'Enter your credentials to continue';
     }
@@ -241,9 +242,7 @@ export default function AuthPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center gap-6 z-10"
         >
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-fuchsia-600 flex items-center justify-center">
-            <Sparkles className="w-9 h-9 text-white" />
-          </div>
+          <BrandLogo />
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
             <p className="text-lg font-medium text-foreground">Signing you in...</p>
@@ -257,10 +256,6 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen bg-background flex relative overflow-hidden">
       {/* Background Effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="floating-orb w-96 h-96 bg-primary/30 top-20 -left-48" />
-        <div className="floating-orb w-80 h-80 bg-accent/30 bottom-20 -right-40" style={{ animationDelay: '2s' }} />
-      </div>
 
       {/* Left Side - Benefits (Signup only) */}
       {mode === 'signup' && (
@@ -271,17 +266,14 @@ export default function AuthPage() {
             transition={{ duration: 0.6 }}
           >
             <Link to="/" className="flex items-center gap-2 mb-12">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-600 via-purple-600 to-fuchsia-600 flex items-center justify-center">
-                <Sparkles className="w-7 h-7 text-white" />
-              </div>
-              <span className="text-2xl font-bold font-display gradient-text">PhyNetix</span>
+              <BrandLogo />
             </Link>
 
             <h1 className="text-4xl font-bold font-display mb-6">
               Start Your Journey to <span className="gradient-text">Success</span>
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Join thousands of students who are already mastering their exams with our AI-powered platform.
+              Prepare with tests, practice questions, and your own performance history.
             </p>
 
             <ul className="space-y-4">
@@ -314,10 +306,7 @@ export default function AuthPage() {
         >
           {/* Logo */}
           <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-600 via-purple-600 to-fuchsia-600 flex items-center justify-center">
-              <Sparkles className="w-7 h-7 text-white" />
-            </div>
-            <span className="text-2xl font-bold font-display gradient-text">PhyNetix</span>
+            <BrandLogo />
           </Link>
 
           {/* Form Card */}

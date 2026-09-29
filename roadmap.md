@@ -3,3 +3,4 @@
 - [ ] Make the app light by default with a white-and-blue visual system.
 - [ ] Replace landing claims with real features and actual available test series; remove Courses and Pricing marketing pages/links.
 - [ ] Verify the result in the preview and inspect build diagnostics.
+- [ ] Add authenticated AI payment questions grounded in each student's payment history and verify a live response.
