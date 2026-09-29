@@ -1,0 +1,5 @@
+- [ ] Add downloadable branded receipts for completed enrollment payments using verified payment and student details.
+- [ ] Prepare shared PhyNetix logo placement for a future /logo.png file across landing, login, and sidebars.
+- [ ] Make the app light by default with a white-and-blue visual system.
+- [ ] Replace landing claims with real features and actual available test series; remove Courses and Pricing marketing pages/links.
+- [ ] Verify the result in the preview and inspect build diagnostics.
