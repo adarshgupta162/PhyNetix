@@ -294,18 +294,11 @@ export function TestSeriesSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <Badge className="mb-6 px-5 py-2 text-sm bg-primary/10 text-primary border-primary/20 backdrop-blur-sm">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Premium Test Series
-          </Badge>
-          <h2 className="text-4xl md:text-6xl font-bold font-display mb-6">
-            <span className="gradient-text">Choose Your</span>
-            <br />
-            <span>Preparation Path</span>
+          <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">
+            Test series available now
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-            India's most comprehensive test series with AI-powered analytics, 
-            detailed solutions, and real exam patterns
+            These are the test series currently open for enrollment on PhyNetix.
           </p>
 
           {/* Search */}
