@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { PaymentAssistant } from "@/components/PaymentAssistant";
 import { downloadPaymentReceipt, type ReceiptPayment, type ReceiptStudent } from "@/lib/paymentReceipt";
 
 const statusVariant = (s: string) =>
@@ -93,6 +94,7 @@ export default function PaymentHistoryPage() {
             )}
           </CardContent>
         </Card>
+        <PaymentAssistant />
       </div>
     </DashboardLayout>
   );
