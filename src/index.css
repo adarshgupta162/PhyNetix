@@ -6,66 +6,68 @@
 
 @layer base {
   :root {
-    /* Solid black + dark green system */
-    --background: 0 0% 0%;
-    --foreground: 140 25% 95%;
-
-    --card: 0 0% 4%;
-    --card-foreground: 140 25% 95%;
-
-    --popover: 0 0% 4%;
-    --popover-foreground: 140 25% 95%;
-
-    --primary: 142 70% 35%;
+    /* White + blue system */
+    --background: 0 0% 100%;
+    --foreground: 220 40% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 40% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 40% 13%;
+    --primary: 216 80% 45%;
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 0 0% 8%;
-    --secondary-foreground: 140 25% 95%;
-
-    --muted: 0 0% 10%;
-    --muted-foreground: 140 10% 65%;
-
-    --accent: 142 70% 35%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84% 60%;
+    --secondary: 214 60% 96%;
+    --secondary-foreground: 220 40% 18%;
+    --muted: 214 40% 96%;
+    --muted-foreground: 218 15% 42%;
+    --accent: 210 90% 94%;
+    --accent-foreground: 216 80% 32%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 142 20% 14%;
-    --input: 0 0% 10%;
-    --ring: 142 70% 40%;
-
+    --border: 214 32% 89%;
+    --input: 214 32% 89%;
+    --ring: 216 80% 45%;
     --radius: 0.75rem;
 
-    /* Custom design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(142, 70%, 28%) 0%, hsl(142, 70%, 40%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(142, 70%, 35%) 0%, hsl(160, 70%, 40%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsla(142, 70%, 40%, 0.05) 0%, hsla(142, 70%, 40%, 0.02) 100%);
-    --gradient-radial: radial-gradient(ellipse at top, hsla(142, 70%, 40%, 0.08) 0%, transparent 60%);
+    --gradient-primary: linear-gradient(135deg, hsl(216, 80%, 40%) 0%, hsl(206, 85%, 50%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(216, 80%, 45%) 0%, hsl(196, 80%, 45%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsla(216, 80%, 45%, 0.04) 0%, hsla(216, 80%, 45%, 0.01) 100%);
+    --gradient-radial: radial-gradient(ellipse at top, hsla(216, 80%, 50%, 0.06) 0%, transparent 60%);
+    --glass-bg: hsla(0, 0%, 100%, 0.9);
+    --glass-border: hsla(214, 32%, 85%, 1);
+    --glass-shadow: 0 8px 24px hsla(220, 40%, 20%, 0.06);
+    --glow-primary: 0 0 30px hsla(216, 80%, 45%, 0.12);
+    --glow-accent: 0 0 30px hsla(216, 80%, 45%, 0.10);
 
-    --glass-bg: hsla(0, 0%, 4%, 0.85);
-    --glass-border: hsla(142, 70%, 40%, 0.18);
-    --glass-shadow: 0 8px 32px hsla(0, 0%, 0%, 0.6);
-
-    --glow-primary: 0 0 40px hsla(142, 70%, 40%, 0.20);
-    --glow-accent: 0 0 40px hsla(142, 70%, 40%, 0.15);
-
-    --sidebar-background: 0 0% 0%;
-    --sidebar-foreground: 140 25% 95%;
-    --sidebar-primary: 142 70% 35%;
+    --sidebar-background: 214 50% 98%;
+    --sidebar-foreground: 220 40% 15%;
+    --sidebar-primary: 216 80% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 8%;
-    --sidebar-accent-foreground: 140 25% 95%;
-    --sidebar-border: 142 20% 14%;
-    --sidebar-ring: 142 70% 40%;
+    --sidebar-accent: 214 60% 94%;
+    --sidebar-accent-foreground: 216 80% 30%;
+    --sidebar-border: 214 32% 89%;
+    --sidebar-ring: 216 80% 45%;
 
-    /* Subject colors (kept distinct so analysis charts stay readable) */
-    --physics: 142 70% 50%;
-    --chemistry: 280 70% 60%;
-    --maths: 45 93% 55%;
+    --success: 142 70% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 45%;
+    --warning-foreground: 220 40% 10%;
+    --surface: 214 50% 98%;
+    --surface-light: 0 0% 100%;
+    --surface-border: 214 32% 89%;
+
+    --physics: 216 80% 50%;
+    --chemistry: 280 60% 55%;
+    --maths: 38 92% 48%;
   }
 
   .dark {
+    --success: 142 70% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 45 93% 47%;
+    --warning-foreground: 222 47% 6%;
+    --surface: 0 0% 0%;
+    --surface-light: 0 0% 4%;
+    --surface-border: 142 20% 14%;
     --background: 0 0% 0%;
     --foreground: 140 25% 95%;
 

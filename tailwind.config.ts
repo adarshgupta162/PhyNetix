@@ -62,33 +62,33 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
         success: {
-          DEFAULT: "hsl(142, 76%, 36%)",
-          foreground: "hsl(210, 40%, 98%)",
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
         },
         warning: {
-          DEFAULT: "hsl(45, 93%, 47%)",
-          foreground: "hsl(222, 47%, 6%)",
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
         },
         physics: {
-          DEFAULT: "hsl(142, 70%, 50%)",
+          DEFAULT: "hsl(var(--physics))",
           foreground: "hsl(0, 0%, 100%)",
         },
         chemistry: {
-          DEFAULT: "hsl(280, 70%, 60%)",
+          DEFAULT: "hsl(var(--chemistry))",
           foreground: "hsl(0, 0%, 100%)",
         },
         maths: {
-          DEFAULT: "hsl(45, 93%, 55%)",
+          DEFAULT: "hsl(var(--maths))",
           foreground: "hsl(0, 0%, 0%)",
         },
         navy: {
-          DEFAULT: "hsl(0, 0%, 0%)",
-          light: "hsl(0, 0%, 4%)",
-          border: "hsl(142, 20%, 14%)",
+          DEFAULT: "hsl(var(--surface))",
+          light: "hsl(var(--surface-light))",
+          border: "hsl(var(--surface-border))",
         },
         teal: {
-          DEFAULT: "hsl(142, 70%, 35%)",
-          glow: "hsla(142, 70%, 40%, 0.3)",
+          DEFAULT: "hsl(var(--primary))",
+          glow: "hsl(var(--primary) / 0.3)",
         },
       },
       borderRadius: {
