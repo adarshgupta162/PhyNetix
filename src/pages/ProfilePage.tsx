@@ -26,6 +26,11 @@ interface Profile {
   avatar_url: string | null;
   target_exam: string | null;
   roll_number: string | null;
+  phone: string | null;
+  academic_status: string | null;
+  country: string | null;
+  state: string | null;
+  city: string | null;
 }
 
 interface Stats {
@@ -40,7 +45,9 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [stats, setStats] = useState<Stats>({ testsCompleted: 0, questionsSolved: 0, avgAccuracy: 0, totalTime: 0 });
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ full_name: "", target_exam: "" });
+  const [editForm, setEditForm] = useState({
+    full_name: "", target_exam: "", phone: "", academic_status: "", country: "", state: "", city: "",
+  });
   const [loading, setLoading] = useState(true);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -53,24 +60,34 @@ export default function ProfilePage() {
   }, [user]);
 
   const fetchProfile = async () => {
+    if (!user) return;
     const { data, error } = await supabase
       .from("profiles")
-      .select("full_name, avatar_url, target_exam, roll_number")
-      .eq("id", user!.id)
+      .select("full_name, avatar_url, target_exam, roll_number, phone, academic_status, country, state, city")
+      .eq("id", user.id)
       .maybeSingle();
 
     if (!error && data) {
       setProfile(data);
-      setEditForm({ full_name: data.full_name || "", target_exam: data.target_exam || "" });
+      setEditForm({
+        full_name: data.full_name || "",
+        target_exam: data.target_exam || "",
+        phone: data.phone || "",
+        academic_status: data.academic_status || "",
+        country: data.country || "",
+        state: data.state || "",
+        city: data.city || "",
+      });
     }
     setLoading(false);
   };
 
   const fetchStats = async () => {
+    if (!user) return;
     const { data: attempts } = await supabase
       .from("test_attempts")
       .select("score, total_marks, time_taken_seconds, test:tests(id)")
-      .eq("user_id", user!.id)
+      .eq("user_id", user.id)
       .not("completed_at", "is", null);
 
     if (attempts) {
@@ -88,13 +105,19 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
+    if (!user) return;
     const { error } = await supabase
       .from("profiles")
       .update({
-        full_name: editForm.full_name,
-        target_exam: editForm.target_exam,
+        full_name: editForm.full_name.trim(),
+        target_exam: editForm.target_exam.trim() || null,
+        phone: editForm.phone.trim() || null,
+        academic_status: editForm.academic_status.trim() || null,
+        country: editForm.country.trim() || null,
+        state: editForm.state.trim() || null,
+        city: editForm.city.trim() || null,
       })
-      .eq("id", user!.id);
+      .eq("id", user.id);
 
     if (error) {
       toast({ title: "Error", description: "Failed to update profile", variant: "destructive" });
@@ -262,7 +285,32 @@ export default function ProfilePage() {
           >
             <h2 className="text-lg font-semibold font-display mb-6">Personal Information</h2>
             
-            <div className="space-y-4">
+              <div className="space-y-4">
+                {isEditing ? (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="space-y-1.5 text-sm">
+                      <span className="text-muted-foreground">Phone number</span>
+                      <Input autoComplete="tel" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} placeholder="Phone number" />
+                    </label>
+                    <label className="space-y-1.5 text-sm">
+                      <span className="text-muted-foreground">Class / academic status</span>
+                      <Input value={editForm.academic_status} onChange={(e) => setEditForm({ ...editForm, academic_status: e.target.value })} placeholder="For example, Class 12" />
+                    </label>
+                    <label className="space-y-1.5 text-sm">
+                      <span className="text-muted-foreground">Country</span>
+                      <Input autoComplete="country-name" value={editForm.country} onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} placeholder="Country" />
+                    </label>
+                    <label className="space-y-1.5 text-sm">
+                      <span className="text-muted-foreground">State</span>
+                      <Input autoComplete="address-level1" value={editForm.state} onChange={(e) => setEditForm({ ...editForm, state: e.target.value })} placeholder="State" />
+                    </label>
+                    <label className="space-y-1.5 text-sm sm:col-span-2">
+                      <span className="text-muted-foreground">City</span>
+                      <Input autoComplete="address-level2" value={editForm.city} onChange={(e) => setEditForm({ ...editForm, city: e.target.value })} placeholder="City" />
+                    </label>
+                  </div>
+                ) : (
+                  <>
               <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <User className="w-5 h-5 text-primary" />
@@ -325,6 +373,35 @@ export default function ProfilePage() {
                     You've completed {stats.testsCompleted} tests so far
                   </div>
                 </div>
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-muted-foreground">Phone number</div>
+                    <div className="font-medium break-words">{profile?.phone || "Not set"}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <GraduationCap className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-muted-foreground">Class / academic status</div>
+                    <div className="font-medium break-words">{profile?.academic_status || "Not set"}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Target className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-muted-foreground">Location</div>
+                    <div className="font-medium break-words">{[profile?.city, profile?.state, profile?.country].filter(Boolean).join(", ") || "Not set"}</div>
+                  </div>
+                </div>
+                  </>
+                )}
               </div>
 
               <div className="flex items-start gap-4 p-4 rounded-xl bg-secondary/30">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useBatch } from "@/hooks/useBatches";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,6 +35,33 @@ export default function CheckoutPage() {
   const [applying, setApplying] = useState(false);
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [studentDetails, setStudentDetails] = useState({
+    full_name: "", phone: "", academic_status: "", country: "", state: "", city: "",
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadStudentDetails = async () => {
+      if (!user) return;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("full_name, phone, academic_status, country, state, city")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (!cancelled && !error && data) {
+        setStudentDetails({
+          full_name: data.full_name || "",
+          phone: data.phone || "",
+          academic_status: data.academic_status || "",
+          country: data.country || "",
+          state: data.state || "",
+          city: data.city || "",
+        });
+      }
+    };
+    void loadStudentDetails();
+    return () => { cancelled = true; };
+  }, [user]);
 
   const basePrice = batch?.price ?? 0;
   const discount = coupon?.computed_discount ?? 0;
@@ -98,8 +125,23 @@ export default function CheckoutPage() {
 
   const handleEnroll = async () => {
     if (!user || !batchId || !batch) { toast.error("Please log in"); return; }
+    if (!studentDetails.full_name.trim() || !studentDetails.phone.trim() || !user.email) {
+      toast.error("Add your name and phone number to continue.");
+      return;
+    }
     setSubmitting(true);
     try {
+      const { error: profileError } = await supabase.from("profiles").upsert({
+        id: user.id,
+        full_name: studentDetails.full_name.trim(),
+        phone: studentDetails.phone.trim(),
+        academic_status: studentDetails.academic_status.trim() || null,
+        country: studentDetails.country.trim() || null,
+        state: studentDetails.state.trim() || null,
+        city: studentDetails.city.trim() || null,
+      }, { onConflict: "id" });
+      if (profileError) throw profileError;
+
       const { data, error } = await supabase.functions.invoke("razorpay-create-order", {
         body: { batch_id: batchId, coupon_code: coupon?.code ?? null },
       });
@@ -212,6 +254,40 @@ export default function CheckoutPage() {
                 <CardDescription>Pay securely with Razorpay (UPI, cards, netbanking)</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold">Student details</h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="student-name">Full name</Label>
+                      <Input id="student-name" autoComplete="name" value={studentDetails.full_name} onChange={(e) => setStudentDetails({ ...studentDetails, full_name: e.target.value })} placeholder="Your full name" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="student-email">Email</Label>
+                      <Input id="student-email" type="email" value={user?.email || ""} readOnly aria-readonly="true" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="student-phone">Phone number</Label>
+                      <Input id="student-phone" type="tel" autoComplete="tel" value={studentDetails.phone} onChange={(e) => setStudentDetails({ ...studentDetails, phone: e.target.value })} placeholder="Phone number" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="student-class">Class / academic status</Label>
+                      <Input id="student-class" value={studentDetails.academic_status} onChange={(e) => setStudentDetails({ ...studentDetails, academic_status: e.target.value })} placeholder="For example, Class 12" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="student-country">Country</Label>
+                      <Input id="student-country" autoComplete="country-name" value={studentDetails.country} onChange={(e) => setStudentDetails({ ...studentDetails, country: e.target.value })} placeholder="Country" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="student-state">State</Label>
+                      <Input id="student-state" autoComplete="address-level1" value={studentDetails.state} onChange={(e) => setStudentDetails({ ...studentDetails, state: e.target.value })} placeholder="State" />
+                    </div>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <Label htmlFor="student-city">City</Label>
+                      <Input id="student-city" autoComplete="address-level2" value={studentDetails.city} onChange={(e) => setStudentDetails({ ...studentDetails, city: e.target.value })} placeholder="City" />
+                    </div>
+                  </div>
+                </div>
+                <Separator />
                 <div className="space-y-2">
                   <Label htmlFor="coupon">Coupon code (optional)</Label>
                   <div className="flex gap-2">
