@@ -44,6 +44,12 @@ Deno.serve(async (req) => {
       })
     }
 
+    const { data: studentProfile } = await admin
+      .from('profiles')
+      .select('full_name, phone')
+      .eq('id', user.id)
+      .maybeSingle()
+
     let input
     try {
       input = BodySchema.parse(await req.json())
@@ -194,7 +200,11 @@ Deno.serve(async (req) => {
       key_id: keyId,
       payment_id: payment.id,
       batch_name: batch.name,
-      prefill: { email: user.email ?? undefined },
+      prefill: {
+        name: studentProfile?.full_name ?? undefined,
+        email: user.email ?? undefined,
+        contact: studentProfile?.phone ?? undefined,
+      },
     }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

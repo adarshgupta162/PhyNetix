@@ -22,6 +22,7 @@ export interface ReceiptStudent {
   state: string | null;
   country: string | null;
   roll_number: string | null;
+  academic_status?: string | null;
 }
 
 const money = (value: number, currency: string) => `${currency} ${value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -99,6 +100,7 @@ export async function downloadPaymentReceipt(payment: ReceiptPayment, student: R
   y = label("Name", student?.full_name || "Not provided", y);
   y = label("Email", email, y);
   if (student?.phone) y = label("Phone", student.phone, y);
+  if (student?.academic_status) y = label("Class / status", student.academic_status, y);
   if (student?.roll_number) y = label("Roll number", student.roll_number, y);
   const address = [student?.address, student?.city, student?.state, student?.country].filter(Boolean).join(", ");
   if (address) y = label("Address", address, y);

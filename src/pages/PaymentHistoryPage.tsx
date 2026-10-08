@@ -39,7 +39,7 @@ export default function PaymentHistoryPage() {
     setDownloading(payment.id);
     try {
       const { data: profile, error } = await supabase.from("profiles")
-        .select("full_name, phone, address, city, state, country, roll_number")
+        .select("full_name, phone, address, city, state, country, roll_number, academic_status")
         .eq("id", user.id).maybeSingle();
       if (error) throw error;
       await downloadPaymentReceipt(payment, profile as ReceiptStudent | null, user.email || "Not provided");
