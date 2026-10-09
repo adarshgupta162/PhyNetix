@@ -38,14 +38,23 @@ async function addLogo(doc: PDF) {
     const response = await fetch("/logo.png");
     if (!response.ok || !response.headers.get("content-type")?.startsWith("image/")) return false;
     const blob = await response.blob();
-    const image = await createImageBitmap(blob);
-    const canvas = document.createElement("canvas");
-    canvas.width = image.width;
-    canvas.height = image.height;
-    canvas.getContext("2d")?.drawImage(image, 0, 0);
-    const width = Math.min(48, 12 * image.width / image.height);
-    doc.addImage(canvas.toDataURL("image/png"), "PNG", 17, 14, width, 12);
-    image.close();
+    const imageUrl = URL.createObjectURL(blob);
+    try {
+      const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error("Could not load logo image"));
+        img.src = imageUrl;
+      });
+      const canvas = document.createElement("canvas");
+      canvas.width = image.width;
+      canvas.height = image.height;
+      canvas.getContext("2d")?.drawImage(image, 0, 0);
+      const width = Math.min(48, 12 * image.width / image.height);
+      doc.addImage(canvas.toDataURL("image/png"), "PNG", 17, 14, width, 12);
+    } finally {
+      URL.revokeObjectURL(imageUrl);
+    }
     return true;
   } catch {
     return false;

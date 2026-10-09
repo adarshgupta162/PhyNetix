@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useBatch, useBatchTests, useCourseSections } from "@/hooks/useBatches";
 import { useIsEnrolled } from "@/hooks/useEnrollment";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +18,8 @@ import {
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import TestListCard from "@/components/test/TestListCard";
+import { PaymentReceiptAction } from "@/components/payments/PaymentReceiptAction";
+import type { ReceiptPayment } from "@/lib/paymentReceipt";
 
 const categoryLabels: Record<string, string> = {
   jee_main: "JEE Main",
@@ -35,6 +39,24 @@ export default function BatchDetailsPage() {
   const { data: sections } = useCourseSections(batchId);
   const { isEnrolled, enrollment } = useIsEnrolled(batchId);
   const [selectedSection, setSelectedSection] = useState<string>("all");
+  const { data: completedPayment } = useQuery({
+    queryKey: ["batch-payment-details", user?.id, batchId],
+    enabled: !!user && !!batchId,
+    queryFn: async () => {
+      if (!user || !batchId) return null;
+      const { data, error } = await supabase
+        .from("payments")
+        .select("id, amount, currency, status, provider, transaction_id, provider_order_id, created_at, updated_at, metadata, batches(name)")
+        .eq("user_id", user.id)
+        .eq("batch_id", batchId)
+        .eq("status", "completed")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data as ReceiptPayment | null;
+    },
+  });
 
   const features = (batch?.features as string[]) || [];
   const syllabus = (batch?.syllabus as { title: string; topics: string[] }[]) || [];
@@ -325,6 +347,29 @@ export default function BatchDetailsPage() {
                   <p className="text-xs text-center text-muted-foreground">
                     Secure payment. Instant access.
                   </p>
+
+                  {completedPayment && user && (
+                    <div className="space-y-3 rounded-md border bg-secondary/20 p-3">
+                      <p className="text-xs font-medium uppercase text-muted-foreground">Payment details</p>
+                      <div className="space-y-1 text-sm">
+                        <p className="font-semibold">
+                          {completedPayment.currency} {Number(completedPayment.amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Paid on {format(new Date(completedPayment.updated_at || completedPayment.created_at), "dd MMM yyyy, h:mm a")}
+                        </p>
+                        {completedPayment.transaction_id && (
+                          <p className="text-xs text-muted-foreground break-all">Txn ID: {completedPayment.transaction_id}</p>
+                        )}
+                      </div>
+                      <PaymentReceiptAction
+                        payment={completedPayment}
+                        userId={user.id}
+                        email={user.email || "Not provided"}
+                        buttonLabel="View invoice"
+                      />
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
