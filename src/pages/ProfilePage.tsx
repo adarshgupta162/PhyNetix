@@ -276,7 +276,6 @@ export default function ProfilePage() {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Personal Information */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -284,76 +283,63 @@ export default function ProfilePage() {
             className="glass-card p-6"
           >
             <h2 className="text-lg font-semibold font-display mb-6">Personal Information</h2>
-            
+            {isEditing ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="space-y-1.5 text-sm">
+                  <span className="text-muted-foreground">Phone number</span>
+                  <Input autoComplete="tel" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} placeholder="Phone number" />
+                </label>
+                <label className="space-y-1.5 text-sm">
+                  <span className="text-muted-foreground">Class / academic status</span>
+                  <Input value={editForm.academic_status} onChange={(e) => setEditForm({ ...editForm, academic_status: e.target.value })} placeholder="For example, Class 12" />
+                </label>
+                <label className="space-y-1.5 text-sm">
+                  <span className="text-muted-foreground">Country</span>
+                  <Input autoComplete="country-name" value={editForm.country} onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} placeholder="Country" />
+                </label>
+                <label className="space-y-1.5 text-sm">
+                  <span className="text-muted-foreground">State</span>
+                  <Input autoComplete="address-level1" value={editForm.state} onChange={(e) => setEditForm({ ...editForm, state: e.target.value })} placeholder="State" />
+                </label>
+                <label className="space-y-1.5 text-sm sm:col-span-2">
+                  <span className="text-muted-foreground">City</span>
+                  <Input autoComplete="address-level2" value={editForm.city} onChange={(e) => setEditForm({ ...editForm, city: e.target.value })} placeholder="City" />
+                </label>
+              </div>
+            ) : (
               <div className="space-y-4">
-                {isEditing ? (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <label className="space-y-1.5 text-sm">
-                      <span className="text-muted-foreground">Phone number</span>
-                      <Input autoComplete="tel" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} placeholder="Phone number" />
-                    </label>
-                    <label className="space-y-1.5 text-sm">
-                      <span className="text-muted-foreground">Class / academic status</span>
-                      <Input value={editForm.academic_status} onChange={(e) => setEditForm({ ...editForm, academic_status: e.target.value })} placeholder="For example, Class 12" />
-                    </label>
-                    <label className="space-y-1.5 text-sm">
-                      <span className="text-muted-foreground">Country</span>
-                      <Input autoComplete="country-name" value={editForm.country} onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} placeholder="Country" />
-                    </label>
-                    <label className="space-y-1.5 text-sm">
-                      <span className="text-muted-foreground">State</span>
-                      <Input autoComplete="address-level1" value={editForm.state} onChange={(e) => setEditForm({ ...editForm, state: e.target.value })} placeholder="State" />
-                    </label>
-                    <label className="space-y-1.5 text-sm sm:col-span-2">
-                      <span className="text-muted-foreground">City</span>
-                      <Input autoComplete="address-level2" value={editForm.city} onChange={(e) => setEditForm({ ...editForm, city: e.target.value })} placeholder="City" />
-                    </label>
-                  </div>
-                ) : (
-                  <>
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
                   <User className="w-5 h-5 text-primary" />
+                  <div className="flex-1"><div className="text-xs text-muted-foreground">Full Name</div><div className="font-medium">{displayName}</div></div>
                 </div>
-                <div className="flex-1">
-                  <div className="text-xs text-muted-foreground">Full Name</div>
-                  <div className="font-medium">{displayName}</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
                   <Mail className="w-5 h-5 text-primary" />
+                  <div className="flex-1 min-w-0"><div className="text-xs text-muted-foreground">Email</div><div className="font-medium break-words">{user?.email}</div></div>
                 </div>
-                <div className="flex-1">
-                  <div className="text-xs text-muted-foreground">Email</div>
-                  <div className="font-medium">{user?.email}</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
                   <GraduationCap className="w-5 h-5 text-primary" />
+                  <div className="flex-1"><div className="text-xs text-muted-foreground">Target Exam</div><div className="font-medium">{profile?.target_exam || "Not set"}</div></div>
                 </div>
-                <div className="flex-1">
-                  <div className="text-xs text-muted-foreground">Target Exam</div>
-                  <div className="font-medium">{profile?.target_exam || "Not set"}</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
                   <Hash className="w-5 h-5 text-primary" />
+                  <div className="flex-1"><div className="text-xs text-muted-foreground">Roll Number</div><div className="font-medium font-mono">{profile?.roll_number || "Generating..."}</div></div>
                 </div>
-                <div className="flex-1">
-                  <div className="text-xs text-muted-foreground">Roll Number</div>
-                  <div className="font-medium font-mono">{profile?.roll_number || "Generating..."}</div>
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
+                  <User className="w-5 h-5 text-primary" />
+                  <div className="flex-1 min-w-0"><div className="text-xs text-muted-foreground">Phone number</div><div className="font-medium break-words">{profile?.phone || "Not set"}</div></div>
+                </div>
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
+                  <GraduationCap className="w-5 h-5 text-primary" />
+                  <div className="flex-1 min-w-0"><div className="text-xs text-muted-foreground">Class / academic status</div><div className="font-medium break-words">{profile?.academic_status || "Not set"}</div></div>
+                </div>
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
+                  <Target className="w-5 h-5 text-primary" />
+                  <div className="flex-1 min-w-0"><div className="text-xs text-muted-foreground">Location</div><div className="font-medium break-words">{[profile?.city, profile?.state, profile?.country].filter(Boolean).join(", ") || "Not set"}</div></div>
                 </div>
               </div>
-            </div>
+            )}
           </motion.div>
 
-          {/* Performance Summary */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -361,83 +347,22 @@ export default function ProfilePage() {
             className="glass-card p-6"
           >
             <h2 className="text-lg font-semibold font-display mb-6">Performance Summary</h2>
-            
             <div className="space-y-4">
               <div className="flex items-start gap-4 p-4 rounded-xl bg-secondary/30">
-                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center">
-                  <Trophy className="w-6 h-6 text-primary-foreground" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold mb-1">Tests Completed</div>
-                  <div className="text-sm text-muted-foreground">
-                    You've completed {stats.testsCompleted} tests so far
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs text-muted-foreground">Phone number</div>
-                    <div className="font-medium break-words">{profile?.phone || "Not set"}</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <GraduationCap className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs text-muted-foreground">Class / academic status</div>
-                    <div className="font-medium break-words">{profile?.academic_status || "Not set"}</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Target className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs text-muted-foreground">Location</div>
-                    <div className="font-medium break-words">{[profile?.city, profile?.state, profile?.country].filter(Boolean).join(", ") || "Not set"}</div>
-                  </div>
-                </div>
-                  </>
-                )}
+                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center"><Trophy className="w-6 h-6 text-primary-foreground" /></div>
+                <div className="flex-1"><div className="font-semibold mb-1">Tests Completed</div><div className="text-sm text-muted-foreground">You've completed {stats.testsCompleted} tests so far</div></div>
               </div>
-
               <div className="flex items-start gap-4 p-4 rounded-xl bg-secondary/30">
-                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center">
-                  <Target className="w-6 h-6 text-primary-foreground" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold mb-1">Average Accuracy</div>
-                  <div className="text-sm text-muted-foreground">
-                    Your average accuracy is {stats.avgAccuracy}%
-                  </div>
-                </div>
+                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center"><Target className="w-6 h-6 text-primary-foreground" /></div>
+                <div className="flex-1"><div className="font-semibold mb-1">Average Accuracy</div><div className="text-sm text-muted-foreground">Your average accuracy is {stats.avgAccuracy}%</div></div>
               </div>
-
               <div className="flex items-start gap-4 p-4 rounded-xl bg-secondary/30">
-                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-primary-foreground" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold mb-1">Study Time</div>
-                  <div className="text-sm text-muted-foreground">
-                    You've spent {Math.round(stats.totalTime / 60)} hours practicing
-                  </div>
-                </div>
+                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center"><Clock className="w-6 h-6 text-primary-foreground" /></div>
+                <div className="flex-1"><div className="font-semibold mb-1">Study Time</div><div className="text-sm text-muted-foreground">You've spent {Math.round(stats.totalTime / 60)} hours practicing</div></div>
               </div>
-
               <div className="flex items-start gap-4 p-4 rounded-xl bg-secondary/30">
-                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center">
-                  <BookOpen className="w-6 h-6 text-primary-foreground" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold mb-1">Questions Solved</div>
-                  <div className="text-sm text-muted-foreground">
-                    Approximately {stats.questionsSolved.toLocaleString()} questions attempted
-                  </div>
-                </div>
+                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center"><BookOpen className="w-6 h-6 text-primary-foreground" /></div>
+                <div className="flex-1"><div className="font-semibold mb-1">Questions Solved</div><div className="text-sm text-muted-foreground">Approximately {stats.questionsSolved.toLocaleString()} questions attempted</div></div>
               </div>
             </div>
           </motion.div>
