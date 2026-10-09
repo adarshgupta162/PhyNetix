@@ -7,18 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
-import { toast } from "sonner";
-import { useState } from "react";
 import { PaymentAssistant } from "@/components/PaymentAssistant";
-import { downloadPaymentReceipt, type ReceiptPayment, type ReceiptStudent } from "@/lib/paymentReceipt";
+import { PaymentReceiptAction } from "@/components/payments/PaymentReceiptAction";
+import type { ReceiptPayment } from "@/lib/paymentReceipt";
 
 const statusVariant = (s: string) =>
   s === "completed" ? "default" : s === "failed" ? "destructive" : "secondary";
 
 export default function PaymentHistoryPage() {
   const { user } = useAuth();
-  const [downloading, setDownloading] = useState<string | null>(null);
   const { data, isLoading } = useQuery({
     queryKey: ["payment-history", user?.id],
     enabled: !!user,
@@ -33,22 +30,6 @@ export default function PaymentHistoryPage() {
       return data as ReceiptPayment[];
     },
   });
-
-  const handleDownload = async (payment: ReceiptPayment) => {
-    if (!user || payment.status !== "completed") return;
-    setDownloading(payment.id);
-    try {
-      const { data: profile, error } = await supabase.from("profiles")
-        .select("full_name, phone, address, city, state, country, roll_number, academic_status")
-        .eq("id", user.id).maybeSingle();
-      if (error) throw error;
-      await downloadPaymentReceipt(payment, profile as ReceiptStudent | null, user.email || "Not provided");
-    } catch {
-      toast.error("Could not download receipt. Please try again.");
-    } finally {
-      setDownloading(null);
-    }
-  };
 
   return (
     <DashboardLayout>
@@ -83,9 +64,7 @@ export default function PaymentHistoryPage() {
                       <TableCell><Badge variant={statusVariant(p.status) as any} className="capitalize">{p.status}</Badge></TableCell>
                       <TableCell className="text-xs text-muted-foreground font-mono">{p.transaction_id ?? p.provider ?? "—"}</TableCell>
                       <TableCell className="text-right">
-                        {p.status === "completed" && <Button variant="outline" size="sm" onClick={() => handleDownload(p)} disabled={downloading === p.id} aria-label={`Download receipt for ${p.batches?.name || "enrollment"}`}>
-                          <Download className="w-4 h-4 mr-2" />{downloading === p.id ? "Preparing…" : "Receipt"}
-                        </Button>}
+                        {p.status === "completed" && user && <PaymentReceiptAction payment={p} userId={user.id} email={user.email || "Not provided"} buttonLabel="Receipt" />}
                       </TableCell>
                     </TableRow>
                   ))}
