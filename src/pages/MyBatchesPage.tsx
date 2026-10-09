@@ -1,5 +1,9 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useUserEnrollments } from "@/hooks/useEnrollment";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +13,7 @@ import { EnrollmentBadge } from "@/components/batch/EnrollmentBadge";
 import { BookOpen, Calendar, ArrowRight, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import type { ReceiptPayment } from "@/lib/paymentReceipt";
 
 const categoryLabels: Record<string, string> = {
   jee_main: "JEE Main",
@@ -21,7 +26,32 @@ const categoryLabels: Record<string, string> = {
 
 export default function MyBatchesPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: enrollments, isLoading } = useUserEnrollments();
+  const batchIds = useMemo(
+    () => (enrollments ?? []).map((enrollment: any) => enrollment.batch_id).filter(Boolean),
+    [enrollments],
+  );
+
+  const { data: latestPaymentsByBatch = {} as Record<string, ReceiptPayment> } = useQuery<Record<string, ReceiptPayment>>({
+    queryKey: ["my-batches-payments", user?.id, batchIds],
+    enabled: !!user && batchIds.length > 0,
+    queryFn: async () => {
+      if (!user || batchIds.length === 0) return {};
+      const { data, error } = await supabase
+        .from("payments")
+        .select("id, amount, currency, status, provider, transaction_id, provider_order_id, created_at, updated_at, metadata, batch_id, batches(name)")
+        .eq("user_id", user.id)
+        .eq("status", "completed")
+        .in("batch_id", batchIds)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data as (ReceiptPayment & { batch_id: string | null })[]).reduce<Record<string, ReceiptPayment>>((acc, payment) => {
+        if (payment.batch_id && !acc[payment.batch_id]) acc[payment.batch_id] = payment;
+        return acc;
+      }, {});
+    },
+  });
 
   if (isLoading) {
     return (
@@ -61,7 +91,9 @@ export default function MyBatchesPage() {
 
           {enrollments && enrollments.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {enrollments.map((enrollment: any) => (
+              {enrollments.map((enrollment: any) => {
+                const payment = latestPaymentsByBatch[enrollment.batch_id];
+                return (
                 <Card 
                   key={enrollment.id} 
                   className="group hover:border-primary/30 transition-all cursor-pointer"
@@ -97,6 +129,18 @@ export default function MyBatchesPage() {
                         </div>
                       )}
 
+                      {payment && (
+                        <div className="rounded-md border bg-secondary/20 p-3">
+                          <p className="text-xs font-medium uppercase text-muted-foreground">Payment</p>
+                          <p className="mt-1 text-sm font-semibold">
+                            {payment.currency} {Number(payment.amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Paid on {format(new Date(payment.updated_at || payment.created_at), "dd MMM yyyy, h:mm a")}
+                          </p>
+                        </div>
+                      )}
+
                       <Button variant="ghost" className="w-full mt-2 group-hover:bg-primary/10">
                         View Batch
                         <ArrowRight className="w-4 h-4 ml-2" />
@@ -104,7 +148,8 @@ export default function MyBatchesPage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <Card className="text-center py-12">
