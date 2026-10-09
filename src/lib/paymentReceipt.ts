@@ -52,7 +52,7 @@ async function addLogo(doc: PDF) {
   }
 }
 
-export async function downloadPaymentReceipt(payment: ReceiptPayment, student: ReceiptStudent | null, email: string) {
+export async function buildPaymentReceiptDocument(payment: ReceiptPayment, student: ReceiptStudent | null, email: string) {
   if (payment.status !== "completed") throw new Error("Receipts are available only for completed payments.");
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF();
@@ -117,5 +117,10 @@ export async function downloadPaymentReceipt(payment: ReceiptPayment, student: R
   doc.text(money(Number(payment.amount), payment.currency), 188, y + 13, { align: "right" });
   doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...grey);
   doc.text("Generated from your completed payment record. This is a payment acknowledgement, not a tax invoice.", 17, 281);
+  return doc;
+}
+
+export async function downloadPaymentReceipt(payment: ReceiptPayment, student: ReceiptStudent | null, email: string) {
+  const doc = await buildPaymentReceiptDocument(payment, student, email);
   doc.save(`PhyNetix-receipt-${payment.id.slice(0, 8)}.pdf`);
 }

@@ -1,3 +1,4 @@
 - Use a single shared BrandLogo component with /logo.png fallback, so a future original asset updates every brand placement without inventing a logo.
 - Generate student payment receipts on demand from authenticated payment history and profile data, so no receipt storage or unverified payment claims are introduced.
 - Keep batch browsing and checkout routes while retiring only the separate Courses and Pricing marketing routes, so active enrollment flows remain available.
+- Use one shared payment receipt preview and download control on payment history and purchased batch details, so both surfaces show the same verified transaction and student data.

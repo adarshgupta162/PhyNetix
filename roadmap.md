@@ -1,4 +1,6 @@
-- [ ] Add downloadable branded receipts for completed enrollment payments using verified payment and student details.
+- [ ] Add a branded receipt preview and verified downloadable invoices to payment history and purchased batch details.
+- [ ] Show the selected test-series logo and collect only relevant new-student profile details, without a Telegram ID.
+- [ ] Add automated checks proving generated receipt PDFs contain the correct transaction and student details.
 - [x] Prepare shared PhyNetix logo placement for a future /logo.png file across landing, login, and sidebars.
 - [x] Make the app light by default with a white-and-blue visual system.
 - [x] Replace landing claims with real features and actual available test series; remove Courses and Pricing marketing pages/links.
