@@ -44,13 +44,13 @@ const C = {
   loginCard:    "#e8e8e8",
   loginHdr:     "#d0d0d0",
   // screen 4
-  topbarDark:   "#1a1a2e",
-  sectionTabBg: "#f0f0f0",
-  secActive:    "#2979c5",
-  secInactive:  "#dce8f4",
-  sidebarBg:    "#dce8f5",
-  sidebarTitle: "#2979c5",
-  bottomBg:     "#f0f0f0",
+  topbarDark:   "#17365d",
+  sectionTabBg: "#f4f7fb",
+  secActive:    "#2463a6",
+  secInactive:  "#e8f1fb",
+  sidebarBg:    "#f0f5fb",
+  sidebarTitle: "#2463a6",
+  bottomBg:     "#f7f9fc",
   // palette exact
   palGrey:      "#c8c8c8",   // not visited — square
   palRed:       "#cc0000",   // not answered (visited) — round
@@ -1087,7 +1087,7 @@ export default function NormalTestInterface() {
           <span style={{ width: 22, height: 22, background: "#16a34a", borderRadius: 5, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <Atom style={{ width: 14, height: 14, color: "#fff" }} />
           </span>
-          <span style={{ fontSize: 14, fontWeight: "bold", color: "#fff", letterSpacing: 0.3 }}>Phynetix</span>
+          <span style={{ fontSize: 14, fontWeight: "bold", color: "#fff", letterSpacing: 0.3 }}>PhyNetix <span style={{ fontWeight: 400, color: "#c9d9ee" }}>| Online Test</span></span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <button style={{ background: "transparent", border: "none", color: "#aaccee", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
@@ -1310,6 +1310,13 @@ export default function NormalTestInterface() {
         <style>{`
           @media (max-width: 768px) {
             .mobile-palette-toggle { display: flex !important; }
+          }
+
+          .nta-question-option:hover { background: #f4f8fd !important; }
+          .nta-question-option:focus-within { outline: 2px solid #2463a6; outline-offset: 2px; }
+          @media (max-width: 768px) {
+            [data-test-content] { height: 100dvh !important; }
+            [data-test-content] button { touch-action: manipulation; }
           }
         `}</style>
 
