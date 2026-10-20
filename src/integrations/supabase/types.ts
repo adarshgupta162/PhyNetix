@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -21,7 +21,6 @@ export type Database = {
           entity_id: string | null
           entity_type: string
           id: string
-          institution_id: string | null
           new_value: Json | null
           old_value: Json | null
           user_id: string
@@ -32,7 +31,6 @@ export type Database = {
           entity_id?: string | null
           entity_type: string
           id?: string
-          institution_id?: string | null
           new_value?: Json | null
           old_value?: Json | null
           user_id: string
@@ -43,68 +41,50 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string
           id?: string
-          institution_id?: string | null
           new_value?: Json | null
           old_value?: Json | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "audit_logs_institution_id_fkey"
-            columns: ["institution_id"]
-            isOneToOne: false
-            referencedRelation: "institutions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       batch_enrollments: {
         Row: {
           batch_id: string
-          created_at: string
-          enrolled_at: string
+          enrolled_at: string | null
           enrolled_by: string | null
           enrollment_type: string | null
           expires_at: string | null
           id: string
-          is_active: boolean
+          is_active: boolean | null
           notes: string | null
           payment_id: string | null
           payment_status: string | null
-          status: string
-          updated_at: string
           user_id: string
         }
         Insert: {
           batch_id: string
-          created_at?: string
-          enrolled_at?: string
+          enrolled_at?: string | null
           enrolled_by?: string | null
           enrollment_type?: string | null
           expires_at?: string | null
           id?: string
-          is_active?: boolean
+          is_active?: boolean | null
           notes?: string | null
           payment_id?: string | null
           payment_status?: string | null
-          status?: string
-          updated_at?: string
           user_id: string
         }
         Update: {
           batch_id?: string
-          created_at?: string
-          enrolled_at?: string
+          enrolled_at?: string | null
           enrolled_by?: string | null
           enrollment_type?: string | null
           expires_at?: string | null
           id?: string
-          is_active?: boolean
+          is_active?: boolean | null
           notes?: string | null
           payment_id?: string | null
           payment_status?: string | null
-          status?: string
-          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -120,37 +100,28 @@ export type Database = {
       batch_tests: {
         Row: {
           batch_id: string
-          created_at: string
-          display_order: number
+          created_at: string | null
           id: string
-          is_bonus: boolean
+          is_bonus: boolean | null
           order_index: number | null
-          section_id: string | null
-          sort_order: number | null
           test_id: string
           unlock_date: string | null
         }
         Insert: {
           batch_id: string
-          created_at?: string
-          display_order?: number
+          created_at?: string | null
           id?: string
-          is_bonus?: boolean
+          is_bonus?: boolean | null
           order_index?: number | null
-          section_id?: string | null
-          sort_order?: number | null
           test_id: string
           unlock_date?: string | null
         }
         Update: {
           batch_id?: string
-          created_at?: string
-          display_order?: number
+          created_at?: string | null
           id?: string
-          is_bonus?: boolean
+          is_bonus?: boolean | null
           order_index?: number | null
-          section_id?: string | null
-          sort_order?: number | null
           test_id?: string
           unlock_date?: string | null
         }
@@ -160,13 +131,6 @@ export type Database = {
             columns: ["batch_id"]
             isOneToOne: false
             referencedRelation: "batches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "batch_tests_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "course_sections"
             referencedColumns: ["id"]
           },
           {
@@ -181,26 +145,18 @@ export type Database = {
       batches: {
         Row: {
           category: string | null
-          course_id: string | null
-          created_at: string
+          created_at: string | null
           created_by: string | null
-          currency: string
           current_students: number | null
           description: string | null
-          discount_price: number | null
-          duration_days: number | null
           end_date: string | null
-          ends_at: string | null
           enrollment_deadline: string | null
-          exam_type: string | null
           features: Json | null
           id: string
           institution_id: string | null
           instructions: string | null
-          is_active: boolean
-          is_featured: boolean
-          is_free: boolean
-          is_published: boolean
+          is_active: boolean | null
+          is_featured: boolean | null
           join_code: string | null
           max_students: number | null
           name: string
@@ -208,34 +164,25 @@ export type Database = {
           price: number
           short_description: string | null
           start_date: string | null
-          starts_at: string | null
           syllabus: Json | null
           thumbnail_url: string | null
-          updated_at: string
+          updated_at: string | null
           welcome_message: string | null
         }
         Insert: {
           category?: string | null
-          course_id?: string | null
-          created_at?: string
+          created_at?: string | null
           created_by?: string | null
-          currency?: string
           current_students?: number | null
           description?: string | null
-          discount_price?: number | null
-          duration_days?: number | null
           end_date?: string | null
-          ends_at?: string | null
           enrollment_deadline?: string | null
-          exam_type?: string | null
           features?: Json | null
           id?: string
           institution_id?: string | null
           instructions?: string | null
-          is_active?: boolean
-          is_featured?: boolean
-          is_free?: boolean
-          is_published?: boolean
+          is_active?: boolean | null
+          is_featured?: boolean | null
           join_code?: string | null
           max_students?: number | null
           name: string
@@ -243,34 +190,25 @@ export type Database = {
           price?: number
           short_description?: string | null
           start_date?: string | null
-          starts_at?: string | null
           syllabus?: Json | null
           thumbnail_url?: string | null
-          updated_at?: string
+          updated_at?: string | null
           welcome_message?: string | null
         }
         Update: {
           category?: string | null
-          course_id?: string | null
-          created_at?: string
+          created_at?: string | null
           created_by?: string | null
-          currency?: string
           current_students?: number | null
           description?: string | null
-          discount_price?: number | null
-          duration_days?: number | null
           end_date?: string | null
-          ends_at?: string | null
           enrollment_deadline?: string | null
-          exam_type?: string | null
           features?: Json | null
           id?: string
           institution_id?: string | null
           instructions?: string | null
-          is_active?: boolean
-          is_featured?: boolean
-          is_free?: boolean
-          is_published?: boolean
+          is_active?: boolean | null
+          is_featured?: boolean | null
           join_code?: string | null
           max_students?: number | null
           name?: string
@@ -278,20 +216,12 @@ export type Database = {
           price?: number
           short_description?: string | null
           start_date?: string | null
-          starts_at?: string | null
           syllabus?: Json | null
           thumbnail_url?: string | null
-          updated_at?: string
+          updated_at?: string | null
           welcome_message?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "batches_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "batches_institution_id_fkey"
             columns: ["institution_id"]
@@ -366,111 +296,95 @@ export type Database = {
         }
         Relationships: []
       }
+      coupon_usage: {
+        Row: {
+          coupon_id: string
+          id: string
+          payment_id: string | null
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          coupon_id: string
+          id?: string
+          payment_id?: string | null
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          coupon_id?: string
+          id?: string
+          payment_id?: string | null
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_usage_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_usage_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupons: {
         Row: {
           applicable_batches: string[] | null
-          applies_to: string
-          batch_id: string | null
           code: string
-          created_at: string
+          created_at: string | null
           created_by: string | null
-          current_uses: number
+          current_uses: number | null
           description: string | null
-          discount_type: string
+          discount_type: string | null
           discount_value: number
           id: string
-          is_active: boolean
+          is_active: boolean | null
           max_uses: number | null
           min_purchase_amount: number | null
-          updated_at: string
-          used_count: number
           valid_from: string | null
           valid_until: string | null
         }
         Insert: {
           applicable_batches?: string[] | null
-          applies_to?: string
-          batch_id?: string | null
           code: string
-          created_at?: string
+          created_at?: string | null
           created_by?: string | null
-          current_uses?: number
+          current_uses?: number | null
           description?: string | null
-          discount_type?: string
-          discount_value?: number
+          discount_type?: string | null
+          discount_value: number
           id?: string
-          is_active?: boolean
+          is_active?: boolean | null
           max_uses?: number | null
           min_purchase_amount?: number | null
-          updated_at?: string
-          used_count?: number
           valid_from?: string | null
           valid_until?: string | null
         }
         Update: {
           applicable_batches?: string[] | null
-          applies_to?: string
-          batch_id?: string | null
           code?: string
-          created_at?: string
+          created_at?: string | null
           created_by?: string | null
-          current_uses?: number
+          current_uses?: number | null
           description?: string | null
-          discount_type?: string
+          discount_type?: string | null
           discount_value?: number
           id?: string
-          is_active?: boolean
+          is_active?: boolean | null
           max_uses?: number | null
           min_purchase_amount?: number | null
-          updated_at?: string
-          used_count?: number
           valid_from?: string | null
           valid_until?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "coupons_batch_id_fkey"
-            columns: ["batch_id"]
-            isOneToOne: false
-            referencedRelation: "batches"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      course_sections: {
-        Row: {
-          batch_id: string
-          created_at: string
-          display_order: number
-          id: string
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          batch_id: string
-          created_at?: string
-          display_order?: number
-          id?: string
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          batch_id?: string
-          created_at?: string
-          display_order?: number
-          id?: string
-          name?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_sections_batch_id_fkey"
-            columns: ["batch_id"]
-            isOneToOne: false
-            referencedRelation: "batches"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       courses: {
         Row: {
@@ -527,7 +441,6 @@ export type Database = {
         Row: {
           answers: Json | null
           completed_at: string | null
-          created_at: string
           dpp_id: string
           id: string
           score: number | null
@@ -539,7 +452,6 @@ export type Database = {
         Insert: {
           answers?: Json | null
           completed_at?: string | null
-          created_at?: string
           dpp_id: string
           id?: string
           score?: number | null
@@ -551,7 +463,6 @@ export type Database = {
         Update: {
           answers?: Json | null
           completed_at?: string | null
-          created_at?: string
           dpp_id?: string
           id?: string
           score?: number | null
@@ -572,7 +483,7 @@ export type Database = {
       }
       dpp_questions: {
         Row: {
-          correct_answer: Json | null
+          correct_answer: Json
           created_at: string
           difficulty: string | null
           dpp_id: string
@@ -581,19 +492,18 @@ export type Database = {
           negative_marks: number | null
           options: Json | null
           order_index: number | null
-          question_id: string | null
           question_image_url: string | null
-          question_image_urls: string[] | null
-          question_number: number | null
+          question_image_urls: Json | null
+          question_number: number
           question_text: string | null
-          question_type: string | null
+          question_type: string
           solution_image_url: string | null
-          solution_image_urls: string[] | null
+          solution_image_urls: Json | null
           solution_text: string | null
-          sort_order: number | null
+          updated_at: string
         }
         Insert: {
-          correct_answer?: Json | null
+          correct_answer: Json
           created_at?: string
           difficulty?: string | null
           dpp_id: string
@@ -602,19 +512,18 @@ export type Database = {
           negative_marks?: number | null
           options?: Json | null
           order_index?: number | null
-          question_id?: string | null
           question_image_url?: string | null
-          question_image_urls?: string[] | null
-          question_number?: number | null
+          question_image_urls?: Json | null
+          question_number: number
           question_text?: string | null
-          question_type?: string | null
+          question_type?: string
           solution_image_url?: string | null
-          solution_image_urls?: string[] | null
+          solution_image_urls?: Json | null
           solution_text?: string | null
-          sort_order?: number | null
+          updated_at?: string
         }
         Update: {
-          correct_answer?: Json | null
+          correct_answer?: Json
           created_at?: string
           difficulty?: string | null
           dpp_id?: string
@@ -623,16 +532,15 @@ export type Database = {
           negative_marks?: number | null
           options?: Json | null
           order_index?: number | null
-          question_id?: string | null
           question_image_url?: string | null
-          question_image_urls?: string[] | null
-          question_number?: number | null
+          question_image_urls?: Json | null
+          question_number?: number
           question_text?: string | null
-          question_type?: string | null
+          question_type?: string
           solution_image_url?: string | null
-          solution_image_urls?: string[] | null
+          solution_image_urls?: Json | null
           solution_text?: string | null
-          sort_order?: number | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -642,13 +550,6 @@ export type Database = {
             referencedRelation: "dpps"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "dpp_questions_question_id_fkey"
-            columns: ["question_id"]
-            isOneToOne: false
-            referencedRelation: "questions"
-            referencedColumns: ["id"]
-          },
         ]
       }
       dpps: {
@@ -656,20 +557,16 @@ export type Database = {
           access_type: string | null
           batch_id: string | null
           chapter: string | null
-          chapter_id: string | null
           created_at: string
           created_by: string | null
           description: string | null
           difficulty: string | null
           duration_minutes: number | null
-          exam_type: string | null
           id: string
-          institution_id: string | null
-          is_published: boolean
+          is_published: boolean | null
           is_timed: boolean | null
           publish_date: string | null
-          scheduled_for: string | null
-          subject: string | null
+          subject: string
           title: string
           topic: string | null
           updated_at: string
@@ -678,20 +575,16 @@ export type Database = {
           access_type?: string | null
           batch_id?: string | null
           chapter?: string | null
-          chapter_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           difficulty?: string | null
           duration_minutes?: number | null
-          exam_type?: string | null
           id?: string
-          institution_id?: string | null
-          is_published?: boolean
+          is_published?: boolean | null
           is_timed?: boolean | null
           publish_date?: string | null
-          scheduled_for?: string | null
-          subject?: string | null
+          subject: string
           title: string
           topic?: string | null
           updated_at?: string
@@ -700,20 +593,16 @@ export type Database = {
           access_type?: string | null
           batch_id?: string | null
           chapter?: string | null
-          chapter_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           difficulty?: string | null
           duration_minutes?: number | null
-          exam_type?: string | null
           id?: string
-          institution_id?: string | null
-          is_published?: boolean
+          is_published?: boolean | null
           is_timed?: boolean | null
           publish_date?: string | null
-          scheduled_for?: string | null
-          subject?: string | null
+          subject?: string
           title?: string
           topic?: string | null
           updated_at?: string
@@ -726,60 +615,31 @@ export type Database = {
             referencedRelation: "batches"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "dpps_chapter_id_fkey"
-            columns: ["chapter_id"]
-            isOneToOne: false
-            referencedRelation: "chapters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "dpps_institution_id_fkey"
-            columns: ["institution_id"]
-            isOneToOne: false
-            referencedRelation: "institutions"
-            referencedColumns: ["id"]
-          },
         ]
       }
       institution_members: {
         Row: {
-          created_at: string
-          email: string | null
-          full_name: string | null
+          created_at: string | null
           id: string
           institution_id: string
-          is_primary: boolean
-          permissions: Json
+          invited_by: string | null
           role: string
-          status: string
-          updated_at: string
           user_id: string
         }
         Insert: {
-          created_at?: string
-          email?: string | null
-          full_name?: string | null
+          created_at?: string | null
           id?: string
           institution_id: string
-          is_primary?: boolean
-          permissions?: Json
+          invited_by?: string | null
           role?: string
-          status?: string
-          updated_at?: string
           user_id: string
         }
         Update: {
-          created_at?: string
-          email?: string | null
-          full_name?: string | null
+          created_at?: string | null
           id?: string
           institution_id?: string
-          is_primary?: boolean
-          permissions?: Json
+          invited_by?: string | null
           role?: string
-          status?: string
-          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -794,109 +654,61 @@ export type Database = {
       }
       institutions: {
         Row: {
-          approved_at: string | null
-          approved_by: string | null
-          city: string | null
-          code: string | null
+          code: string
           contact_email: string | null
           contact_phone: string | null
-          country: string | null
-          created_at: string
+          created_at: string | null
           created_by: string | null
-          description: string | null
           id: string
-          is_active: boolean
-          last_activity_at: string
-          logo_url: string | null
+          is_active: boolean | null
           name: string
-          owner_user_id: string | null
-          primary_color: string | null
-          rejection_reason: string | null
-          secondary_color: string | null
-          slug: string | null
-          state: string | null
-          status: Database["public"]["Enums"]["institution_status"]
-          updated_at: string
-          website: string | null
-          welcome_message: string | null
+          slug: string
+          updated_at: string | null
         }
         Insert: {
-          approved_at?: string | null
-          approved_by?: string | null
-          city?: string | null
-          code?: string | null
+          code?: string
           contact_email?: string | null
           contact_phone?: string | null
-          country?: string | null
-          created_at?: string
+          created_at?: string | null
           created_by?: string | null
-          description?: string | null
           id?: string
-          is_active?: boolean
-          last_activity_at?: string
-          logo_url?: string | null
+          is_active?: boolean | null
           name: string
-          owner_user_id?: string | null
-          primary_color?: string | null
-          rejection_reason?: string | null
-          secondary_color?: string | null
-          slug?: string | null
-          state?: string | null
-          status?: Database["public"]["Enums"]["institution_status"]
-          updated_at?: string
-          website?: string | null
-          welcome_message?: string | null
+          slug: string
+          updated_at?: string | null
         }
         Update: {
-          approved_at?: string | null
-          approved_by?: string | null
-          city?: string | null
-          code?: string | null
+          code?: string
           contact_email?: string | null
           contact_phone?: string | null
-          country?: string | null
-          created_at?: string
+          created_at?: string | null
           created_by?: string | null
-          description?: string | null
           id?: string
-          is_active?: boolean
-          last_activity_at?: string
-          logo_url?: string | null
+          is_active?: boolean | null
           name?: string
-          owner_user_id?: string | null
-          primary_color?: string | null
-          rejection_reason?: string | null
-          secondary_color?: string | null
-          slug?: string | null
-          state?: string | null
-          status?: Database["public"]["Enums"]["institution_status"]
-          updated_at?: string
-          website?: string | null
-          welcome_message?: string | null
+          slug?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       monitoring_events: {
         Row: {
-          created_at: string
-          data: Json | null
-          event_type: string
+          created_at: string | null
+          event_type: string | null
           id: string
           metadata: Json | null
           session_id: string | null
         }
         Insert: {
-          created_at?: string
-          data?: Json | null
-          event_type: string
+          created_at?: string | null
+          event_type?: string | null
           id?: string
           metadata?: Json | null
           session_id?: string | null
         }
         Update: {
-          created_at?: string
-          data?: Json | null
-          event_type?: string
+          created_at?: string | null
+          event_type?: string | null
           id?: string
           metadata?: Json | null
           session_id?: string | null
@@ -913,99 +725,184 @@ export type Database = {
       }
       monitoring_permissions: {
         Row: {
-          attempt_id: string | null
+          attempt_id: string
           camera_granted: boolean
+          camera_state: string | null
           created_at: string
+          created_by: string | null
           id: string
+          last_checked_at: string
           microphone_granted: boolean
+          microphone_state: string | null
+          permissions_payload: Json
           screen_granted: boolean
-          session_id: string | null
+          screen_state: string | null
+          session_id: string
+          test_id: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string
         }
         Insert: {
-          attempt_id?: string | null
+          attempt_id: string
           camera_granted?: boolean
+          camera_state?: string | null
           created_at?: string
+          created_by?: string | null
           id?: string
+          last_checked_at?: string
           microphone_granted?: boolean
+          microphone_state?: string | null
+          permissions_payload?: Json
           screen_granted?: boolean
-          session_id?: string | null
+          screen_state?: string | null
+          session_id: string
+          test_id: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
         }
         Update: {
-          attempt_id?: string | null
+          attempt_id?: string
           camera_granted?: boolean
+          camera_state?: string | null
           created_at?: string
+          created_by?: string | null
           id?: string
+          last_checked_at?: string
           microphone_granted?: boolean
+          microphone_state?: string | null
+          permissions_payload?: Json
           screen_granted?: boolean
-          session_id?: string | null
+          screen_state?: string | null
+          session_id?: string
+          test_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "monitoring_permissions_attempt_id_fkey"
             columns: ["attempt_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "test_attempts"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "monitoring_permissions_session_id_fkey"
             columns: ["session_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "proctoring_sessions"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      monitoring_sessions: {
-        Row: {
-          attempt_id: string | null
-          created_at: string
-          data: Json | null
-          ended_at: string | null
-          id: string
-          metadata: Json | null
-          status: string
-          test_id: string | null
-          user_id: string
-        }
-        Insert: {
-          attempt_id?: string | null
-          created_at?: string
-          data?: Json | null
-          ended_at?: string | null
-          id?: string
-          metadata?: Json | null
-          status?: string
-          test_id?: string | null
-          user_id: string
-        }
-        Update: {
-          attempt_id?: string | null
-          created_at?: string
-          data?: Json | null
-          ended_at?: string | null
-          id?: string
-          metadata?: Json | null
-          status?: string
-          test_id?: string | null
-          user_id?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "monitoring_sessions_attempt_id_fkey"
-            columns: ["attempt_id"]
-            isOneToOne: false
-            referencedRelation: "test_attempts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "monitoring_sessions_test_id_fkey"
+            foreignKeyName: "monitoring_permissions_test_id_fkey"
             columns: ["test_id"]
             isOneToOne: false
             referencedRelation: "tests"
             referencedColumns: ["id"]
           },
         ]
+      }
+      monitoring_screenshots: {
+        Row: {
+          attempt_id: string | null
+          captured_at: string
+          created_at: string
+          id: string
+          image_url: string | null
+          metadata: Json
+          session_id: string | null
+          storage_bucket: string | null
+          storage_path: string | null
+          test_id: string | null
+          user_id: string
+        }
+        Insert: {
+          attempt_id?: string | null
+          captured_at?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          metadata?: Json
+          session_id?: string | null
+          storage_bucket?: string | null
+          storage_path?: string | null
+          test_id?: string | null
+          user_id: string
+        }
+        Update: {
+          attempt_id?: string | null
+          captured_at?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          metadata?: Json
+          session_id?: string | null
+          storage_bucket?: string | null
+          storage_path?: string | null
+          test_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      monitoring_sessions: {
+        Row: {
+          attempt_id: string | null
+          cf_camera_track: string | null
+          cf_microphone_track: string | null
+          cf_screen_track: string | null
+          cf_session_id: string | null
+          ended_at: string | null
+          id: string
+          last_heartbeat_at: string | null
+          metadata: Json
+          started_at: string | null
+          status: string | null
+          student_id: string | null
+          student_name: string | null
+          test_id: string | null
+          test_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempt_id?: string | null
+          cf_camera_track?: string | null
+          cf_microphone_track?: string | null
+          cf_screen_track?: string | null
+          cf_session_id?: string | null
+          ended_at?: string | null
+          id?: string
+          last_heartbeat_at?: string | null
+          metadata?: Json
+          started_at?: string | null
+          status?: string | null
+          student_id?: string | null
+          student_name?: string | null
+          test_id?: string | null
+          test_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempt_id?: string | null
+          cf_camera_track?: string | null
+          cf_microphone_track?: string | null
+          cf_screen_track?: string | null
+          cf_session_id?: string | null
+          ended_at?: string | null
+          id?: string
+          last_heartbeat_at?: string | null
+          metadata?: Json
+          started_at?: string | null
+          status?: string | null
+          student_id?: string | null
+          student_name?: string | null
+          test_id?: string | null
+          test_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -1046,68 +943,59 @@ export type Database = {
       payments: {
         Row: {
           amount: number
-          batch_id: string | null
-          coupon_id: string | null
-          created_at: string
-          currency: string
+          batch_id: string
+          created_at: string | null
+          currency: string | null
+          gateway_order_id: string | null
+          gateway_response: Json | null
           id: string
-          metadata: Json | null
+          payment_gateway: string | null
           payment_method: string | null
-          provider: string | null
-          provider_order_id: string | null
-          provider_payment_id: string | null
           refund_amount: number | null
           refund_reason: string | null
           refunded_at: string | null
           refunded_by: string | null
-          status: string
-          test_id: string | null
+          status: string | null
           transaction_id: string | null
-          updated_at: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
-          amount?: number
-          batch_id?: string | null
-          coupon_id?: string | null
-          created_at?: string
-          currency?: string
+          amount: number
+          batch_id: string
+          created_at?: string | null
+          currency?: string | null
+          gateway_order_id?: string | null
+          gateway_response?: Json | null
           id?: string
-          metadata?: Json | null
+          payment_gateway?: string | null
           payment_method?: string | null
-          provider?: string | null
-          provider_order_id?: string | null
-          provider_payment_id?: string | null
           refund_amount?: number | null
           refund_reason?: string | null
           refunded_at?: string | null
           refunded_by?: string | null
-          status?: string
-          test_id?: string | null
+          status?: string | null
           transaction_id?: string | null
-          updated_at?: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
           amount?: number
-          batch_id?: string | null
-          coupon_id?: string | null
-          created_at?: string
-          currency?: string
+          batch_id?: string
+          created_at?: string | null
+          currency?: string | null
+          gateway_order_id?: string | null
+          gateway_response?: Json | null
           id?: string
-          metadata?: Json | null
+          payment_gateway?: string | null
           payment_method?: string | null
-          provider?: string | null
-          provider_order_id?: string | null
-          provider_payment_id?: string | null
           refund_amount?: number | null
           refund_reason?: string | null
           refunded_at?: string | null
           refunded_by?: string | null
-          status?: string
-          test_id?: string | null
+          status?: string | null
           transaction_id?: string | null
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1118,124 +1006,92 @@ export type Database = {
             referencedRelation: "batches"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "payments_coupon_id_fkey"
-            columns: ["coupon_id"]
-            isOneToOne: false
-            referencedRelation: "coupons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payments_test_id_fkey"
-            columns: ["test_id"]
-            isOneToOne: false
-            referencedRelation: "tests"
-            referencedColumns: ["id"]
-          },
         ]
       }
       phynetix_library: {
         Row: {
-          category: string | null
           chapter: string | null
-          correct_answer: Json | null
+          correct_answer: Json
           created_at: string
           created_by: string | null
-          description: string | null
           difficulty: string | null
-          exam_type: string | null
-          file_size: number | null
-          file_type: string | null
-          file_url: string | null
           id: string
           institution_id: string | null
-          is_active: boolean
-          is_published: boolean
-          library_id: string | null
+          is_active: boolean | null
+          library_id: string
           marks: number | null
           negative_marks: number | null
           options: Json | null
           question_image_url: string | null
+          question_image_urls: Json | null
           question_text: string | null
-          question_type: string | null
+          question_type: string
           solution_image_url: string | null
+          solution_image_urls: Json | null
           solution_text: string | null
-          subject: string | null
+          subject: string
           tags: string[] | null
-          thumbnail_url: string | null
           time_seconds: number | null
-          title: string | null
           topic: string | null
           updated_at: string
-          usage_count: number
+          usage_count: number | null
+          visibility: string
         }
         Insert: {
-          category?: string | null
           chapter?: string | null
-          correct_answer?: Json | null
+          correct_answer: Json
           created_at?: string
           created_by?: string | null
-          description?: string | null
           difficulty?: string | null
-          exam_type?: string | null
-          file_size?: number | null
-          file_type?: string | null
-          file_url?: string | null
           id?: string
           institution_id?: string | null
-          is_active?: boolean
-          is_published?: boolean
-          library_id?: string | null
+          is_active?: boolean | null
+          library_id?: string
           marks?: number | null
           negative_marks?: number | null
           options?: Json | null
           question_image_url?: string | null
+          question_image_urls?: Json | null
           question_text?: string | null
-          question_type?: string | null
+          question_type?: string
           solution_image_url?: string | null
+          solution_image_urls?: Json | null
           solution_text?: string | null
-          subject?: string | null
+          subject: string
           tags?: string[] | null
-          thumbnail_url?: string | null
           time_seconds?: number | null
-          title?: string | null
           topic?: string | null
           updated_at?: string
-          usage_count?: number
+          usage_count?: number | null
+          visibility?: string
         }
         Update: {
-          category?: string | null
           chapter?: string | null
-          correct_answer?: Json | null
+          correct_answer?: Json
           created_at?: string
           created_by?: string | null
-          description?: string | null
           difficulty?: string | null
-          exam_type?: string | null
-          file_size?: number | null
-          file_type?: string | null
-          file_url?: string | null
           id?: string
           institution_id?: string | null
-          is_active?: boolean
-          is_published?: boolean
-          library_id?: string | null
+          is_active?: boolean | null
+          library_id?: string
           marks?: number | null
           negative_marks?: number | null
           options?: Json | null
           question_image_url?: string | null
+          question_image_urls?: Json | null
           question_text?: string | null
-          question_type?: string | null
+          question_type?: string
           solution_image_url?: string | null
+          solution_image_urls?: Json | null
           solution_text?: string | null
-          subject?: string | null
+          subject?: string
           tags?: string[] | null
-          thumbnail_url?: string | null
           time_seconds?: number | null
-          title?: string | null
           topic?: string | null
           updated_at?: string
-          usage_count?: number
+          usage_count?: number | null
+          visibility?: string
         }
         Relationships: [
           {
@@ -1249,21 +1105,18 @@ export type Database = {
       }
       platform_settings: {
         Row: {
-          description: string | null
           key: string
           updated_at: string
           updated_by: string | null
           value: Json
         }
         Insert: {
-          description?: string | null
           key: string
           updated_at?: string
           updated_by?: string | null
           value?: Json
         }
         Update: {
-          description?: string | null
           key?: string
           updated_at?: string
           updated_by?: string | null
@@ -1274,33 +1127,60 @@ export type Database = {
       proctoring_alerts: {
         Row: {
           alert_type: string
-          attempt_id: string | null
+          attempt_id: string
           created_at: string
-          details: Json | null
+          created_by: string | null
+          event_id: string | null
           id: string
-          session_id: string | null
-          severity: string
+          message: string
+          payload: Json
+          resolved_at: string | null
+          resolved_by: string | null
+          session_id: string
+          severity: Database["public"]["Enums"]["proctoring_alert_severity"]
           status: string
+          test_id: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string
         }
         Insert: {
           alert_type: string
-          attempt_id?: string | null
+          attempt_id: string
           created_at?: string
-          details?: Json | null
+          created_by?: string | null
+          event_id?: string | null
           id?: string
-          session_id?: string | null
-          severity?: string
+          message: string
+          payload?: Json
+          resolved_at?: string | null
+          resolved_by?: string | null
+          session_id: string
+          severity?: Database["public"]["Enums"]["proctoring_alert_severity"]
           status?: string
+          test_id: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
         }
         Update: {
           alert_type?: string
-          attempt_id?: string | null
+          attempt_id?: string
           created_at?: string
-          details?: Json | null
+          created_by?: string | null
+          event_id?: string | null
           id?: string
-          session_id?: string | null
-          severity?: string
+          message?: string
+          payload?: Json
+          resolved_at?: string | null
+          resolved_by?: string | null
+          session_id?: string
+          severity?: Database["public"]["Enums"]["proctoring_alert_severity"]
           status?: string
+          test_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -1311,38 +1191,64 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "proctoring_alerts_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "proctoring_events"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "proctoring_alerts_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "proctoring_sessions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "proctoring_alerts_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
         ]
       }
       proctoring_events: {
         Row: {
-          attempt_id: string | null
+          attempt_id: string
           created_at: string
-          data: Json | null
-          event_type: string
+          event_type: Database["public"]["Enums"]["proctoring_event_type"]
           id: string
-          session_id: string | null
+          payload: Json
+          question_id: string | null
+          session_id: string
+          subject_name: string | null
+          test_id: string
+          user_id: string
         }
         Insert: {
-          attempt_id?: string | null
+          attempt_id: string
           created_at?: string
-          data?: Json | null
-          event_type: string
+          event_type: Database["public"]["Enums"]["proctoring_event_type"]
           id?: string
-          session_id?: string | null
+          payload?: Json
+          question_id?: string | null
+          session_id: string
+          subject_name?: string | null
+          test_id: string
+          user_id: string
         }
         Update: {
-          attempt_id?: string | null
+          attempt_id?: string
           created_at?: string
-          data?: Json | null
-          event_type?: string
+          event_type?: Database["public"]["Enums"]["proctoring_event_type"]
           id?: string
-          session_id?: string | null
+          payload?: Json
+          question_id?: string | null
+          session_id?: string
+          subject_name?: string | null
+          test_id?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -1359,35 +1265,78 @@ export type Database = {
             referencedRelation: "proctoring_sessions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "proctoring_events_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
         ]
       }
       proctoring_recordings: {
         Row: {
-          attempt_id: string | null
+          attempt_id: string
+          checksum: string | null
           created_at: string
+          created_by: string | null
           duration_seconds: number | null
+          expires_at: string | null
           id: string
-          provider: string | null
-          recording_url: string | null
-          session_id: string | null
+          metadata: Json
+          playback_url: string | null
+          provider: string
+          recorded_at: string | null
+          session_id: string
+          size_bytes: number | null
+          storage_bucket: string | null
+          storage_path: string | null
+          test_id: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string
         }
         Insert: {
-          attempt_id?: string | null
+          attempt_id: string
+          checksum?: string | null
           created_at?: string
+          created_by?: string | null
           duration_seconds?: number | null
+          expires_at?: string | null
           id?: string
-          provider?: string | null
-          recording_url?: string | null
-          session_id?: string | null
+          metadata?: Json
+          playback_url?: string | null
+          provider?: string
+          recorded_at?: string | null
+          session_id: string
+          size_bytes?: number | null
+          storage_bucket?: string | null
+          storage_path?: string | null
+          test_id: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
         }
         Update: {
-          attempt_id?: string | null
+          attempt_id?: string
+          checksum?: string | null
           created_at?: string
+          created_by?: string | null
           duration_seconds?: number | null
+          expires_at?: string | null
           id?: string
-          provider?: string | null
-          recording_url?: string | null
-          session_id?: string | null
+          metadata?: Json
+          playback_url?: string | null
+          provider?: string
+          recorded_at?: string | null
+          session_id?: string
+          size_bytes?: number | null
+          storage_bucket?: string | null
+          storage_path?: string | null
+          test_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -1404,48 +1353,88 @@ export type Database = {
             referencedRelation: "proctoring_sessions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "proctoring_recordings_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
         ]
       }
       proctoring_sessions: {
         Row: {
-          attempt_id: string | null
+          attempt_id: string
+          camera_enabled: boolean
+          camera_track_id: string | null
+          consent_accepted_at: string | null
+          consent_version: string
           created_at: string
           ended_at: string | null
+          failure_reason: string | null
           id: string
           last_heartbeat_at: string | null
-          metadata: Json | null
-          provider_room_name: string | null
+          metadata: Json
+          microphone_enabled: boolean
+          microphone_track_id: string | null
+          provider: string
+          provider_room_name: string
+          recording_enabled: boolean
+          screen_enabled: boolean
+          screen_track_id: string | null
           started_at: string
-          status: string
-          test_id: string | null
+          status: Database["public"]["Enums"]["proctoring_session_status"]
+          test_id: string
           updated_at: string
           user_id: string
         }
         Insert: {
-          attempt_id?: string | null
+          attempt_id: string
+          camera_enabled?: boolean
+          camera_track_id?: string | null
+          consent_accepted_at?: string | null
+          consent_version?: string
           created_at?: string
           ended_at?: string | null
+          failure_reason?: string | null
           id?: string
           last_heartbeat_at?: string | null
-          metadata?: Json | null
-          provider_room_name?: string | null
+          metadata?: Json
+          microphone_enabled?: boolean
+          microphone_track_id?: string | null
+          provider?: string
+          provider_room_name: string
+          recording_enabled?: boolean
+          screen_enabled?: boolean
+          screen_track_id?: string | null
           started_at?: string
-          status?: string
-          test_id?: string | null
+          status?: Database["public"]["Enums"]["proctoring_session_status"]
+          test_id: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          attempt_id?: string | null
+          attempt_id?: string
+          camera_enabled?: boolean
+          camera_track_id?: string | null
+          consent_accepted_at?: string | null
+          consent_version?: string
           created_at?: string
           ended_at?: string | null
+          failure_reason?: string | null
           id?: string
           last_heartbeat_at?: string | null
-          metadata?: Json | null
-          provider_room_name?: string | null
+          metadata?: Json
+          microphone_enabled?: boolean
+          microphone_track_id?: string | null
+          provider?: string
+          provider_room_name?: string
+          recording_enabled?: boolean
+          screen_enabled?: boolean
+          screen_track_id?: string | null
           started_at?: string
-          status?: string
-          test_id?: string | null
+          status?: Database["public"]["Enums"]["proctoring_session_status"]
+          test_id?: string
           updated_at?: string
           user_id?: string
         }
@@ -1453,7 +1442,7 @@ export type Database = {
           {
             foreignKeyName: "proctoring_sessions_attempt_id_fkey"
             columns: ["attempt_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "test_attempts"
             referencedColumns: ["id"]
           },
@@ -1603,10 +1592,8 @@ export type Database = {
           city: string | null
           coaching_name: string | null
           coaching_type: string | null
-          country: string | null
           created_at: string
           date_of_birth: string | null
-          district: string | null
           full_name: string | null
           gender: string | null
           id: string
@@ -1629,10 +1616,8 @@ export type Database = {
           city?: string | null
           coaching_name?: string | null
           coaching_type?: string | null
-          country?: string | null
           created_at?: string
           date_of_birth?: string | null
-          district?: string | null
           full_name?: string | null
           gender?: string | null
           id: string
@@ -1655,10 +1640,8 @@ export type Database = {
           city?: string | null
           coaching_name?: string | null
           coaching_type?: string | null
-          country?: string | null
           created_at?: string
           date_of_birth?: string | null
-          district?: string | null
           full_name?: string | null
           gender?: string | null
           id?: string
@@ -1807,9 +1790,11 @@ export type Database = {
           id: string
           marks: Json
           options: Json | null
+          options_text: Json | null
           pdf_coords: Json | null
           pdf_page: number | null
           qno: number
+          question_text: string | null
           text_source: string
           type: string
         }
@@ -1822,9 +1807,11 @@ export type Database = {
           id?: string
           marks?: Json
           options?: Json | null
+          options_text?: Json | null
           pdf_coords?: Json | null
           pdf_page?: number | null
           qno: number
+          question_text?: string | null
           text_source?: string
           type: string
         }
@@ -1837,9 +1824,11 @@ export type Database = {
           id?: string
           marks?: Json
           options?: Json | null
+          options_text?: Json | null
           pdf_coords?: Json | null
           pdf_page?: number | null
           qno?: number
+          question_text?: string | null
           text_source?: string
           type?: string
         }
@@ -1864,25 +1853,25 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          notes: string | null
+          note: string | null
           question_id: string
-          test_id: string | null
+          test_id: string
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
-          notes?: string | null
+          note?: string | null
           question_id: string
-          test_id?: string | null
+          test_id: string
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          notes?: string | null
+          note?: string | null
           question_id?: string
-          test_id?: string | null
+          test_id?: string
           user_id?: string
         }
         Relationships: [
@@ -1890,7 +1879,7 @@ export type Database = {
             foreignKeyName: "question_bookmarks_question_id_fkey"
             columns: ["question_id"]
             isOneToOne: false
-            referencedRelation: "questions"
+            referencedRelation: "test_section_questions"
             referencedColumns: ["id"]
           },
           {
@@ -1904,33 +1893,54 @@ export type Database = {
       }
       question_paragraphs: {
         Row: {
-          content: string
           created_at: string
-          created_by: string | null
           id: string
-          image_url: string | null
-          title: string | null
+          order_index: number | null
+          paragraph_image_url: string | null
+          paragraph_image_urls: Json | null
+          paragraph_text: string | null
+          section_id: string
+          test_id: string
           updated_at: string
         }
         Insert: {
-          content: string
           created_at?: string
-          created_by?: string | null
           id?: string
-          image_url?: string | null
-          title?: string | null
+          order_index?: number | null
+          paragraph_image_url?: string | null
+          paragraph_image_urls?: Json | null
+          paragraph_text?: string | null
+          section_id: string
+          test_id: string
           updated_at?: string
         }
         Update: {
-          content?: string
           created_at?: string
-          created_by?: string | null
           id?: string
-          image_url?: string | null
-          title?: string | null
+          order_index?: number | null
+          paragraph_image_url?: string | null
+          paragraph_image_urls?: Json | null
+          paragraph_text?: string | null
+          section_id?: string
+          test_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "question_paragraphs_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "test_sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_paragraphs_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       questions: {
         Row: {
@@ -2053,13 +2063,12 @@ export type Database = {
           last_submitted_at: string | null
           percentile: number | null
           rank: number | null
-          reopened_at: string | null
           result_available_at: string | null
           result_release_delay_minutes: number | null
           roll_number: string | null
           score: number | null
           started_at: string
-          submit_disabled: boolean
+          submit_disabled: boolean | null
           test_id: string
           time_per_question: Json | null
           time_taken_seconds: number | null
@@ -2076,13 +2085,12 @@ export type Database = {
           last_submitted_at?: string | null
           percentile?: number | null
           rank?: number | null
-          reopened_at?: string | null
           result_available_at?: string | null
           result_release_delay_minutes?: number | null
           roll_number?: string | null
           score?: number | null
           started_at?: string
-          submit_disabled?: boolean
+          submit_disabled?: boolean | null
           test_id: string
           time_per_question?: Json | null
           time_taken_seconds?: number | null
@@ -2099,13 +2107,12 @@ export type Database = {
           last_submitted_at?: string | null
           percentile?: number | null
           rank?: number | null
-          reopened_at?: string | null
           result_available_at?: string | null
           result_release_delay_minutes?: number | null
           roll_number?: string | null
           score?: number | null
           started_at?: string
-          submit_disabled?: boolean
+          submit_disabled?: boolean | null
           test_id?: string
           time_per_question?: Json | null
           time_taken_seconds?: number | null
@@ -2158,54 +2165,6 @@ export type Database = {
           },
         ]
       }
-      test_reviews: {
-        Row: {
-          batch_id: string | null
-          created_at: string
-          id: string
-          rating: number
-          review: string | null
-          test_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          batch_id?: string | null
-          created_at?: string
-          id?: string
-          rating: number
-          review?: string | null
-          test_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          batch_id?: string | null
-          created_at?: string
-          id?: string
-          rating?: number
-          review?: string | null
-          test_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "test_reviews_batch_id_fkey"
-            columns: ["batch_id"]
-            isOneToOne: false
-            referencedRelation: "batches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "test_reviews_test_id_fkey"
-            columns: ["test_id"]
-            isOneToOne: false
-            referencedRelation: "tests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       test_section_questions: {
         Row: {
           chapter: string | null
@@ -2225,7 +2184,6 @@ export type Database = {
           pdf_page: number | null
           question_number: number
           question_text: string | null
-          question_type: string | null
           section_id: string
           solution_image_url: string | null
           solution_image_urls: Json | null
@@ -2253,7 +2211,6 @@ export type Database = {
           pdf_page?: number | null
           question_number: number
           question_text?: string | null
-          question_type?: string | null
           section_id: string
           solution_image_url?: string | null
           solution_image_urls?: Json | null
@@ -2281,7 +2238,6 @@ export type Database = {
           pdf_page?: number | null
           question_number?: number
           question_text?: string | null
-          question_type?: string | null
           section_id?: string
           solution_image_url?: string | null
           solution_image_urls?: Json | null
@@ -2357,85 +2313,6 @@ export type Database = {
           },
         ]
       }
-      test_similar_questions: {
-        Row: {
-          correct_answer: Json | null
-          created_at: string
-          created_by: string | null
-          difficulty: string | null
-          id: string
-          image_urls: Json
-          library_question_id: string | null
-          options: Json | null
-          order_index: number
-          parent_question_id: string
-          question_text: string | null
-          question_type: string
-          solution_image_urls: Json
-          solution_text: string | null
-          test_id: string
-          updated_at: string
-        }
-        Insert: {
-          correct_answer?: Json | null
-          created_at?: string
-          created_by?: string | null
-          difficulty?: string | null
-          id?: string
-          image_urls?: Json
-          library_question_id?: string | null
-          options?: Json | null
-          order_index?: number
-          parent_question_id: string
-          question_text?: string | null
-          question_type?: string
-          solution_image_urls?: Json
-          solution_text?: string | null
-          test_id: string
-          updated_at?: string
-        }
-        Update: {
-          correct_answer?: Json | null
-          created_at?: string
-          created_by?: string | null
-          difficulty?: string | null
-          id?: string
-          image_urls?: Json
-          library_question_id?: string | null
-          options?: Json | null
-          order_index?: number
-          parent_question_id?: string
-          question_text?: string | null
-          question_type?: string
-          solution_image_urls?: Json
-          solution_text?: string | null
-          test_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "test_similar_questions_library_question_id_fkey"
-            columns: ["library_question_id"]
-            isOneToOne: false
-            referencedRelation: "phynetix_library"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "test_similar_questions_parent_question_id_fkey"
-            columns: ["parent_question_id"]
-            isOneToOne: false
-            referencedRelation: "test_section_questions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "test_similar_questions_test_id_fkey"
-            columns: ["test_id"]
-            isOneToOne: false
-            referencedRelation: "tests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       test_subjects: {
         Row: {
           created_at: string
@@ -2470,45 +2347,39 @@ export type Database = {
       }
       test_user_overrides: {
         Row: {
-          allowed: boolean
           created_at: string
           created_by: string | null
-          extra_time_minutes: number | null
+          extra_time_minutes: number
           id: string
           notes: string | null
-          result_release_delay_minutes: number | null
+          result_release_delay_minutes: number
           submit_disabled: boolean
           test_id: string
           updated_at: string
-          updated_by: string | null
           user_id: string
         }
         Insert: {
-          allowed?: boolean
           created_at?: string
           created_by?: string | null
-          extra_time_minutes?: number | null
+          extra_time_minutes?: number
           id?: string
           notes?: string | null
-          result_release_delay_minutes?: number | null
+          result_release_delay_minutes?: number
           submit_disabled?: boolean
           test_id: string
           updated_at?: string
-          updated_by?: string | null
           user_id: string
         }
         Update: {
-          allowed?: boolean
           created_at?: string
           created_by?: string | null
-          extra_time_minutes?: number | null
+          extra_time_minutes?: number
           id?: string
           notes?: string | null
-          result_release_delay_minutes?: number | null
+          result_release_delay_minutes?: number
           submit_disabled?: boolean
           test_id?: string
           updated_at?: string
-          updated_by?: string | null
           user_id?: string
         }
         Relationships: [
@@ -2531,7 +2402,6 @@ export type Database = {
           exam_type: string | null
           fullscreen_enabled: boolean | null
           id: string
-          institution_id: string | null
           instructions_json: Json | null
           is_published: boolean | null
           name: string
@@ -2540,8 +2410,6 @@ export type Database = {
           scheduled_at: string | null
           show_solutions: boolean | null
           solution_reopen_mode: boolean | null
-          syllabus: string | null
-          syllabus_subtitle: string | null
           test_type: string
           updated_at: string
         }
@@ -2554,7 +2422,6 @@ export type Database = {
           exam_type?: string | null
           fullscreen_enabled?: boolean | null
           id?: string
-          institution_id?: string | null
           instructions_json?: Json | null
           is_published?: boolean | null
           name: string
@@ -2563,8 +2430,6 @@ export type Database = {
           scheduled_at?: string | null
           show_solutions?: boolean | null
           solution_reopen_mode?: boolean | null
-          syllabus?: string | null
-          syllabus_subtitle?: string | null
           test_type?: string
           updated_at?: string
         }
@@ -2577,7 +2442,6 @@ export type Database = {
           exam_type?: string | null
           fullscreen_enabled?: boolean | null
           id?: string
-          institution_id?: string | null
           instructions_json?: Json | null
           is_published?: boolean | null
           name?: string
@@ -2586,20 +2450,10 @@ export type Database = {
           scheduled_at?: string | null
           show_solutions?: boolean | null
           solution_reopen_mode?: boolean | null
-          syllabus?: string | null
-          syllabus_subtitle?: string | null
           test_type?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "tests_institution_id_fkey"
-            columns: ["institution_id"]
-            isOneToOne: false
-            referencedRelation: "institutions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -2638,16 +2492,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      can_write_institution: {
-        Args: { _institution_id: string }
-        Returns: boolean
-      }
-      gen_readable_code: { Args: { _len?: number }; Returns: string }
-      get_user_institution_id: { Args: never; Returns: string }
-      has_institution_permission: {
-        Args: { _institution_id: string; _perm: string }
-        Returns: boolean
-      }
+      get_user_institution_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2655,86 +2500,36 @@ export type Database = {
         }
         Returns: boolean
       }
-      institution_dashboard_stats: { Args: never; Returns: Json }
-      institution_is_active: {
-        Args: { _institution_id: string }
+      has_test_access: {
+        Args: { _test_id: string; _user_id: string }
         Returns: boolean
-      }
-      institution_students: {
-        Args: {
-          _batch_id?: string
-          _limit?: number
-          _offset?: number
-          _search?: string
-        }
-        Returns: {
-          attempts: number
-          batches: string[]
-          full_name: string
-          joined_at: string
-          phone: string
-          roll_number: string
-          total_count: number
-          user_id: string
-        }[]
-      }
-      institution_summaries: {
-        Args: never
-        Returns: {
-          attempts: number
-          batches: number
-          city: string
-          code: string
-          contact_email: string
-          contact_phone: string
-          created_at: string
-          id: string
-          last_activity_at: string
-          logo_url: string
-          name: string
-          owner_email: string
-          owner_name: string
-          owner_user_id: string
-          rejection_reason: string
-          slug: string
-          state: string
-          status: Database["public"]["Enums"]["institution_status"]
-          students: number
-          tests: number
-          website: string
-        }[]
       }
       is_enrolled_in_batch: {
         Args: { _batch_id: string; _user_id: string }
         Returns: boolean
       }
       is_institution_admin: {
-        Args: { _institution_id: string }
-        Returns: boolean
-      }
-      is_institution_member: {
-        Args: { _institution_id: string }
-        Returns: boolean
-      }
-      is_institution_student: {
-        Args: { _institution_id: string }
+        Args: { _institution_id: string; _user_id: string }
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       join_batch_with_code: { Args: { _code: string }; Returns: Json }
-      platform_institute_stats: { Args: never; Returns: Json }
-      preview_batch_code: { Args: { _code: string }; Returns: Json }
       proctoring_schema_health: { Args: never; Returns: Json }
-      recompute_batch_current_students: {
+      prune_proctoring_data: {
+        Args: { target_test_id?: string }
+        Returns: {
+          deleted_alerts: number
+          deleted_events: number
+          deleted_recordings: number
+          deleted_sessions: number
+        }[]
+      }
+      recompute_batch_students: {
         Args: { _batch_id: string }
         Returns: undefined
       }
-      regenerate_batch_code: { Args: { _batch_id: string }; Returns: Json }
       user_completed_test: {
-        Args: { _test_id: string; _user_id: string }
-        Returns: boolean
-      }
-      user_has_paid_for_test: {
         Args: { _test_id: string; _user_id: string }
         Returns: boolean
       }
@@ -2748,11 +2543,37 @@ export type Database = {
         | "teacher"
         | "data_manager"
         | "test_manager"
+        | "finance_admin"
         | "academic_admin"
         | "operations_admin"
-        | "finance_admin"
         | "marketing_admin"
-      institution_status: "pending" | "active" | "rejected" | "suspended"
+      proctoring_alert_severity: "low" | "medium" | "high" | "critical"
+      proctoring_event_type:
+        | "consent_accepted"
+        | "permission_state"
+        | "session_started"
+        | "session_stopped"
+        | "heartbeat"
+        | "question_change"
+        | "subject_change"
+        | "answer_saved"
+        | "fullscreen_exit"
+        | "focus_lost"
+        | "focus_returned"
+        | "visibility_hidden"
+        | "visibility_visible"
+        | "screen_share_stopped"
+        | "camera_stopped"
+        | "microphone_muted"
+        | "provider_connected"
+        | "provider_disconnected"
+        | "failure"
+      proctoring_session_status:
+        | "pending"
+        | "active"
+        | "ended"
+        | "failed"
+        | "stale"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2888,12 +2709,40 @@ export const Constants = {
         "teacher",
         "data_manager",
         "test_manager",
+        "finance_admin",
         "academic_admin",
         "operations_admin",
-        "finance_admin",
         "marketing_admin",
       ],
-      institution_status: ["pending", "active", "rejected", "suspended"],
+      proctoring_alert_severity: ["low", "medium", "high", "critical"],
+      proctoring_event_type: [
+        "consent_accepted",
+        "permission_state",
+        "session_started",
+        "session_stopped",
+        "heartbeat",
+        "question_change",
+        "subject_change",
+        "answer_saved",
+        "fullscreen_exit",
+        "focus_lost",
+        "focus_returned",
+        "visibility_hidden",
+        "visibility_visible",
+        "screen_share_stopped",
+        "camera_stopped",
+        "microphone_muted",
+        "provider_connected",
+        "provider_disconnected",
+        "failure",
+      ],
+      proctoring_session_status: [
+        "pending",
+        "active",
+        "ended",
+        "failed",
+        "stale",
+      ],
     },
   },
 } as const
