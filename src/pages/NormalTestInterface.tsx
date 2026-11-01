@@ -1,9 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, type CSSProperties, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Clock, Flag, ChevronLeft, ChevronRight, AlertCircle,
-  CheckCircle2, XCircle, Loader2, WifiOff, Atom
-} from "lucide-react";
+import { WifiOff, Loader2 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -33,9 +30,8 @@ const VISITED_QUESTIONS_META_KEY = "__visited_questions__";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const SUPABASE_PUBLISHABLE_KEY = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY) as string | undefined;
 
-/* ─── EXACT COLOURS FROM SCREENSHOT ─── */
+/* ─── COLOURS ─── */
 const C = {
-  // screens 1-3
   blueStripe:   "#4a90d9",
   headerGrey:   "#636363",
   yellow:       "#f5c518",
@@ -43,7 +39,6 @@ const C = {
   signInBlue:   "#29abe2",
   loginCard:    "#e8e8e8",
   loginHdr:     "#d0d0d0",
-  // screen 4
   topbarDark:   "#17365d",
   sectionTabBg: "#f4f7fb",
   secActive:    "#2463a6",
@@ -51,89 +46,74 @@ const C = {
   sidebarBg:    "#f0f5fb",
   sidebarTitle: "#2463a6",
   bottomBg:     "#f7f9fc",
-  // palette exact
-  palGrey:      "#c8c8c8",   // not visited — square
-  palRed:       "#cc0000",   // not answered (visited) — round
-  palRed2:      "#cc0000",   // current — red square
-  palGreen:     "#26a65b",   // answered — round
-  palPurple:    "#7b2fbf",   // marked — round
+  palGrey:      "#c8c8c8",
+  palRed:       "#cc0000",
+  palRed2:      "#cc0000",
+  palGreen:     "#26a65b",
+  palPurple:    "#7b2fbf",
 };
 
-/* ─── PALETTE BUTTON ─── */
-function PaletteBtn({ num, status, isCurrent, onClick }: { num: number; status: string; isCurrent?: boolean; onClick: () => void }) {
-  // Real status drives color. Current question is shown via outline + fade (only when
-  // the question isn't answered or marked — those keep their solid colours).
-  let bg = C.palGrey, color = "#555", borderRadius = "4px", border = "1px solid #aaa";
-  if (status === "not-answered") {
-    bg = C.palRed; color = "#fff"; borderRadius = "50%"; border = "none";
-  } else if (status === "answered") {
-    bg = C.palGreen; color = "#fff"; borderRadius = "50%"; border = "none";
-  } else if (status === "marked" || status === "answered-marked") {
-    bg = C.palPurple; color = "#fff"; borderRadius = "50%"; border = "none";
-  }
-  const showFade = isCurrent && (status === "not-visited" || status === "not-answered");
-  const outline = isCurrent ? `2px solid ${C.secActive}` : "none";
+/* ─── NTA UI THEME ─── */
+const N = { header: "#363636", yellow: "#f4e91b", blue: "#157EB3", side: "#e5f6fd", line: "#c8c8c8", green: "#2e7d32", red: "#d32f2f" };
+
+const SHAPE: Record<string, { bg: string; color: string; clip?: string; br?: string; border?: string }> = {
+  "not-visited":     { bg: "linear-gradient(#fafafa,#d6d6d6)", color: "#444", br: "3px", border: "1px solid #9a9a9a" },
+  "not-answered":    { bg: "linear-gradient(#ff8a2b,#c62d0a)", color: "#fff", clip: "polygon(0 0,100% 0,100% 70%,50% 100%,0 70%)" },
+  "answered":        { bg: "linear-gradient(#8fd13f,#3f9a10)", color: "#fff", clip: "polygon(0 24%,24% 0,76% 0,100% 24%,100% 100%,0 100%)" },
+  "marked":          { bg: "radial-gradient(circle at 35% 30%,#9a6cc4,#5a2a86)", color: "#fff", br: "50%" },
+  "answered-marked": { bg: "radial-gradient(circle at 35% 30%,#9a6cc4,#5a2a86)", color: "#fff", br: "50%" },
+};
+
+function NtaBadge({ status, n, w = 40, h = 38, fs = 14, current = false }: { status: string; n: number; w?: number; h?: number; fs?: number; current?: boolean }) {
+  const s = SHAPE[status] || SHAPE["not-visited"];
   return (
-    <div onClick={onClick} style={{
-      width: 36, height: 36, background: bg, color, borderRadius, border,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: 13, fontWeight: "bold", cursor: "pointer",
-      fontFamily: "Arial,sans-serif", position: "relative", flexShrink: 0,
-      outline, outlineOffset: "2px", boxSizing: "border-box", userSelect: "none",
-      opacity: showFade ? 0.45 : 1,
-      transition: "opacity .15s ease, outline-color .15s ease",
-    }}>
-      {num}
-      {status === "answered-marked" && (
-        <span style={{ position: "absolute", bottom: -2, right: -2, width: 11, height: 11, background: C.palGreen, borderRadius: "50%", border: "2px solid #fff" }} />
-      )}
+    <div style={{ position: "relative", width: w, height: h, flexShrink: 0, transform: current ? "scale(1.1)" : undefined, filter: current ? "brightness(1.12)" : undefined, transition: "transform .12s" }}>
+      <div style={{ position: "absolute", inset: 0, background: s.bg, clipPath: s.clip, borderRadius: s.br, border: s.border, boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", color: s.color, fontSize: fs, fontWeight: current ? 800 : 600, fontFamily: "Arial,sans-serif", userSelect: "none" }}>{n}</div>
+      {status === "answered-marked" && <span style={{ position: "absolute", right: -2, bottom: -2, width: 12, height: 12, background: "#43a047", border: "2px solid #fff", borderRadius: 3, boxSizing: "border-box" }} />}
     </div>
   );
 }
 
+/* ─── PALETTE BUTTON ─── */
+function PaletteBtn({ num, status, isCurrent, onClick }: { num: number; status: string; isCurrent?: boolean; onClick: () => void }) {
+  return <div onClick={onClick} style={{ cursor: "pointer", display: "flex", justifyContent: "center" }}><NtaBadge status={status} n={num} current={!!isCurrent} /></div>;
+}
+
 /* ─── LEGEND ICON ─── */
-function LegIcon({ n, type }: { n: number; type: "answered"|"notans"|"notvisit"|"marked"|"ansmarked" }) {
-  const s = {
-    answered:  { bg: C.palGreen,  color: "#fff", br: "50%",              border: "none" },
-    notans:    { bg: C.palRed,    color: "#fff", br: "50%",              border: "none" },
-    notvisit:  { bg: C.palGrey,   color: "#555", br: "4px",              border: "1px solid #aaa" },
-    marked:    { bg: C.palPurple, color: "#fff", br: "50%",              border: "none" },
-    ansmarked: { bg: C.palPurple, color: "#fff", br: "50%",              border: "none" },
-  }[type];
+function LegIcon({ n, type }: { n: number; type: "answered" | "notans" | "notvisit" | "marked" | "ansmarked" }) {
+  const map = { answered: "answered", notans: "not-answered", notvisit: "not-visited", marked: "marked", ansmarked: "answered-marked" } as const;
+  return <NtaBadge status={map[type]} n={n} w={32} h={30} fs={12} />;
+}
+
+function InfoDot({ light }: { light?: boolean }) {
+  return <span style={{ width: 18, height: 18, borderRadius: "50%", background: light ? "#fff" : N.blue, color: light ? N.blue : "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", fontStyle: "italic", fontFamily: "serif", flexShrink: 0, cursor: "pointer" }}>i</span>;
+}
+
+function HdrBtn({ color, glyph, label, onClick }: { color: string; glyph: string; label: string; onClick: () => void }) {
   return (
-    <div style={{ position: "relative", width: 28, height: 28, background: s.bg, color: s.color, borderRadius: s.br, border: s.border, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", flexShrink: 0 }}>
-      {n}
-      {type === "ansmarked" && <span style={{ position: "absolute", bottom: -2, right: -2, width: 9, height: 9, background: C.palGreen, borderRadius: "50%", border: "2px solid #fff" }} />}
-    </div>
+    <button onClick={onClick} style={{ background: "transparent", border: "none", color: "#fff", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, padding: 0 }}>
+      <span style={{ width: 18, height: 18, borderRadius: "50%", background: color, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: "bold" }}>{glyph}</span>{label}
+    </button>
   );
 }
 
 /* ─── TOOLTIP POPUP ─── */
-function StatusTooltip({ counts, visible }: { counts: { answered: number; notAnswered: number; notVisited: number; marked: number; answeredMarked: number }; visible: boolean }) {
+function StatusTooltip({ counts, visible, title }: { counts: { answered: number; notAnswered: number; notVisited: number; marked: number; answeredMarked: number }; visible: boolean; title?: string }) {
   if (!visible) return null;
+  const rows: [string, number, string][] = [
+    ["answered", counts.answered, "Answered"], ["not-answered", counts.notAnswered, "Not Answered"], ["not-visited", counts.notVisited, "Not Visited"],
+    ["marked", counts.marked, "Marked for Review"], ["answered-marked", counts.answeredMarked, "Answered and Marked for Review (will also be evaluated)"],
+  ];
   return (
-    <div style={{
-      position: "absolute", top: "110%", left: "50%", transform: "translateX(-50%)",
-      background: "#fff", border: "1px solid #bbb", borderRadius: 4, padding: "10px 14px",
-      boxShadow: "0 4px 16px rgba(0,0,0,.18)", zIndex: 9999, minWidth: 200,
-      fontFamily: "Arial,sans-serif", fontSize: 12, color: "#222", whiteSpace: "nowrap",
-    }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-        {[
-          { color: C.palGreen,  br: "50%",  label: "Answered",                        val: counts.answered },
-          { color: C.palRed,    br: "50%",  label: "Not Answered",                    val: counts.notAnswered },
-          { color: C.palGrey,   br: "4px",  label: "Not Visited",                     val: counts.notVisited },
-          { color: C.palPurple, br: "50%",  label: "Marked for Review",               val: counts.marked },
-          { color: C.palPurple, br: "50%",  label: "Answered & Marked for Review",    val: counts.answeredMarked },
-        ].map((row, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 20, height: 20, background: row.color, borderRadius: row.br, border: row.color === C.palGrey ? "1px solid #aaa" : "none", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff", fontWeight: "bold", flexShrink: 0 }}>{row.val}</div>
-            <span>{row.label}</span>
+    <div style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, zIndex: 9999, background: "#e5eff9", border: "1px solid #ccc", boxShadow: "0 4px 14px rgba(0,0,0,.22)", fontFamily: "Arial,sans-serif", color: "#000", minWidth: 280, maxWidth: 420 }}>
+      {title && <div style={{ background: "#fff", borderBottom: "1px solid #ccc", padding: "8px 12px", fontWeight: "bold", fontSize: 16, whiteSpace: "nowrap" }}>{title}</div>}
+      <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
+        {rows.map(([st, v, label]) => (
+          <div key={st} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <NtaBadge status={st} n={v} w={52} h={48} fs={16} /><span style={{ fontSize: 14 }}>{label}</span>
           </div>
         ))}
       </div>
-      {/* Arrow */}
-      <div style={{ position: "absolute", top: -6, left: "50%", transform: "translateX(-50%)", width: 10, height: 10, background: "#fff", border: "1px solid #bbb", borderBottom: "none", borderRight: "none", rotate: "45deg" }} />
     </div>
   );
 }
@@ -148,7 +128,7 @@ export default function NormalTestInterface() {
   const { user } = useAuth();
   const proctoring = useProctoring(testId, user?.id);
 
-  /* ── ALL STATE (100% identical to original) ── */
+  /* ── STATE ── */
   const [attemptId, setAttemptId]               = useState<string | null>(null);
   const [testName, setTestName]                 = useState("Loading...");
   const [questions, setQuestions]               = useState<Question[]>([]);
@@ -193,10 +173,14 @@ export default function NormalTestInterface() {
 
   // tooltip hover state
   const [hoveredSectionTooltip, setHoveredSectionTooltip] = useState<string | null>(null);
+  // NTA UI-only state (popups / collapsible instruction box)
+  const [showInstructions, setShowInstructions]   = useState(false);
+  const [showQuestionPaper, setShowQuestionPaper] = useState(false);
+  const [showSecInstr, setShowSecInstr]           = useState(true);
   const [unlockDate, setUnlockDate]             = useState<string | null>((location.state as { unlockDate?: string | null } | null)?.unlockDate || null);
   const [showUnlockPopup, setShowUnlockPopup]   = useState(false);
 
-  /* ════ ALL API/BACKEND LOGIC — 100% IDENTICAL TO ORIGINAL ════ */
+  /* ════ API / BACKEND LOGIC — UNCHANGED ════ */
 
   // Online/offline detection
   useEffect(() => {
@@ -823,9 +807,8 @@ export default function NormalTestInterface() {
   }, [proctoring]);
 
   const getQuestionStatus = (qid: string) => {
-    // Note: "current" is no longer encoded in the status — answered/marked
-    // colors should persist when the user is viewing the question. The
-    // PaletteBtn receives `isCurrent` separately and shows a faded outline.
+    // "current" is not part of the status — answered/marked colours persist while viewing.
+    // PaletteBtn receives `isCurrent` separately.
     if (markedForReview.has(qid) && isAnswerPresent(answers[qid])) return "answered-marked";
     if (markedForReview.has(qid)) return "marked";
     if (isAnswerPresent(answers[qid])) return "answered";
@@ -1070,7 +1053,7 @@ export default function NormalTestInterface() {
   }
 
   /* ════════════════════════════════════════════
-     SCREEN 4 — MAIN TEST
+     SCREEN 4 — MAIN TEST (NTA interface)
   ════════════════════════════════════════════ */
   const sc = getStatusCounts(currentSection ?? undefined);
   const activeSectionIndex = sections.findIndex(s => s.id === activeSection);
@@ -1078,54 +1061,69 @@ export default function NormalTestInterface() {
     ? sections.slice(0, activeSectionIndex).reduce((sum, s) => sum + s.questions.length, 0)
     : 0;
 
+  // NTA UI helpers (display only)
+  const secQs = currentSection?.questions ?? [];
+  const secMax = secQs.reduce((a, q) => a + (q.marks || 0), 0);
+  const qTypeLabel = isIntegerQuestion ? "Numerical" : isMultipleChoice ? "Multiple Correct" : "Single Correct";
+  const fmtNeg = (n?: number) => `-${Math.abs(n || 0).toFixed(1)}`;
+  const currentQuestionNo = currentQuestionIndex + 1 + sectionOffset;
+  const scrollQArea = (toBottom: boolean) => document.getElementById("nta-qarea")?.scrollTo({ top: toBottom ? 99999 : 0, behavior: "smooth" });
+  const ntaBtn: CSSProperties = { height: 46, padding: "0 18px", background: "#fff", border: "1px solid #c8c8c8", fontSize: 14, cursor: "pointer", color: "#222", fontFamily: "Arial,sans-serif" };
+  const ntaBlue: CSSProperties = { height: 46, padding: "0 30px", background: N.blue, border: `1px solid ${N.blue}`, color: "#fff", fontSize: 14, cursor: "pointer", fontFamily: "Arial,sans-serif" };
+  const modalShell = (title: string, note: string, onClose: () => void, body: ReactNode) => (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.55)", zIndex: 99998, display: "flex", justifyContent: "center", alignItems: "flex-start", paddingTop: 70 }}>
+      <div onClick={e => e.stopPropagation()} style={{ width: 748, maxWidth: "96vw", maxHeight: "calc(100vh - 100px)", background: "#fff", display: "flex", flexDirection: "column", fontFamily: "Arial,sans-serif" }}>
+        <div style={{ background: "#4285f4", color: "#fff", padding: "6px 10px", display: "flex", justifyContent: "space-between", fontWeight: "bold", fontSize: 17 }}>
+          <span>{title}</span><span onClick={onClose} style={{ fontWeight: 400, fontSize: 15, cursor: "pointer" }}>Close ✕</span>
+        </div>
+        <div style={{ overflowY: "auto", padding: "0 10px 14px" }}>
+          <p style={{ color: "#f00", fontSize: 20, lineHeight: 1.25, margin: "6px 0 10px" }}>{note}</p>{body}
+        </div>
+      </div>
+    </div>
+  );
+
   const testContent = (
     <div data-test-content style={{ height: "100vh", display: "flex", flexDirection: "column", fontFamily: "Arial,sans-serif", fontSize: 13, overflow: "hidden", background: "#f5f5f5" }}>
 
-      {/* ── ROW 1: Full-width dark top bar ── */}
-      <div style={{ background: C.topbarDark, color: "#fff", height: 32, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 12px", flexShrink: 0, zIndex: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ width: 22, height: 22, background: "#16a34a", borderRadius: 5, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <Atom style={{ width: 14, height: 14, color: "#fff" }} />
-          </span>
-          <span style={{ fontSize: 14, fontWeight: "bold", color: "#fff", letterSpacing: 0.3 }}>PhyNetix <span style={{ fontWeight: 400, color: "#c9d9ee" }}>| Online Test</span></span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button style={{ background: "transparent", border: "none", color: "#aaccee", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
-            <span style={{ width: 15, height: 15, background: C.secActive, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 9, fontWeight: "bold", flexShrink: 0 }}>i</span>
-            Instructions
-          </button>
-          <button style={{ background: "transparent", border: "none", color: "#aaccee", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
-            <span style={{ width: 15, height: 15, background: C.palGreen, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 9, flexShrink: 0 }}>≡</span>
-            Question Paper
-          </button>
+      {/* ── HEADER ── */}
+      <div style={{ background: N.header, height: 34, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 14px", flexShrink: 0, gap: 12 }}>
+        <span style={{ color: N.yellow, fontSize: 16, textTransform: "uppercase", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{testName}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
           <AccessibilityToolbar />
+          <HdrBtn color="#2f80ed" glyph="i" label="Instructions" onClick={() => setShowInstructions(true)} />
+          <HdrBtn color={C.palGreen} glyph="≡" label="Question Paper" onClick={() => setShowQuestionPaper(true)} />
         </div>
       </div>
 
-      {/* ── BODY: left column + sidebar ── */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+      {/* ── BODY ── */}
+      <div style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0, position: "relative" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0, background: "#fff" }}>
 
-        {/* ── LEFT COLUMN ── */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-
-          {/* ROW 2: Test name + i tooltip + Time Left — left area only */}
-          <div style={{ background: C.sectionTabBg, borderBottom: "1px solid #ccc", padding: "4px 10px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 13, fontWeight: "bold", color: "#111" }}>{testName}</span>
+          {/* test-name tab */}
+          <div style={{ background: "#f5f5f5", padding: "8px 12px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
+            <div style={{ position: "relative" }} onMouseEnter={() => setHoveredSectionTooltip("__all")} onMouseLeave={() => setHoveredSectionTooltip(null)}>
+              <div style={{ background: N.blue, color: "#fff", padding: "7px 12px", borderRadius: 3, fontSize: 16, display: "flex", alignItems: "center", gap: 8, maxWidth: 230 }}>
+                <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{testName}</span><InfoDot light />
+              </div>
+              <div style={{ width: 0, height: 0, borderLeft: "7px solid transparent", borderRight: "7px solid transparent", borderTop: `7px solid ${N.blue}`, marginLeft: 22 }} />
+              {(() => { const a = getStatusCounts(); return <StatusTooltip title={testName} visible={hoveredSectionTooltip === "__all"} counts={{ answered: a.answered, notAnswered: a.notAnswered, notVisited: a.notVisited, marked: a.markedCount, answeredMarked: a.answeredMarked }} />; })()}
             </div>
-            <span style={{ fontSize: 13, fontWeight: "bold", color: timeLeft < 300 ? "#cc0000" : "#000" }}>
-              Time Left : {formatTime(timeLeft)}
-            </span>
+            <span style={{ color: "#777", fontSize: 14, paddingTop: 12 }}>▶</span>
           </div>
 
-          {/* ROW 3: Sections + ◀ subject pills ▶ — left area only */}
-          <div style={{ background: "#fff", borderBottom: "1px solid #ccc", padding: "3px 8px", display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-            <span style={{ fontSize: 11, color: "#555", fontWeight: "bold", flexShrink: 0 }}>Sections</span>
-            <button style={{ width: 20, height: 20, background: "#e0e0e0", border: "1px solid #bbb", cursor: "pointer", fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", padding: 0, color: "#333", flexShrink: 0 }}>◀</button>
-            {/* Scrollable section pills */}
+          {/* Sections / Time Left */}
+          <div style={{ background: "#f5f5f5", borderBottom: "1px solid #ddd", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+            <span style={{ color: "#6d6d6d", fontSize: 16 }}>Sections</span>
+            <span style={{ fontSize: 15, color: timeLeft < 300 ? "#cc0000" : "#363636" }}><b style={{ fontWeight: 400 }}>Time Left : </b>{formatTime(timeLeft)}</span>
+          </div>
+
+          {/* section tabs */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 8px", borderBottom: "1px solid #ddd", flexShrink: 0 }}>
+            <span style={{ color: "#555", fontSize: 12 }}>◀</span>
             <div style={{ display: "flex", gap: 4, overflowX: "auto", flex: 1, scrollbarWidth: "none" }}>
               {sections.map(sec => {
-                const secCounts = getStatusCounts(sec);
+                const act = activeSection === sec.id, c = getStatusCounts(sec);
                 return (
                   <div key={sec.id} style={{ position: "relative", flexShrink: 0 }}>
                     <button
@@ -1139,240 +1137,153 @@ export default function NormalTestInterface() {
                           if (firstQ) setVisitedQuestions(nextVisited);
                         }, nextVisited);
                       }}
-                      style={{ display: "flex", alignItems: "center", gap: 3, padding: "4px 12px", border: "1px solid", borderColor: activeSection === sec.id ? "#1a60b0" : "#b0c8e0", borderRadius: 3, background: activeSection === sec.id ? C.secActive : C.secInactive, color: activeSection === sec.id ? "#fff" : "#1a1a1a", fontSize: 12, fontWeight: "bold", cursor: "pointer", whiteSpace: "nowrap" }}>
+                      style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 12px", border: `1px solid ${act ? N.blue : "#d0d0d0"}`, background: act ? N.blue : "#fff", color: act ? "#fff" : N.blue, fontSize: 15, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "Arial,sans-serif" }}>
                       {sec.name}
-                      <span
-                        onMouseEnter={(e) => { e.stopPropagation(); setHoveredSectionTooltip(sec.id); }}
-                        onMouseLeave={() => setHoveredSectionTooltip(null)}
-                        style={{ width: 14, height: 14, background: activeSection === sec.id ? "rgba(255,255,255,.3)" : C.secActive, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 9, fontWeight: "bold", cursor: "help" }}>i</span>
+                      <span onMouseEnter={e => { e.stopPropagation(); setHoveredSectionTooltip(sec.id); }} onMouseLeave={() => setHoveredSectionTooltip(null)}><InfoDot light={act} /></span>
                     </button>
-                    <StatusTooltip counts={{ answered: secCounts.answered, notAnswered: secCounts.notAnswered, notVisited: secCounts.notVisited, marked: secCounts.markedCount, answeredMarked: secCounts.answeredMarked }} visible={hoveredSectionTooltip === sec.id} />
+                    <StatusTooltip visible={hoveredSectionTooltip === sec.id} counts={{ answered: c.answered, notAnswered: c.notAnswered, notVisited: c.notVisited, marked: c.markedCount, answeredMarked: c.answeredMarked }} />
                   </div>
                 );
               })}
             </div>
-            <button style={{ width: 20, height: 20, background: "#e0e0e0", border: "1px solid #bbb", cursor: "pointer", fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", padding: 0, color: "#333", flexShrink: 0 }}>▶</button>
+            <span style={{ color: "#555", fontSize: 12 }}>▶</span>
           </div>
 
-          {/* Question area */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "14px 18px", background: "#fff" }}>
+          {/* question type + marks */}
+          <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 14px", borderBottom: "1px solid #ddd", fontSize: 13, color: "#444", flexShrink: 0 }}>
+            <span>Question Type: {qTypeLabel}</span>
+            <span>Marks for correct answer: <b style={{ color: "#1b7a1b", fontWeight: 400 }}>{currentQuestion?.marks ?? 0}</b> | Negative Marks: <b style={{ color: "#d00", fontWeight: 400 }}>{fmtNeg(currentQuestion?.negative_marks)}</b></span>
+          </div>
 
-            <div style={{ fontWeight: "bold", fontSize: 13, marginBottom: 12, color: "#000" }}>
-              Question No. {currentQuestionIndex + 1 + sectionOffset}
+          {/* question number */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 10px", borderBottom: "1px solid #ddd", flexShrink: 0 }}>
+            <span style={{ fontSize: 16, color: "#222" }}>Question No. {currentQuestionNo}</span>
+            <button onClick={() => scrollQArea(true)} style={{ width: 32, height: 32, borderRadius: "50%", background: N.blue, color: "#fff", border: "none", fontSize: 18, cursor: "pointer" }}>↓</button>
+          </div>
+
+          {/* scrollable question area */}
+          <div id="nta-qarea" style={{ flex: 1, overflowY: "auto", padding: "10px 14px 80px", position: "relative" }}>
+            <div style={{ border: "2px solid #000", maxWidth: 820, marginBottom: 14, fontSize: 14 }}>
+              <div onClick={() => setShowSecInstr(v => !v)} style={{ textAlign: "center", fontWeight: "bold", padding: "10px 30px", cursor: "pointer", position: "relative" }}>
+                {currentSection?.name} (Maximum Marks: {secMax})<span style={{ position: "absolute", right: 12 }}>{showSecInstr ? "⌃" : "⌄"}</span>
+              </div>
+              {showSecInstr && (
+                <div style={{ padding: "0 14px 10px", lineHeight: 1.6 }}>
+                  <ul style={{ paddingLeft: 18, margin: "0 0 8px", listStyle: "disc" }}>
+                    <li>This section contains <b>{secQs.length}</b> questions.</li>
+                    {isIntegerQuestion
+                      ? <li>Answer must be typed into the input box.</li>
+                      : <li>Each question has <b>4</b> options. <b>{isMultipleChoice ? "ONE OR MORE" : "ONLY ONE"}</b> of these options {isMultipleChoice ? "may be" : "is"} the correct answer.</li>}
+                    <li>Answer to each question will be evaluated <u>according to the following marking scheme</u>:</li>
+                  </ul>
+                  <div style={{ marginLeft: 36 }}>
+                    <div><i>Full Marks</i> : +{currentQuestion?.marks ?? 0} If <b>ONLY</b> the correct option is chosen</div>
+                    <div><i>Zero Marks</i> : 0 If none of the options is chosen (i.e. the question is unanswered)</div>
+                    {(currentQuestion?.negative_marks || 0) > 0 && <div><i>Negative Marks</i> : {fmtNeg(currentQuestion?.negative_marks)} In all other cases.</div>}
+                  </div>
+                </div>
+              )}
             </div>
 
             {currentQuestion?.paragraph_text && (
-              <div style={{ marginBottom: 14, padding: "10px 14px", background: "#fffde7", border: "1px solid #f0c040", fontSize: 13, lineHeight: 1.7 }}>
-                <div style={{ fontSize: 10, fontWeight: "bold", color: "#9a6500", marginBottom: 5, textTransform: "uppercase" }}>Paragraph</div>
+              <div style={{ marginBottom: 14, padding: "10px 14px", background: "#fffde7", border: "1px solid #f0c040", fontSize: 14, lineHeight: 1.7 }}>
                 <LatexRenderer content={currentQuestion.paragraph_text} />
-              {currentQuestion.paragraph_image_urls?.map((img, i) => (
-                <img key={i} src={img} alt="" style={{ maxWidth: "min(100%, 420px)", maxHeight: 260, width: "auto", height: "auto", objectFit: "contain", marginTop: 6, border: "none", display: "block" }} />
-              ))}
-            </div>
-          )}
-
-          {(() => {
-            const imgs = currentQuestion?.image_urls?.length ? currentQuestion.image_urls : currentQuestion?.image_url ? [currentQuestion.image_url] : [];
-            return imgs.length > 0 && <div style={{ marginBottom: 10 }}>{imgs.map((u, i) => <img key={i} src={u} alt="" style={{ maxWidth: "min(100%, 480px)", maxHeight: 320, width: "auto", height: "auto", objectFit: "contain", border: "none", marginBottom: 6, display: "block" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />)}</div>;
-          })()}
-
-            {currentQuestion?.question_text && (
-              <div style={{ fontSize: 14, lineHeight: 1.85, color: "#000", marginBottom: 16 }}>
-                <LatexRenderer content={currentQuestion.question_text} />
+                {currentQuestion.paragraph_image_urls?.map((img, i) => <img key={i} src={img} alt="" style={{ maxWidth: "min(100%, 420px)", maxHeight: 260, objectFit: "contain", marginTop: 6, display: "block" }} />)}
               </div>
             )}
+            {(() => {
+              const imgs = currentQuestion?.image_urls?.length ? currentQuestion.image_urls : currentQuestion?.image_url ? [currentQuestion.image_url] : [];
+              return imgs.length > 0 && <div style={{ marginBottom: 10 }}>{imgs.map((u, i) => <img key={i} src={u} alt="" style={{ maxWidth: "min(100%, 480px)", maxHeight: 320, objectFit: "contain", marginBottom: 6, display: "block" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />)}</div>;
+            })()}
+            {currentQuestion?.question_text && <div style={{ fontSize: 16, lineHeight: 1.8, color: "#000", marginBottom: 16 }}><LatexRenderer content={currentQuestion.question_text} /></div>}
 
-            {/* Options */}
             {isIntegerQuestion ? (
-              <div style={{ marginTop: 10, width: 180 }}>
-                <div style={{ fontSize: 13, color: "#444", marginBottom: 8 }}>Enter your answer (integer only):</div>
+              <div style={{ width: 225, marginTop: 10 }}>
                 <input
-                  type="text"
-                  inputMode={isMobileDevice ? "none" : "decimal"}
-                  readOnly={isMobileDevice}
+                  type="text" inputMode={isMobileDevice ? "none" : "decimal"} readOnly={isMobileDevice}
                   value={typeof displayedCurrentAnswer === "string" ? displayedCurrentAnswer : ""}
                   onChange={e => handleIntegerAnswer(e.target.value)}
-                  onClick={(e) => {
-                    const target = e.target as HTMLInputElement;
-                    const nextCursor = target.selectionStart ?? target.value.length;
-                    setIntegerCursorPosition(Math.min(nextCursor, target.value.length));
-                  }}
-                  onSelect={(e) => {
-                    const target = e.target as HTMLInputElement;
-                    const nextCursor = target.selectionStart ?? target.value.length;
-                    setIntegerCursorPosition(Math.min(nextCursor, target.value.length));
-                  }}
-                  placeholder="Type answer"
-                  style={{ padding: "8px 12px", border: "2px solid #888", width: "100%", fontSize: 16, fontFamily: "monospace", textAlign: "center", outline: "none", background: "#ffffff", color: "#000", borderRadius: 6, boxSizing: "border-box" }}
+                  onClick={e => { const t = e.target as HTMLInputElement; setIntegerCursorPosition(Math.min(t.selectionStart ?? t.value.length, t.value.length)); }}
+                  onSelect={e => { const t = e.target as HTMLInputElement; setIntegerCursorPosition(Math.min(t.selectionStart ?? t.value.length, t.value.length)); }}
+                  style={{ width: "100%", height: 40, boxSizing: "border-box", border: "2px solid #000", borderRadius: 4, padding: "2px 8px", fontSize: 20, outline: "none", background: "#fff", color: "#000", display: "block" }}
                 />
-                <div style={{ marginTop: 8, background: "#eef3f9", border: "1px solid #d2dce8", borderRadius: 8, padding: 8, width: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column", gap: 6 }}>
-                  <button type="button" onClick={handleIntegerKeypadBackspace} style={{ width: "100%", height: 34, border: "1px solid #b8c5d8", borderRadius: 6, background: "#f8fbff", fontWeight: "bold", cursor: "pointer", color: "#000" }}>
-                    Backspace
-                  </button>
-                  {[
-                    ["7", "8", "9"],
-                    ["4", "5", "6"],
-                    ["1", "2", "3"],
-                    ["0", ".", "-"],
-                  ].map((row, rowIndex) => (
-                    <div key={rowIndex} style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 6 }}>
-                      {row.map((key) => (
-                        <button key={key} type="button" onClick={() => handleIntegerKeypadInsert(key)} style={{ width: "100%", height: 34, border: "1px solid #b8c5d8", borderRadius: 6, background: "#f8fbff", cursor: "pointer", fontWeight: 600, color: "#000" }}>
-                          {key}
-                        </button>
-                      ))}
+                <div style={{ background: "#f2f2f2", padding: "12px 0 8px", textAlign: "center", borderRadius: "0 0 6px 6px" }}>
+                  {(() => { const kb: CSSProperties = { height: 46, minWidth: 46, border: "1px solid #333", borderRadius: 6, background: "#e9e9e9", font: "bold 20px Arial", cursor: "pointer", color: "#000" }; return (<>
+                    <button type="button" onClick={handleIntegerKeypadBackspace} style={{ ...kb, padding: "0 10px" }}>Backspace</button>
+                    <div style={{ width: 168, margin: "10px auto 0", display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 6 }}>
+                      {["7", "8", "9", "4", "5", "6", "1", "2", "3", "0", ".", "-"].map(k => <button key={k} type="button" onClick={() => handleIntegerKeypadInsert(k)} style={kb}>{k}</button>)}
                     </div>
-                  ))}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 6 }}>
-                    <button type="button" onClick={() => moveIntegerCursor("left")} style={{ width: "100%", height: 34, border: "1px solid #b8c5d8", borderRadius: 6, background: "#f8fbff", cursor: "pointer", fontWeight: 600, color: "#000" }}>
-                      ←
-                    </button>
-                    <button type="button" onClick={() => moveIntegerCursor("right")} style={{ width: "100%", height: 34, border: "1px solid #b8c5d8", borderRadius: 6, background: "#f8fbff", cursor: "pointer", fontWeight: 600, color: "#000" }}>
-                      →
-                    </button>
-                  </div>
-                  <button type="button" onClick={clearIntegerAnswer} style={{ width: "100%", height: 34, border: "1px solid #b8c5d8", borderRadius: 6, background: "#f8fbff", cursor: "pointer", fontWeight: "bold", color: "#000" }}>
-                    Clear All
-                  </button>
+                    <div style={{ margin: "10px 0 8px" }}>
+                      <button type="button" onClick={() => moveIntegerCursor("left")} style={{ ...kb, padding: "0 10px", height: 40, marginRight: 8 }}>Left</button>
+                      <button type="button" onClick={() => moveIntegerCursor("right")} style={{ ...kb, padding: "0 10px", height: 40 }}>Right</button>
+                    </div>
+                    <button type="button" onClick={clearIntegerAnswer} style={{ ...kb, padding: "0 10px" }}>Clear All</button>
+                  </>); })()}
                 </div>
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {options.map((opt, idx) => {
-                  const optStr = String(idx);
-                  const curAns = displayedCurrentAnswer;
-                  const selected = isMultipleChoice
-                    ? Array.isArray(curAns) && curAns.includes(optStr)
-                    : curAns === optStr;
+                  const optStr = String(idx), cur = displayedCurrentAnswer;
+                  const selected = isMultipleChoice ? Array.isArray(cur) && cur.includes(optStr) : cur === optStr;
                   return (
-                    <label key={idx} style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" }}>
-                      {/* Custom radio — white bg + dark border unselected, blue fill selected */}
-                      <div
-                        onClick={() => handleAnswer(idx)}
-                        style={{
-                          width: 18, height: 18, borderRadius: "50%",
-                          border: selected ? `2px solid #1a73e8` : `2px solid #333`,
-                          background: selected ? "#1a73e8" : "#ffffff",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          flexShrink: 0, marginTop: 3, cursor: "pointer", boxSizing: "border-box",
-                          transition: "border-color .1s, background .1s",
-                        }}>
-                        {selected && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} />}
+                    <label key={idx} style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" }} onClick={e => { e.preventDefault(); handleAnswer(idx); }}>
+                      <div style={{ width: 16, height: 16, marginTop: 5, flexShrink: 0, boxSizing: "border-box", borderRadius: isMultipleChoice ? 3 : "50%", border: `1px solid ${selected ? "#0b5cff" : "#767676"}`, background: selected ? "#0b5cff" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        {selected && <div style={{ width: 6, height: 6, borderRadius: isMultipleChoice ? 1 : "50%", background: "#fff" }} />}
                       </div>
-                      <div style={{ flex: 1, fontSize: 14, lineHeight: 1.75, color: "#000" }} onClick={() => handleAnswer(idx)}>
+                      <div style={{ flex: 1, fontSize: 16, lineHeight: 1.7, color: "#000" }}>
                         <LatexRenderer content={opt.text} />
-                        {opt.image_url && (
-                          <img src={opt.image_url} alt="" style={{ maxWidth: "min(100%, 360px)", maxHeight: 220, width: "auto", height: "auto", objectFit: "contain", marginTop: 6, border: "none", display: "block" }}
-                            onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                        )}
+                        {opt.image_url && <img src={opt.image_url} alt="" style={{ maxWidth: "min(100%, 360px)", maxHeight: 220, objectFit: "contain", marginTop: 6, display: "block" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />}
                       </div>
                     </label>
                   );
                 })}
               </div>
             )}
-          </div>
-
-          {/* ── BOTTOM ACTION BAR ──
-              [Mark for Review & Next] [Clear Response]  spacer  [Save & Next]
-          */}
-          <div style={{ background: C.bottomBg, borderTop: "2px solid #c8c8c8", padding: "7px 10px", display: "flex", alignItems: "center", flexShrink: 0 }}>
-            <button onClick={markForReviewAndNext}
-              style={{ padding: "8px 16px", background: "#fff", border: "1px solid #888", fontSize: 13, cursor: "pointer", borderRadius: 2, marginRight: 8, color: "#333" }}>
-              Mark for Review &amp; Next
-            </button>
-            <button onClick={clearResponse}
-              style={{ padding: "8px 14px", background: "#fff", border: "1px solid #888", fontSize: 13, cursor: "pointer", borderRadius: 2, color: "#333" }}>
-              Clear Response
-            </button>
-            <div style={{ flex: 1 }} />
-            <button onClick={saveAndNext}
-              style={{ padding: "8px 22px", background: "#fff", border: "1px solid #888", fontSize: 13, fontWeight: "bold", cursor: "pointer", borderRadius: 2, marginRight: 8, color: "#333" }}>
-              Save &amp; Next
-            </button>
+            <button onClick={() => scrollQArea(false)} style={{ position: "fixed", right: 292, bottom: 76, width: 44, height: 44, borderRadius: "50%", background: N.blue, color: "#fff", border: "none", fontSize: 22, cursor: "pointer", zIndex: 50 }}>↑</button>
           </div>
         </div>
 
-        {/* ── Mobile palette toggle button ── */}
-        <button
-          onClick={() => setShowPalette(p => !p)}
-          style={{
-            display: "none", position: "fixed", bottom: 70, right: 10, zIndex: 9998,
-            width: 40, height: 40, borderRadius: "50%", background: C.secActive,
-            border: "none", color: "#fff", fontSize: 11, fontWeight: "bold",
-            cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,.3)",
-            alignItems: "center", justifyContent: "center",
-          }}
-          className="mobile-palette-toggle"
-        >
-          {showPalette ? "✕" : "Q"}
-        </button>
+        {/* edge tab — toggles palette */}
+        <button className="nta-edge-tab" onClick={() => setShowPalette(p => !p)} style={{ position: "absolute", top: "50%", right: showPalette ? 270 : 0, transform: "translateY(-50%)", width: 20, height: 62, background: "rgba(0,0,0,.97)", color: "rgba(255,255,255,.6)", border: "none", borderRadius: "5px 0 0 5px", cursor: "pointer", zIndex: 60, padding: 0 }}>{showPalette ? "›" : "‹"}</button>
+
+        {/* mobile palette button */}
+        <button onClick={() => setShowPalette(p => !p)} className="mobile-palette-toggle" style={{ display: "none", position: "fixed", bottom: 80, right: 10, zIndex: 9998, width: 40, height: 40, borderRadius: "50%", background: N.blue, border: "none", color: "#fff", fontSize: 11, fontWeight: "bold", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,.3)", alignItems: "center", justifyContent: "center" }}>{showPalette ? "✕" : "Q"}</button>
         <style>{`
           @media (max-width: 768px) {
             .mobile-palette-toggle { display: flex !important; }
-          }
-
-          .nta-question-option:hover { background: #f4f8fd !important; }
-          .nta-question-option:focus-within { outline: 2px solid #2463a6; outline-offset: 2px; }
-          @media (max-width: 768px) {
+            .nta-edge-tab { display: none !important; }
             [data-test-content] { height: 100dvh !important; }
             [data-test-content] button { touch-action: manipulation; }
+            .test-sidebar { position: fixed !important; top: 0 !important; right: 0 !important; bottom: 0 !important; z-index: 9997 !important; box-shadow: -4px 0 16px rgba(0,0,0,.25) !important; }
           }
         `}</style>
 
-        {/* ── SIDEBAR — starts from below Row 1, full height ── */}
-        <div className="test-sidebar" style={{
-          width: 235, background: C.sidebarBg, display: "flex", flexDirection: "column",
-          overflow: "hidden", flexShrink: 0, borderLeft: "1px solid #bbb",
-        }}>
-          <style>{`
-            @media (max-width: 768px) {
-              .test-sidebar {
-                position: fixed !important; top: 0 !important; right: 0 !important;
-                bottom: 0 !important; z-index: 9997 !important;
-                box-shadow: -4px 0 16px rgba(0,0,0,.25) !important;
-                display: ${showPalette ? 'flex' : 'none'} !important;
-              }
-            }
-          `}</style>
-
-          {/* Candidate photo + name */}
-          <div style={{ background: "#fff", borderBottom: "1px solid #ccc", padding: "10px 8px", display: "flex", flexDirection: "row", alignItems: "center", gap: 10, flexShrink: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: "bold", color: "#111", textAlign: "left", flex: 1 }}>{studentName}</div>
-            <div style={{ width: 82, height: 92, background: "#ccc", border: "1px solid #aaa", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, flexShrink: 0 }}>
-              {studentAvatar ? <img data-a11y-preserve-img src={studentAvatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 34 }}>👤</span>}
+        {/* ── SIDEBAR ── */}
+        <div className="test-sidebar" style={{ width: 270, background: N.side, borderLeft: `1px solid ${N.line}`, display: showPalette ? "flex" : "none", flexDirection: "column", flexShrink: 0, overflow: "hidden" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", padding: 15, borderBottom: `1px solid ${N.line}`, flexShrink: 0, gap: 12 }}>
+            <div style={{ width: 90, height: 90, border: `1px solid ${N.line}`, background: "#ddd", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              {studentAvatar ? <img data-a11y-preserve-img src={studentAvatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 44 }}>👤</span>}
+            </div>
+            <div style={{ fontSize: 16, marginTop: 4, color: "#000", wordBreak: "break-word" }}>{studentName}</div>
+          </div>
+          <div style={{ background: "#fff", padding: "10px 12px 6px", flexShrink: 0 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto 1fr", gap: "8px 8px", alignItems: "center", fontSize: 12.5, color: "#000" }}>
+              <LegIcon n={sc.answered} type="answered" /><span>Answered</span>
+              <LegIcon n={sc.notAnswered} type="notans" /><span>Not Answered</span>
+              <LegIcon n={sc.notVisited} type="notvisit" /><span>Not Visited</span>
+              <LegIcon n={sc.markedCount} type="marked" /><span>Marked for review</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, fontSize: 12.5, color: "#000" }}>
+              <LegIcon n={sc.answeredMarked} type="ansmarked" /><span>Answered and Marked for Review (will also be evaluated)</span>
             </div>
           </div>
-
-          {/* Legend — icon + count + text, 2-col grid */}
-          <div style={{ background: "#fff", borderBottom: "1px solid #ccc", padding: "8px 10px", flexShrink: 0 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto 1fr", gap: "6px 6px", alignItems: "center" }}>
-              <LegIcon n={sc.answered}    type="answered" />
-              <span style={{ fontSize: 11, color: "#222" }}>Answered</span>
-              <LegIcon n={sc.notAnswered} type="notans" />
-              <span style={{ fontSize: 11, color: "#222" }}>Not Answered</span>
-              <LegIcon n={sc.notVisited}  type="notvisit" />
-              <span style={{ fontSize: 11, color: "#222" }}>Not Visited</span>
-              <LegIcon n={sc.markedCount} type="marked" />
-              <span style={{ fontSize: 11, color: "#222" }}>Marked for Review</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 6, marginTop: 6 }}>
-              <LegIcon n={sc.answeredMarked} type="ansmarked" />
-              <span style={{ fontSize: 11, color: "#222", lineHeight: 1.4 }}>Answered &amp; Marked for Review (will also be evaluated)</span>
-            </div>
+          <div style={{ padding: "8px 12px 0", flexShrink: 0 }}>
+            <div style={{ fontWeight: "bold", fontSize: 15, color: "#222" }}>{currentSection?.name || "Section"}</div>
+            <div style={{ fontSize: 13.6, margin: "8px 0 8px", color: "#000" }}>Choose a Question</div>
           </div>
-
-          {/* Section title */}
-          <div style={{ background: C.sidebarTitle, color: "#fff", padding: "5px 10px", fontSize: 13, fontWeight: "bold", flexShrink: 0 }}>
-            {currentSection?.name || "Section"}
-          </div>
-          <div style={{ padding: "3px 10px 3px", fontSize: 11, color: "#444", background: "#fff", flexShrink: 0, borderBottom: "1px solid #ddd" }}>
-            Choose a Question
-          </div>
-
-          {/* Palette grid */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "8px 10px", background: C.sidebarBg }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6 }}>
+          <div style={{ flex: 1, overflowY: "auto", padding: "4px 14px 12px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "10px 8px" }}>
               {currentSection?.questions.map((q, idx) => (
                 <PaletteBtn
                   key={q.id}
@@ -1393,16 +1304,55 @@ export default function NormalTestInterface() {
               ))}
             </div>
           </div>
-
-          {/* Submit button at bottom of sidebar */}
-          <div style={{ padding: "8px", borderTop: "1px solid #ccc", background: "#fff", flexShrink: 0 }}>
-            <button onClick={() => setShowSubmitModal(true)} disabled={submitting || submitDisabled}
-              style={{ width: "100%", padding: "9px 0", background: C.secActive, border: "none", color: "#fff", fontSize: 14, fontWeight: "bold", cursor: "pointer", borderRadius: 2 }}>
-              {submitDisabled ? "Submit Disabled" : submitting ? "Submitting…" : "Submit"}
-            </button>
-          </div>
         </div>
       </div>
+
+      {/* ── FOOTER (full width) ── */}
+      <div style={{ background: "#fff", borderTop: "1px solid #c8c8c8", padding: "8px 14px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0, flexWrap: "wrap" }}>
+        <button onClick={markForReviewAndNext} style={{ ...ntaBtn, minWidth: 200 }}>Mark for Review &amp; Next</button>
+        <button onClick={clearResponse} style={{ ...ntaBtn, minWidth: 160 }}>Clear Response</button>
+        <button onClick={saveAndNext} style={{ ...ntaBlue, marginLeft: "auto" }}>Save &amp; Next</button>
+        <button onClick={() => setShowSubmitModal(true)} disabled={submitting || submitDisabled} style={{ ...ntaBlue, marginLeft: 40, opacity: submitting || submitDisabled ? 0.6 : 1, cursor: submitting || submitDisabled ? "not-allowed" : "pointer" }}>
+          {submitDisabled ? "Submit Disabled" : submitting ? "Submitting…" : "Submit"}
+        </button>
+      </div>
+
+      {/* ── INSTRUCTIONS / QUESTION PAPER POPUPS (view only) ── */}
+      {showInstructions && modalShell("Instructions", "Note that the timer is ticking while you read the instructions. Close this page to return to answering the questions.", () => setShowInstructions(false), (
+        <div style={{ padding: "0 24px", fontSize: 16, lineHeight: 1.9 }}>
+          <h3 style={{ fontSize: 22 }}>INSTRUCTIONS TO CANDIDATES</h3>
+          <h4 style={{ fontSize: 17 }}>GENERAL INSTRUCTIONS</h4>
+          <ol>
+            <li>Total duration of the paper is {testDuration} minutes.</li>
+            <li>The countdown timer in the top right corner of the screen displays the remaining time. When the timer reaches zero, the examination will end by itself and your answers will be submitted automatically.</li>
+            <li>The question palette shows the status of each question:</li>
+          </ol>
+          <div style={{ background: N.side, padding: 8, display: "flex", flexDirection: "column", gap: 8 }}>
+            {([["not-visited", "You have not visited the question yet."], ["not-answered", "You have not answered the question."], ["answered", "You have answered the question."], ["marked", "You have NOT answered the question, but have marked it for review."], ["answered-marked", "You have answered the question and marked it for review (it will also be evaluated)."]] as [string, string][]).map(([s, t], i) => (
+              <div key={s} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 14 }}><NtaBadge status={s} n={i + 1} w={40} h={38} fs={13} />{t}</div>
+            ))}
+          </div>
+        </div>
+      ))}
+      {showQuestionPaper && modalShell("Question Paper", "Note that the timer is ticking while you read the questions. Close this page to return to answering the questions.", () => setShowQuestionPaper(false), (
+        <div>
+          {(() => { let n = 0; return sections.map(sec => sec.questions.map(q => {
+            n++;
+            const opts: any[] = Array.isArray(q.options) ? q.options : [];
+            return (
+              <div key={q.id} style={{ display: "flex", padding: "10px 4px", borderBottom: "1px solid #ddd" }}>
+                <b style={{ minWidth: 48, fontSize: 16 }}>Q.{n})</b>
+                <div style={{ flex: 1, minWidth: 0, fontSize: 15 }}>
+                  <div style={{ fontWeight: "bold", fontSize: 12, color: "#555", marginBottom: 4 }}>{sec.name}</div>
+                  <LatexRenderer content={q.question_text} />
+                  {opts.map((o, k) => <div key={k} style={{ margin: "10px 6px", display: "flex", gap: 6 }}><span>{String.fromCharCode(65 + k)}.</span><LatexRenderer content={typeof o === "object" && o ? (o.text || o.label || "") : String(o)} /></div>)}
+                  <div style={{ fontStyle: "italic", fontSize: 13, marginTop: 8 }}>Marks for correct answer: <b style={{ color: "green" }}>{q.marks}</b> ; Negative Marks: <b style={{ color: "red" }}>{fmtNeg(q.negative_marks)}</b></div>
+                </div>
+              </div>
+            );
+          })); })()}
+        </div>
+      ))}
 
       {/* ── OFFLINE POPUP ── */}
       <AnimatePresence>
