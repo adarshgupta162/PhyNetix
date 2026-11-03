@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, type CSSProperties, type ReactNode } from "react";
+import { Fragment, useState, useEffect, useCallback, useRef, type CSSProperties, type ReactNode, type MouseEvent as RME } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WifiOff, Loader2 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -9,6 +9,7 @@ import { useProctoring } from "@/hooks/useProctoring";
 import FullscreenGuard from "@/components/test/FullscreenGuard";
 import AccessibilityToolbar from "@/components/test/AccessibilityToolbar";
 import { LatexRenderer } from "@/components/ui/latex-renderer";
+import "@/components/test/nta-test.css"; // exact NTA styles (scoped under .nta-root)
 
 /* ─── TYPES ─── */
 interface Question {
@@ -53,64 +54,35 @@ const C = {
   palPurple:    "#7b2fbf",
 };
 
-/* ─── NTA UI THEME ─── */
-const N = { header: "#363636", yellow: "#f4e91b", blue: "#157EB3", side: "#e5f6fd", line: "#c8c8c8", green: "#2e7d32", red: "#d32f2f" };
-
-const SHAPE: Record<string, { bg: string; color: string; clip?: string; br?: string; border?: string }> = {
-  "not-visited":     { bg: "linear-gradient(#fafafa,#d6d6d6)", color: "#444", br: "3px", border: "1px solid #9a9a9a" },
-  "not-answered":    { bg: "linear-gradient(#ff8a2b,#c62d0a)", color: "#fff", clip: "polygon(0 0,100% 0,100% 70%,50% 100%,0 70%)" },
-  "answered":        { bg: "linear-gradient(#8fd13f,#3f9a10)", color: "#fff", clip: "polygon(0 24%,24% 0,76% 0,100% 24%,100% 100%,0 100%)" },
-  "marked":          { bg: "radial-gradient(circle at 35% 30%,#9a6cc4,#5a2a86)", color: "#fff", br: "50%" },
-  "answered-marked": { bg: "radial-gradient(circle at 35% 30%,#9a6cc4,#5a2a86)", color: "#fff", br: "50%" },
+/* ─── NTA STATUS SPRITE CLASSES (defined in nta-test.css, from the real NTA page) ─── */
+const STATUS_CLASS: Record<string, string> = {
+  "answered": "_answered_1fufs_21",
+  "not-answered": "_notAnswered_1fufs_34",
+  "not-visited": "_notVisited_1fufs_5",
+  "marked": "_markedReview_1fufs_47",
+  "answered-marked": "_answeredReview_1fufs_62",
 };
+type LegendCounts = { answered: number; notAnswered: number; notVisited: number; marked: number; answeredMarked: number };
+type LegendPopupState = { key: string; left: number; top: number; arrowLeft: number; title?: string; wide?: boolean } | null;
 
-function NtaBadge({ status, n, w = 40, h = 38, fs = 14, current = false }: { status: string; n: number; w?: number; h?: number; fs?: number; current?: boolean }) {
-  const s = SHAPE[status] || SHAPE["not-visited"];
-  return (
-    <div style={{ position: "relative", width: w, height: h, flexShrink: 0, transform: current ? "scale(1.1)" : undefined, filter: current ? "brightness(1.12)" : undefined, transition: "transform .12s" }}>
-      <div style={{ position: "absolute", inset: 0, background: s.bg, clipPath: s.clip, borderRadius: s.br, border: s.border, boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", color: s.color, fontSize: fs, fontWeight: current ? 800 : 600, fontFamily: "Arial,sans-serif", userSelect: "none" }}>{n}</div>
-      {status === "answered-marked" && <span style={{ position: "absolute", right: -2, bottom: -2, width: 12, height: 12, background: "#43a047", border: "2px solid #fff", borderRadius: 3, boxSizing: "border-box" }} />}
-    </div>
-  );
-}
-
-/* ─── PALETTE BUTTON ─── */
-function PaletteBtn({ num, status, isCurrent, onClick }: { num: number; status: string; isCurrent?: boolean; onClick: () => void }) {
-  return <div onClick={onClick} style={{ cursor: "pointer", display: "flex", justifyContent: "center" }}><NtaBadge status={status} n={num} current={!!isCurrent} /></div>;
-}
-
-/* ─── LEGEND ICON ─── */
-function LegIcon({ n, type }: { n: number; type: "answered" | "notans" | "notvisit" | "marked" | "ansmarked" }) {
-  const map = { answered: "answered", notans: "not-answered", notvisit: "not-visited", marked: "marked", ansmarked: "answered-marked" } as const;
-  return <NtaBadge status={map[type]} n={n} w={32} h={30} fs={12} />;
-}
-
-function InfoDot({ light }: { light?: boolean }) {
-  return <span style={{ width: 18, height: 18, borderRadius: "50%", background: light ? "#fff" : N.blue, color: light ? N.blue : "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", fontStyle: "italic", fontFamily: "serif", flexShrink: 0, cursor: "pointer" }}>i</span>;
-}
-
-function HdrBtn({ color, glyph, label, onClick }: { color: string; glyph: string; label: string; onClick: () => void }) {
-  return (
-    <button onClick={onClick} style={{ background: "transparent", border: "none", color: "#fff", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, padding: 0 }}>
-      <span style={{ width: 18, height: 18, borderRadius: "50%", background: color, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: "bold" }}>{glyph}</span>{label}
-    </button>
-  );
-}
-
-/* ─── TOOLTIP POPUP ─── */
-function StatusTooltip({ counts, visible, title }: { counts: { answered: number; notAnswered: number; notVisited: number; marked: number; answeredMarked: number }; visible: boolean; title?: string }) {
-  if (!visible) return null;
+/* ─── LEGEND POPUP (opens when an "i" icon is clicked) ─── */
+function LegendPopup({ pos, counts }: { pos: NonNullable<LegendPopupState>; counts: LegendCounts }) {
   const rows: [string, number, string][] = [
-    ["answered", counts.answered, "Answered"], ["not-answered", counts.notAnswered, "Not Answered"], ["not-visited", counts.notVisited, "Not Visited"],
-    ["marked", counts.marked, "Marked for Review"], ["answered-marked", counts.answeredMarked, "Answered and Marked for Review (will also be evaluated)"],
+    ["answered", counts.answered, "Answered"],
+    ["not-answered", counts.notAnswered, "Not Answered"],
+    ["not-visited", counts.notVisited, "Not Visited"],
+    ["marked", counts.marked, "Marked for Review"],
+    ["answered-marked", counts.answeredMarked, "Answered and Marked for Review (will also be evaluated)"],
   ];
   return (
-    <div style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, zIndex: 9999, background: "#e5eff9", border: "1px solid #ccc", boxShadow: "0 4px 14px rgba(0,0,0,.22)", fontFamily: "Arial,sans-serif", color: "#000", minWidth: 280, maxWidth: 420 }}>
-      {title && <div style={{ background: "#fff", borderBottom: "1px solid #ccc", padding: "8px 12px", fontWeight: "bold", fontSize: 16, whiteSpace: "nowrap" }}>{title}</div>}
-      <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
+    <div data-legend-popup style={{ position: "fixed", left: pos.left, top: pos.top, zIndex: 1000000, background: "rgb(229, 239, 249)", border: "1px solid rgb(204,204,204)", boxShadow: "0 4px 14px rgba(0,0,0,.2)", fontFamily: "Arial, sans-serif", color: "#000", fontSize: 12, width: pos.wide ? 500 : 238, maxWidth: "96vw" }}>
+      <div style={{ position: "absolute", top: -6, left: pos.arrowLeft, width: 10, height: 10, background: "rgb(229, 239, 249)", borderLeft: "1px solid rgb(204,204,204)", borderTop: "1px solid rgb(204,204,204)", transform: "rotate(45deg)" }} />
+      {pos.title && <div style={{ background: "rgb(240,246,252)", borderBottom: "1px solid rgb(204,204,204)", padding: "6px 8px", fontWeight: "bold", fontSize: 13, whiteSpace: "nowrap" }}>{pos.title}</div>}
+      <div style={{ padding: "6px 8px 4px" }}>
         {rows.map(([st, v, label]) => (
-          <div key={st} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <NtaBadge status={st} n={v} w={52} h={48} fs={16} /><span style={{ fontSize: 14 }}>{label}</span>
+          <div key={st} style={{ display: "flex", alignItems: "center", minHeight: 50, marginBottom: 2 }}>
+            <span className={STATUS_CLASS[st]} style={{ paddingTop: 7, display: "inline-block" }}>{v}</span>
+            <span style={{ marginLeft: 6 }}>{label}</span>
           </div>
         ))}
       </div>
@@ -172,13 +144,21 @@ export default function NormalTestInterface() {
   const sessionAccessTokenRef = useRef<string | null>(null);
 
   // tooltip hover state
-  const [hoveredSectionTooltip, setHoveredSectionTooltip] = useState<string | null>(null);
+  const [legendPopup, setLegendPopup] = useState<LegendPopupState>(null);
   // NTA UI-only state (popups / collapsible instruction box)
   const [showInstructions, setShowInstructions]   = useState(false);
   const [showQuestionPaper, setShowQuestionPaper] = useState(false);
   const [showSecInstr, setShowSecInstr]           = useState(true);
   const [unlockDate, setUnlockDate]             = useState<string | null>((location.state as { unlockDate?: string | null } | null)?.unlockDate || null);
   const [showUnlockPopup, setShowUnlockPopup]   = useState(false);
+
+  // close the legend popup when clicking anywhere else
+  useEffect(() => {
+    if (!legendPopup) return;
+    const close = (e: MouseEvent) => { if (!(e.target as HTMLElement).closest("[data-legend-trigger],[data-legend-popup]")) setLegendPopup(null); };
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [legendPopup]);
 
   /* ════ API / BACKEND LOGIC — UNCHANGED ════ */
 
@@ -1053,7 +1033,7 @@ export default function NormalTestInterface() {
   }
 
   /* ════════════════════════════════════════════
-     SCREEN 4 — MAIN TEST (NTA interface)
+     SCREEN 4 — MAIN TEST  (markup mirrors the real NTA page; styles come from nta-test.css)
   ════════════════════════════════════════════ */
   const sc = getStatusCounts(currentSection ?? undefined);
   const activeSectionIndex = sections.findIndex(s => s.id === activeSection);
@@ -1061,275 +1041,372 @@ export default function NormalTestInterface() {
     ? sections.slice(0, activeSectionIndex).reduce((sum, s) => sum + s.questions.length, 0)
     : 0;
 
-  // NTA UI helpers (display only)
-  const secQs = currentSection?.questions ?? [];
-  const secMax = secQs.reduce((a, q) => a + (q.marks || 0), 0);
-  const qTypeLabel = isIntegerQuestion ? "Numerical" : isMultipleChoice ? "Multiple Correct" : "Single Correct";
+  /* display-only helpers (no logic / data is changed) */
+  const typeLabelOf = (q?: Question) =>
+    ["integer", "numerical"].includes(q?.question_type || "") ? "Numerical"
+    : ["multiple_choice", "multi"].includes(q?.question_type || "") || ["multiple_choice", "multi"].includes(q?.section_type || "") ? "Multiple Correct"
+    : "Single Correct";
+  const secLabel = (sec?: Section) => (sec ? `${sec.questions[0]?.subject || "General"} ${typeLabelOf(sec.questions[0])}` : "Section");
   const fmtNeg = (n?: number) => `-${Math.abs(n || 0).toFixed(1)}`;
-  const currentQuestionNo = currentQuestionIndex + 1 + sectionOffset;
-  const scrollQArea = (toBottom: boolean) => document.getElementById("nta-qarea")?.scrollTo({ top: toBottom ? 99999 : 0, behavior: "smooth" });
-  const ntaBtn: CSSProperties = { height: 46, padding: "0 18px", background: "#fff", border: "1px solid #c8c8c8", fontSize: 14, cursor: "pointer", color: "#222", fontFamily: "Arial,sans-serif" };
-  const ntaBlue: CSSProperties = { height: 46, padding: "0 30px", background: N.blue, border: `1px solid ${N.blue}`, color: "#fff", fontSize: 14, cursor: "pointer", fontFamily: "Arial,sans-serif" };
+  const qTypeLabel = typeLabelOf(currentQuestion);
+  const countsOf = (s?: Section): LegendCounts => { const c = getStatusCounts(s); return { answered: c.answered, notAnswered: c.notAnswered, notVisited: c.notVisited, marked: c.markedCount, answeredMarked: c.answeredMarked }; };
+  const cellCur: CSSProperties = { boxShadow: "rgba(240, 255, 255, 0.4) 0px 0px 0px 100px inset", fontWeight: 800 };
+
+  const openLegend = (e: RME, key: string, kind: "all" | "tab", title?: string) => {
+    e.stopPropagation();
+    if (legendPopup?.key === key) { setLegendPopup(null); return; }
+    const el = e.currentTarget as HTMLElement, r = el.getBoundingClientRect();
+    if (kind === "all") {
+      setLegendPopup({ key, title, left: r.left - 2, top: r.bottom + 6, arrowLeft: 10 });
+    } else {
+      const tabBottom = ((el.closest(".nav-link") as HTMLElement | null) || el).getBoundingClientRect().bottom;
+      const w = 500, cx = r.left + r.width / 2;
+      const left = Math.max(5, Math.min(cx - w / 2, window.innerWidth - w - 5));
+      setLegendPopup({ key, left, top: tabBottom + 22, arrowLeft: cx - left - 5, wide: true });
+    }
+  };
+
+  const sectionInstructions = (sec?: Section) => {
+    const q0 = sec?.questions[0];
+    const isInt = ["integer", "numerical"].includes(q0?.question_type || "");
+    const isMulti = typeLabelOf(q0) === "Multiple Correct";
+    const word = (n: number) => ({ 5: "FIVE", 10: "TEN", 15: "FIFTEEN", 20: "TWENTY", 25: "TWENTY FIVE", 30: "THIRTY" } as Record<number, string>)[n];
+    const n = sec?.questions.length || 0;
+    return (
+      <div style={{ padding: "12px 14px", fontSize: "clamp(13px, 2.8vw, 15px)", lineHeight: 1.55 }}>
+        <ul style={{ marginBottom: 12, paddingLeft: 18, listStyleType: "disc" }}>
+          <li style={{ marginBottom: 6 }}>This section contains <b>{word(n) ? `${word(n)} (${n})` : n}</b> questions.</li>
+          {isInt
+            ? <li style={{ marginBottom: 6 }}>Answer must be typed into the input box.</li>
+            : <li style={{ marginBottom: 6 }}>Each question has <b>4</b> options A, B, C, D. <b>{isMulti ? "ONE OR MORE" : "ONLY ONE"}</b> of these 4 options {isMulti ? "may be" : "is"} the correct answer.</li>}
+          <li style={{ marginBottom: 6 }}>For each question, choose the option corresponding to the correct answer.</li>
+        </ul>
+        <ul style={{ paddingLeft: 18, listStyleType: "disc" }}>
+          <li style={{ marginBottom: 6 }}></li>
+          <li>Answer to each question will be evaluated <u>according to the following marking scheme</u>:</li>
+          <li style={{ marginBottom: 6 }}>
+            <div style={{ marginLeft: 20 }}>
+              <div><i>Full Marks</i> : +{q0?.marks ?? 4} If <b>ONLY</b> the correct option is chosen</div>
+              <div><i>Zero Marks</i> : 0 If none of the options is chosen (i.e. the question is unanswered)</div>
+              <div><i>Negative Marks</i> : {-Math.abs(q0?.negative_marks ?? 1)} In all other cases.</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    );
+  };
+  const secMax = (sec?: Section) => (sec?.questions || []).reduce((a, q) => a + (q.marks || 0), 0);
+
   const modalShell = (title: string, note: string, onClose: () => void, body: ReactNode) => (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.55)", zIndex: 99998, display: "flex", justifyContent: "center", alignItems: "flex-start", paddingTop: 70 }}>
-      <div onClick={e => e.stopPropagation()} style={{ width: 748, maxWidth: "96vw", maxHeight: "calc(100vh - 100px)", background: "#fff", display: "flex", flexDirection: "column", fontFamily: "Arial,sans-serif" }}>
-        <div style={{ background: "#4285f4", color: "#fff", padding: "6px 10px", display: "flex", justifyContent: "space-between", fontWeight: "bold", fontSize: 17 }}>
-          <span>{title}</span><span onClick={onClose} style={{ fontWeight: 400, fontSize: 15, cursor: "pointer" }}>Close ✕</span>
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", zIndex: 1000001, display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <div onClick={e => e.stopPropagation()} style={{ width: 500, maxWidth: "96vw", maxHeight: "82vh", background: "#fff", display: "flex", flexDirection: "column", fontFamily: "Arial, sans-serif", color: "#000" }}>
+        <div style={{ background: "#4285f4", color: "#fff", padding: "4px 6px", display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: "bold", fontSize: 16 }}>
+          <span>{title}</span><span onClick={onClose} style={{ fontWeight: 400, fontSize: 14, cursor: "pointer" }}>Close ✕</span>
         </div>
-        <div style={{ overflowY: "auto", padding: "0 10px 14px" }}>
-          <p style={{ color: "#f00", fontSize: 20, lineHeight: 1.25, margin: "6px 0 10px" }}>{note}</p>{body}
+        <div style={{ overflowY: "auto", padding: "0 3px 10px" }}>
+          <p style={{ color: "#f00", fontSize: 19, lineHeight: 1.2, margin: "2px 2px 8px" }}>{note}</p>{body}
         </div>
       </div>
     </div>
   );
 
+  const kb: CSSProperties = { border: "1px solid #333", borderRadius: 4, background: "#ececec", font: "bold 15px Arial", cursor: "pointer", color: "#000", height: 35, padding: 0 };
+
   const testContent = (
-    <div data-test-content style={{ height: "100vh", display: "flex", flexDirection: "column", fontFamily: "Arial,sans-serif", fontSize: 13, overflow: "hidden", background: "#f5f5f5" }}>
+    <div className="nta-root" data-test-content style={{ minHeight: "100vh" }}>
 
       {/* ── HEADER ── */}
-      <div style={{ background: N.header, height: 34, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 14px", flexShrink: 0, gap: 12 }}>
-        <span style={{ color: N.yellow, fontSize: 16, textTransform: "uppercase", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{testName}</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
+      <div className="_top_header_cexgz_9" style={{ overflowX: "visible", whiteSpace: "normal" }}>
+        <div style={{ fontFamily: "Arial, sans-serif", whiteSpace: "normal", textOverflow: "clip", display: "inline", width: "auto", paddingRight: 0 }}>{testName.toUpperCase()}</div>
+        <div className="_header_right_controls_cexgz_21" style={{ display: "inline-flex" }}>
           <AccessibilityToolbar />
-          <HdrBtn color="#2f80ed" glyph="i" label="Instructions" onClick={() => setShowInstructions(true)} />
-          <HdrBtn color={C.palGreen} glyph="≡" label="Question Paper" onClick={() => setShowQuestionPaper(true)} />
+          <div className="_header_control_item_cexgz_27" style={{ fontFamily: "Arial, sans-serif" }} onClick={() => setShowInstructions(true)}>
+            <div className="_instruction_icon_cexgz_121"></div>
+            <span className="_instruction_text_cexgz_104" style={{ fontSize: 13, fontWeight: "normal" }}>Instructions</span>
+          </div>
+          <div className="_header_control_item_cexgz_27" style={{ fontFamily: "Arial, sans-serif" }} onClick={() => setShowQuestionPaper(true)}>
+            <div className="_questions_icon_cexgz_139"></div>
+            <span className="_questions_text_cexgz_89" style={{ fontSize: 13, fontWeight: "normal" }}>Question Paper</span>
+          </div>
         </div>
       </div>
 
-      {/* ── BODY ── */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0, position: "relative" }}>
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0, background: "#fff" }}>
-
-          {/* test-name tab */}
-          <div style={{ background: "#f5f5f5", padding: "8px 12px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
-            <div style={{ position: "relative" }} onMouseEnter={() => setHoveredSectionTooltip("__all")} onMouseLeave={() => setHoveredSectionTooltip(null)}>
-              <div style={{ background: N.blue, color: "#fff", padding: "7px 12px", borderRadius: 3, fontSize: 16, display: "flex", alignItems: "center", gap: 8, maxWidth: 230 }}>
-                <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{testName}</span><InfoDot light />
-              </div>
-              <div style={{ width: 0, height: 0, borderLeft: "7px solid transparent", borderRight: "7px solid transparent", borderTop: `7px solid ${N.blue}`, marginLeft: 22 }} />
-              {(() => { const a = getStatusCounts(); return <StatusTooltip title={testName} visible={hoveredSectionTooltip === "__all"} counts={{ answered: a.answered, notAnswered: a.notAnswered, notVisited: a.notVisited, marked: a.markedCount, answeredMarked: a.answeredMarked }} />; })()}
+      {/* ── STICKY: test-name pill + Sections / Time Left ── */}
+      <div className="sticky-top">
+        <div className="_dropdown_section_cexgz_33 hide_on_mobile" style={{ width: "75%" }}>
+          <div className="_questions_status_cexgz_380">
+            <div style={{ marginRight: 8, maxWidth: 150, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontWeight: "normal" }}>{testName}</div>
+            <div className="instruction-icon-wrapper" data-legend-trigger style={{ display: "inline-block", position: "relative" }} onClick={e => openLegend(e, "__all", "all", testName)}>
+              <div className="_instruction_icon_cexgz_121" style={{ cursor: "pointer" }}></div>
             </div>
-            <span style={{ color: "#777", fontSize: 14, paddingTop: 12 }}>▶</span>
           </div>
-
-          {/* Sections / Time Left */}
-          <div style={{ background: "#f5f5f5", borderBottom: "1px solid #ddd", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
-            <span style={{ color: "#6d6d6d", fontSize: 16 }}>Sections</span>
-            <span style={{ fontSize: 15, color: timeLeft < 300 ? "#cc0000" : "#363636" }}><b style={{ fontWeight: 400 }}>Time Left : </b>{formatTime(timeLeft)}</span>
+          <div className="_dropdown_arrow_cexgz_46"></div>
+        </div>
+        <div className="_section_time_row_cexgz_61 hide_on_mobile" style={{ width: "75%", fontFamily: "OpenSans-Regular, sans-serif", fontWeight: 400 }}>
+          <div style={{ color: "rgb(109, 109, 109)", fontSize: 16 }}>Sections</div>
+          <div className="d-flex gap-2 align-items-center">
+            <div><b style={{ color: timeLeft < 300 ? "#cc0000" : "rgb(54, 54, 54)", fontWeight: "normal", transition: "color 0.3s" }}>Time Left : <span className="px-1">{formatTime(timeLeft)}</span></b></div>
           </div>
+        </div>
+      </div>
 
-          {/* section tabs */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 8px", borderBottom: "1px solid #ddd", flexShrink: 0 }}>
-            <span style={{ color: "#555", fontSize: 12 }}>◀</span>
-            <div style={{ display: "flex", gap: 4, overflowX: "auto", flex: 1, scrollbarWidth: "none" }}>
-              {sections.map(sec => {
-                const act = activeSection === sec.id, c = getStatusCounts(sec);
-                return (
-                  <div key={sec.id} style={{ position: "relative", flexShrink: 0 }}>
-                    <button
-                      onClick={() => {
-                        const firstQ = sec.questions[0];
-                        const nextVisited = new Set(visitedQuestions);
-                        if (firstQ) nextVisited.add(firstQ.id);
-                        navigateWithoutSavingAnswer(() => {
-                          setActiveSection(sec.id);
-                          setCurrentQuestionIndex(0);
-                          if (firstQ) setVisitedQuestions(nextVisited);
-                        }, nextVisited);
-                      }}
-                      style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 12px", border: `1px solid ${act ? N.blue : "#d0d0d0"}`, background: act ? N.blue : "#fff", color: act ? "#fff" : N.blue, fontSize: 15, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "Arial,sans-serif" }}>
-                      {sec.name}
-                      <span onMouseEnter={e => { e.stopPropagation(); setHoveredSectionTooltip(sec.id); }} onMouseLeave={() => setHoveredSectionTooltip(null)}><InfoDot light={act} /></span>
-                    </button>
-                    <StatusTooltip visible={hoveredSectionTooltip === sec.id} counts={{ answered: c.answered, notAnswered: c.notAnswered, notVisited: c.notVisited, marked: c.markedCount, answeredMarked: c.answeredMarked }} />
-                  </div>
-                );
-              })}
-            </div>
-            <span style={{ color: "#555", fontSize: 12 }}>▶</span>
-          </div>
+      <div className="test-container container-fluid">
+        <div className="row" style={{ height: "100%", minHeight: "100vh", backgroundColor: "white" }}>
+          <div className="col-xxl-10 col-lg-9 col-md-12" style={{ paddingLeft: 0, paddingRight: 0 }}>
 
-          {/* question type + marks */}
-          <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 14px", borderBottom: "1px solid #ddd", fontSize: 13, color: "#444", flexShrink: 0 }}>
-            <span>Question Type: {qTypeLabel}</span>
-            <span>Marks for correct answer: <b style={{ color: "#1b7a1b", fontWeight: 400 }}>{currentQuestion?.marks ?? 0}</b> | Negative Marks: <b style={{ color: "#d00", fontWeight: 400 }}>{fmtNeg(currentQuestion?.negative_marks)}</b></span>
-          </div>
-
-          {/* question number */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 10px", borderBottom: "1px solid #ddd", flexShrink: 0 }}>
-            <span style={{ fontSize: 16, color: "#222" }}>Question No. {currentQuestionNo}</span>
-            <button onClick={() => scrollQArea(true)} style={{ width: 32, height: 32, borderRadius: "50%", background: N.blue, color: "#fff", border: "none", fontSize: 18, cursor: "pointer" }}>↓</button>
-          </div>
-
-          {/* scrollable question area */}
-          <div id="nta-qarea" style={{ flex: 1, overflowY: "auto", padding: "10px 14px 80px", position: "relative" }}>
-            <div style={{ border: "2px solid #000", maxWidth: 820, marginBottom: 14, fontSize: 14 }}>
-              <div onClick={() => setShowSecInstr(v => !v)} style={{ textAlign: "center", fontWeight: "bold", padding: "10px 30px", cursor: "pointer", position: "relative" }}>
-                {currentSection?.name} (Maximum Marks: {secMax})<span style={{ position: "absolute", right: 12 }}>{showSecInstr ? "⌃" : "⌄"}</span>
-              </div>
-              {showSecInstr && (
-                <div style={{ padding: "0 14px 10px", lineHeight: 1.6 }}>
-                  <ul style={{ paddingLeft: 18, margin: "0 0 8px", listStyle: "disc" }}>
-                    <li>This section contains <b>{secQs.length}</b> questions.</li>
-                    {isIntegerQuestion
-                      ? <li>Answer must be typed into the input box.</li>
-                      : <li>Each question has <b>4</b> options. <b>{isMultipleChoice ? "ONE OR MORE" : "ONLY ONE"}</b> of these options {isMultipleChoice ? "may be" : "is"} the correct answer.</li>}
-                    <li>Answer to each question will be evaluated <u>according to the following marking scheme</u>:</li>
-                  </ul>
-                  <div style={{ marginLeft: 36 }}>
-                    <div><i>Full Marks</i> : +{currentQuestion?.marks ?? 0} If <b>ONLY</b> the correct option is chosen</div>
-                    <div><i>Zero Marks</i> : 0 If none of the options is chosen (i.e. the question is unanswered)</div>
-                    {(currentQuestion?.negative_marks || 0) > 0 && <div><i>Negative Marks</i> : {fmtNeg(currentQuestion?.negative_marks)} In all other cases.</div>}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {currentQuestion?.paragraph_text && (
-              <div style={{ marginBottom: 14, padding: "10px 14px", background: "#fffde7", border: "1px solid #f0c040", fontSize: 14, lineHeight: 1.7 }}>
-                <LatexRenderer content={currentQuestion.paragraph_text} />
-                {currentQuestion.paragraph_image_urls?.map((img, i) => <img key={i} src={img} alt="" style={{ maxWidth: "min(100%, 420px)", maxHeight: 260, objectFit: "contain", marginTop: 6, display: "block" }} />)}
-              </div>
-            )}
-            {(() => {
-              const imgs = currentQuestion?.image_urls?.length ? currentQuestion.image_urls : currentQuestion?.image_url ? [currentQuestion.image_url] : [];
-              return imgs.length > 0 && <div style={{ marginBottom: 10 }}>{imgs.map((u, i) => <img key={i} src={u} alt="" style={{ maxWidth: "min(100%, 480px)", maxHeight: 320, objectFit: "contain", marginBottom: 6, display: "block" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />)}</div>;
-            })()}
-            {currentQuestion?.question_text && <div style={{ fontSize: 16, lineHeight: 1.8, color: "#000", marginBottom: 16 }}><LatexRenderer content={currentQuestion.question_text} /></div>}
-
-            {isIntegerQuestion ? (
-              <div style={{ width: 225, marginTop: 10 }}>
-                <input
-                  type="text" inputMode={isMobileDevice ? "none" : "decimal"} readOnly={isMobileDevice}
-                  value={typeof displayedCurrentAnswer === "string" ? displayedCurrentAnswer : ""}
-                  onChange={e => handleIntegerAnswer(e.target.value)}
-                  onClick={e => { const t = e.target as HTMLInputElement; setIntegerCursorPosition(Math.min(t.selectionStart ?? t.value.length, t.value.length)); }}
-                  onSelect={e => { const t = e.target as HTMLInputElement; setIntegerCursorPosition(Math.min(t.selectionStart ?? t.value.length, t.value.length)); }}
-                  style={{ width: "100%", height: 40, boxSizing: "border-box", border: "2px solid #000", borderRadius: 4, padding: "2px 8px", fontSize: 20, outline: "none", background: "#fff", color: "#000", display: "block" }}
-                />
-                <div style={{ background: "#f2f2f2", padding: "12px 0 8px", textAlign: "center", borderRadius: "0 0 6px 6px" }}>
-                  {(() => { const kb: CSSProperties = { height: 46, minWidth: 46, border: "1px solid #333", borderRadius: 6, background: "#e9e9e9", font: "bold 20px Arial", cursor: "pointer", color: "#000" }; return (<>
-                    <button type="button" onClick={handleIntegerKeypadBackspace} style={{ ...kb, padding: "0 10px" }}>Backspace</button>
-                    <div style={{ width: 168, margin: "10px auto 0", display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 6 }}>
-                      {["7", "8", "9", "4", "5", "6", "1", "2", "3", "0", ".", "-"].map(k => <button key={k} type="button" onClick={() => handleIntegerKeypadInsert(k)} style={kb}>{k}</button>)}
-                    </div>
-                    <div style={{ margin: "10px 0 8px" }}>
-                      <button type="button" onClick={() => moveIntegerCursor("left")} style={{ ...kb, padding: "0 10px", height: 40, marginRight: 8 }}>Left</button>
-                      <button type="button" onClick={() => moveIntegerCursor("right")} style={{ ...kb, padding: "0 10px", height: 40 }}>Right</button>
-                    </div>
-                    <button type="button" onClick={clearIntegerAnswer} style={{ ...kb, padding: "0 10px" }}>Clear All</button>
-                  </>); })()}
+            {/* mobile palette strip */}
+            <div className="custom_top_div mobile_only" style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <div style={{ flex: "1 1 auto", minWidth: 0 }}>
+                <div className="_scrollmenu_r2ptz_1">
+                  {currentSection?.questions.map((q, idx) => (
+                    <span key={q.id}><div className="_badge_div_1fufs_1">
+                      <span className={STATUS_CLASS[getQuestionStatus(q.id)]} style={{ paddingTop: 7, ...(currentQuestion?.id === q.id ? cellCur : {}) }}
+                        onClick={() => { const nv = new Set(visitedQuestions); nv.add(q.id); navigateWithoutSavingAnswer(() => { setCurrentQuestionIndex(idx); setVisitedQuestions(nv); }, nv); }}>{idx + 1 + sectionOffset}</span>
+                    </div></span>
+                  ))}
                 </div>
               </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                {options.map((opt, idx) => {
-                  const optStr = String(idx), cur = displayedCurrentAnswer;
-                  const selected = isMultipleChoice ? Array.isArray(cur) && cur.includes(optStr) : cur === optStr;
+            </div>
+
+            {/* section tabs */}
+            <div style={{ position: "relative" }}>
+              <div className="custom_tab nav" role="tablist" style={{ overflowX: "auto", whiteSpace: "nowrap", padding: "0px 30px 0px 25px", display: "flex", flexFlow: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                {sections.map(sec => {
+                  const act = activeSection === sec.id;
                   return (
-                    <label key={idx} style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" }} onClick={e => { e.preventDefault(); handleAnswer(idx); }}>
-                      <div style={{ width: 16, height: 16, marginTop: 5, flexShrink: 0, boxSizing: "border-box", borderRadius: isMultipleChoice ? 3 : "50%", border: `1px solid ${selected ? "#0b5cff" : "#767676"}`, background: selected ? "#0b5cff" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        {selected && <div style={{ width: 6, height: 6, borderRadius: isMultipleChoice ? 1 : "50%", background: "#fff" }} />}
-                      </div>
-                      <div style={{ flex: 1, fontSize: 16, lineHeight: 1.7, color: "#000" }}>
-                        <LatexRenderer content={opt.text} />
-                        {opt.image_url && <img src={opt.image_url} alt="" style={{ maxWidth: "min(100%, 360px)", maxHeight: 220, objectFit: "contain", marginTop: 6, display: "block" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />}
-                      </div>
-                    </label>
+                    <div key={sec.id} className="nav-item" style={{ display: "inline-block", flex: "0 0 auto", margin: 0 }}>
+                      <a role="tab" aria-selected={act} tabIndex={act ? 0 : -1} href="#" className={(act ? "custom-active-tab" : "custom-inactive-tab") + " nav-link" + (act ? " active" : "")}
+                        style={{ display: "inline-flex", flex: "0 0 auto", width: "auto", minWidth: "auto", justifyContent: "center", alignItems: "center", border: "1px solid rgb(211, 211, 211)", backgroundColor: act ? "rgb(55, 120, 189)" : "rgb(255, 255, 255)", color: act ? "rgb(255, 255, 255)" : "rgb(55, 120, 189)", padding: "5px 10px", margin: "6px 3px 3px", whiteSpace: "nowrap", fontSize: 14 }}
+                        onClick={ev => {
+                          ev.preventDefault();
+                          const firstQ = sec.questions[0];
+                          const nextVisited = new Set(visitedQuestions);
+                          if (firstQ) nextVisited.add(firstQ.id);
+                          navigateWithoutSavingAnswer(() => { setActiveSection(sec.id); setCurrentQuestionIndex(0); if (firstQ) setVisitedQuestions(nextVisited); }, nextVisited);
+                        }}>
+                        <div>{secLabel(sec)}</div>
+                        <div className="_instruction_icon_tab_cexgz_130" data-legend-trigger onClick={e => openLegend(e, sec.id, "tab")}></div>
+                      </a>
+                    </div>
                   );
                 })}
               </div>
-            )}
-            <button onClick={() => scrollQArea(false)} style={{ position: "fixed", right: 292, bottom: 76, width: 44, height: 44, borderRadius: "50%", background: N.blue, color: "#fff", border: "none", fontSize: 22, cursor: "pointer", zIndex: 50 }}>↑</button>
-          </div>
-        </div>
-
-        {/* edge tab — toggles palette */}
-        <button className="nta-edge-tab" onClick={() => setShowPalette(p => !p)} style={{ position: "absolute", top: "50%", right: showPalette ? 270 : 0, transform: "translateY(-50%)", width: 20, height: 62, background: "rgba(0,0,0,.97)", color: "rgba(255,255,255,.6)", border: "none", borderRadius: "5px 0 0 5px", cursor: "pointer", zIndex: 60, padding: 0 }}>{showPalette ? "›" : "‹"}</button>
-
-        {/* mobile palette button */}
-        <button onClick={() => setShowPalette(p => !p)} className="mobile-palette-toggle" style={{ display: "none", position: "fixed", bottom: 80, right: 10, zIndex: 9998, width: 40, height: 40, borderRadius: "50%", background: N.blue, border: "none", color: "#fff", fontSize: 11, fontWeight: "bold", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,.3)", alignItems: "center", justifyContent: "center" }}>{showPalette ? "✕" : "Q"}</button>
-        <style>{`
-          @media (max-width: 768px) {
-            .mobile-palette-toggle { display: flex !important; }
-            .nta-edge-tab { display: none !important; }
-            [data-test-content] { height: 100dvh !important; }
-            [data-test-content] button { touch-action: manipulation; }
-            .test-sidebar { position: fixed !important; top: 0 !important; right: 0 !important; bottom: 0 !important; z-index: 9997 !important; box-shadow: -4px 0 16px rgba(0,0,0,.25) !important; }
-          }
-        `}</style>
-
-        {/* ── SIDEBAR ── */}
-        <div className="test-sidebar" style={{ width: 270, background: N.side, borderLeft: `1px solid ${N.line}`, display: showPalette ? "flex" : "none", flexDirection: "column", flexShrink: 0, overflow: "hidden" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", padding: 15, borderBottom: `1px solid ${N.line}`, flexShrink: 0, gap: 12 }}>
-            <div style={{ width: 90, height: 90, border: `1px solid ${N.line}`, background: "#ddd", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              {studentAvatar ? <img data-a11y-preserve-img src={studentAvatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 44 }}>👤</span>}
+              <div className="scroll-arrow" style={{ position: "absolute", top: "50%", left: 0, transform: "translateY(-50%)", cursor: "pointer", width: 20, height: 40, display: "flex", alignItems: "center", justifyContent: "center", background: "rgb(255, 255, 255)", zIndex: 2 }}
+                onClick={() => document.querySelector(".nta-root .custom_tab")?.scrollBy({ left: -150, behavior: "smooth" })}>
+                <div style={{ width: 0, height: 0, borderTop: "6px solid transparent", borderBottom: "6px solid transparent", borderRight: "6px solid rgb(128, 128, 128)" }}></div>
+              </div>
+              <div className="scroll-arrow" style={{ position: "absolute", top: "50%", right: 0, transform: "translateY(-50%)", cursor: "pointer", width: 30, height: 40, display: "flex", alignItems: "center", justifyContent: "center", background: "rgb(255, 255, 255)", zIndex: 2 }}
+                onClick={() => document.querySelector(".nta-root .custom_tab")?.scrollBy({ left: 150, behavior: "smooth" })}>
+                <div style={{ width: 0, height: 0, borderTop: "6px solid transparent", borderBottom: "6px solid transparent", borderLeft: "6px solid rgb(128, 128, 128)" }}></div>
+              </div>
             </div>
-            <div style={{ fontSize: 16, marginTop: 4, color: "#000", wordBreak: "break-word" }}>{studentName}</div>
-          </div>
-          <div style={{ background: "#fff", padding: "10px 12px 6px", flexShrink: 0 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto 1fr", gap: "8px 8px", alignItems: "center", fontSize: 12.5, color: "#000" }}>
-              <LegIcon n={sc.answered} type="answered" /><span>Answered</span>
-              <LegIcon n={sc.notAnswered} type="notans" /><span>Not Answered</span>
-              <LegIcon n={sc.notVisited} type="notvisit" /><span>Not Visited</span>
-              <LegIcon n={sc.markedCount} type="marked" /><span>Marked for review</span>
+
+            {/* question container */}
+            <div className="_ques_container_cexgz_369" id="question-container" style={{ maxHeight: "calc(100dvh - 270px)", paddingBottom: 40, overflowY: "auto", position: "relative" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 15px", borderBottom: "1px solid rgb(224, 224, 224)", fontSize: 14, flexWrap: "nowrap", overflowX: "auto", whiteSpace: "nowrap", gap: 0 }}>
+                <div>Question Type: {qTypeLabel}</div>
+                <div style={{ fontSize: 14 }}>
+                  <span style={{ color: "rgb(109, 109, 109)" }}> Marks for correct answer:</span> <span style={{ color: "rgb(3, 128, 1)" }}>{currentQuestion?.marks ?? 0}</span> | <span style={{ color: "rgb(109, 109, 109)" }}>Negative Marks:</span> <span style={{ color: "rgb(174, 29, 22)" }}>{fmtNeg(currentQuestion?.negative_marks)}</span>
+                </div>
+              </div>
+              <div className="_top_row_cexgz_238" style={{ borderBottom: "1px solid rgb(200, 200, 200)" }}>
+                <div className="_question_text_cexgz_248" style={{ fontWeight: "normal", marginLeft: 10 }}>
+                  <span>Question No. {currentQuestionIndex + 1 + sectionOffset}<span className="ms-2 text-muted">#{currentQuestion?.id}</span></span>
+                </div>
+                <div className="_button_container_cexgz_252">
+                  <span onClick={() => document.getElementById("question-container")?.scrollTo({ top: 99999, behavior: "smooth" })}
+                    style={{ backgroundColor: "rgb(21, 126, 179)", cursor: "pointer", marginRight: 12, display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: "50%", userSelect: "none", marginBottom: 2 }}>
+                    <i className="fe fe-arrow-down" style={{ fontSize: 18, fontWeight: "bold", color: "rgb(255, 255, 255)" }}></i>
+                  </span>
+                </div>
+              </div>
+
+              {/* section instruction box */}
+              <div className="ms-md-3 ms-1" style={{ border: "2px solid rgb(51, 51, 51)", padding: 0, margin: "15px 8px", width: "75%", fontFamily: "Arial, sans-serif" }}>
+                <div className="accordion-trigger" onClick={() => setShowSecInstr(v => !v)} style={{ cursor: "pointer", padding: "12px 16px", fontSize: "clamp(14px, 3vw, 16px)", fontWeight: "bold", position: "relative", textAlign: "center", userSelect: "none", minHeight: 46, lineHeight: 1.4 }}>
+                  <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", display: "flex", alignItems: "center" }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={showSecInstr ? "m18 15-6-6-6 6" : "m6 9 6 6 6-6"} /></svg>
+                  </span>
+                  {secLabel(currentSection)} (Maximum Marks: {secMax(currentSection)})
+                </div>
+                <div id="instructionsCollapse" className={"collapse" + (showSecInstr ? " show" : "")}>{sectionInstructions(currentSection)}</div>
+              </div>
+
+              <div className="position-relative ps-md-3 ps-1" style={{ marginBottom: 100 }}>
+                {currentQuestion?.paragraph_text && (
+                  <div style={{ width: "75%", margin: "0 8px 14px", padding: "10px 14px", background: "#fffde7", border: "1px solid #f0c040", lineHeight: 1.7 }}>
+                    <LatexRenderer content={currentQuestion.paragraph_text} />
+                    {currentQuestion.paragraph_image_urls?.map((img, i) => <img key={i} src={img} alt="" style={{ maxWidth: "min(100%, 420px)", maxHeight: 260, objectFit: "contain", marginTop: 6, display: "block" }} />)}
+                  </div>
+                )}
+                <div className="_question_cexgz_89" style={{ width: "75%", margin: "0 8px", padding: 0, fontFamily: "Arial, sans-serif" }}>
+                  {currentQuestion?.question_text && <div><LatexRenderer content={currentQuestion.question_text} /></div>}
+                  {(() => {
+                    const imgs = currentQuestion?.image_urls?.length ? currentQuestion.image_urls : currentQuestion?.image_url ? [currentQuestion.image_url] : [];
+                    return imgs.length > 0 && <div style={{ marginTop: 10 }}>{imgs.map((u, i) => <img key={i} src={u} alt="" style={{ maxWidth: "min(100%, 480px)", maxHeight: 320, objectFit: "contain", marginBottom: 6, display: "block" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />)}</div>;
+                  })()}
+                </div>
+
+                <form className="_options_cexgz_284" id="option-form" onSubmit={e => e.preventDefault()} style={{ width: "75%", margin: "0 8px", padding: 0, fontFamily: "Arial, sans-serif" }}>
+                  {isIntegerQuestion ? (
+                    <div style={{ width: 150, marginTop: 14 }}>
+                      <input
+                        type="text" inputMode={isMobileDevice ? "none" : "decimal"} readOnly={isMobileDevice}
+                        value={typeof displayedCurrentAnswer === "string" ? displayedCurrentAnswer : ""}
+                        onChange={e => handleIntegerAnswer(e.target.value)}
+                        onClick={e => { const t = e.target as HTMLInputElement; setIntegerCursorPosition(Math.min(t.selectionStart ?? t.value.length, t.value.length)); }}
+                        onSelect={e => { const t = e.target as HTMLInputElement; setIntegerCursorPosition(Math.min(t.selectionStart ?? t.value.length, t.value.length)); }}
+                        style={{ width: "100%", height: 25, boxSizing: "border-box", border: "2px solid #000", borderRadius: 3, padding: "0 5px", fontSize: 15, outline: "none", background: "#fff", color: "#000", display: "block" }}
+                      />
+                      <div style={{ background: "#f4f4f4", padding: "9px 0 6px", textAlign: "center" }}>
+                        <button type="button" onClick={handleIntegerKeypadBackspace} style={{ ...kb, width: 95 }}>Backspace</button>
+                        <div style={{ width: 107, margin: "9px auto 0", display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 4 }}>
+                          {["7", "8", "9", "4", "5", "6", "1", "2", "3", "0", ".", "-"].map(k => <button key={k} type="button" onClick={() => handleIntegerKeypadInsert(k)} style={kb}>{k}</button>)}
+                        </div>
+                        <div style={{ margin: "9px 0 6px" }}>
+                          <button type="button" onClick={() => moveIntegerCursor("left")} style={{ ...kb, width: 40, marginRight: 6 }}>Left</button>
+                          <button type="button" onClick={() => moveIntegerCursor("right")} style={{ ...kb, width: 48 }}>Right</button>
+                        </div>
+                        <button type="button" onClick={clearIntegerAnswer} style={{ ...kb, width: 62 }}>Clear All</button>
+                      </div>
+                    </div>
+                  ) : (
+                    options.map((opt, idx) => {
+                      const optStr = String(idx), cur = displayedCurrentAnswer;
+                      const selected = isMultipleChoice ? Array.isArray(cur) && cur.includes(optStr) : cur === optStr;
+                      return (
+                        <div key={idx} className="col-xs-12 col-md-6 col-lg-4" style={{ width: "75%", padding: 0, margin: 0 }}>
+                          <label className="_option_labels_cexgz_292">
+                            <input type={isMultipleChoice ? "checkbox" : "radio"} name={`selected-${currentQuestion?.id}`} autoComplete="off" checked={selected} onChange={() => handleAnswer(idx)} />
+                            <span className="_option_text_cexgz_300">
+                              <div>
+                                <LatexRenderer content={opt.text} />
+                                {opt.image_url && <img src={opt.image_url} alt="" style={{ maxWidth: "min(100%, 360px)", maxHeight: 220, objectFit: "contain", marginTop: 6, display: "block" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />}
+                              </div>
+                            </span>
+                          </label>
+                        </div>
+                      );
+                    })
+                  )}
+
+                  {/* footer actions */}
+                  <div className="_footer_cexgz_304" style={{ position: "fixed", left: 0, bottom: 0, width: "100%", backgroundColor: "rgb(255, 255, 255)", zIndex: 1000 }}>
+                    <div className="row">
+                      <div className="d-flex justify-content-between justify-content-md-start col-md-7 col-12">
+                        <button type="button" className="_button_transparent_cexgz_165 order-md-1 order-2 btn btn-primary" style={{ fontFamily: "Arial, sans-serif" }} onClick={markForReviewAndNext}>Mark for Review &amp; Next</button>
+                        <button type="button" className="_button_transparent_cexgz_165 order-md-2 order-1 btn btn-primary" style={{ fontFamily: "Arial, sans-serif" }} onClick={clearResponse}>Clear Response</button>
+                      </div>
+                      <div className="d-flex justify-content-between justify-content-md-around col-md-5 col-12">
+                        <button type="button" className="_button_save_cexgz_203 me-md-4 btn btn-primary" style={{ order: 1, marginLeft: "-16rem" }} onClick={saveAndNext}>Save &amp; Next</button>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, fontSize: 12.5, color: "#000" }}>
-              <LegIcon n={sc.answeredMarked} type="ansmarked" /><span>Answered and Marked for Review (will also be evaluated)</span>
-            </div>
           </div>
-          <div style={{ padding: "8px 12px 0", flexShrink: 0 }}>
-            <div style={{ fontWeight: "bold", fontSize: 15, color: "#222" }}>{currentSection?.name || "Section"}</div>
-            <div style={{ fontSize: 13.6, margin: "8px 0 8px", color: "#000" }}>Choose a Question</div>
-          </div>
-          <div style={{ flex: 1, overflowY: "auto", padding: "4px 14px 12px" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "10px 8px" }}>
-              {currentSection?.questions.map((q, idx) => (
-                <PaletteBtn
-                  key={q.id}
-                  num={idx + 1 + sectionOffset}
-                  status={getQuestionStatus(q.id)}
-                  isCurrent={currentQuestion?.id === q.id}
-                  onClick={() => {
-                    const nextVisited = new Set(visitedQuestions);
-                    nextVisited.add(q.id);
-                    navigateWithoutSavingAnswer(() => {
-                      setCurrentQuestionIndex(idx);
-                      setVisitedQuestions(nextVisited);
-                    }, nextVisited);
-                    // Auto-close palette on mobile after selecting
-                    if (window.innerWidth <= 768) setShowPalette(false);
-                  }}
-                />
-              ))}
+
+          {/* ── SIDEBAR ── */}
+          <div className="d-none d-lg-block col-xxl-2 col-lg-3" style={{ paddingLeft: 0, paddingRight: 0, zIndex: 1000, ...(showPalette ? {} : { display: "none" }) }}>
+            <div className="container-fluid" style={{ padding: 0, position: "relative", margin: "-90px 0px 0px", height: "100%", borderLeft: "1px solid rgb(200, 200, 200)", backgroundColor: "rgb(229, 246, 253)", color: "rgb(0, 0, 0)" }}>
+              <button type="button" className="d-none d-lg-flex align-items-center justify-content-center btn btn-primary" onClick={() => setShowPalette(false)}
+                style={{ width: 20, height: 62, position: "absolute", top: "50%", left: -20, right: "auto", transform: "translateY(-50%)", borderRadius: "5px 0px 0px 5px", backgroundColor: "rgba(0, 0, 0, 0.973)", border: "1px solid rgba(200, 200, 200, 0.333)", color: "rgba(255, 255, 255, 0.392)", padding: 0, zIndex: 1000 }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: -2 }}><path d="m9 18 6-6-6-6" /></svg>
+              </button>
+              <div className="d-md-block" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", padding: 15, borderBottom: "1px solid rgb(200, 200, 200)", color: "rgb(0, 0, 0)", flexShrink: 0 }}>
+                  <img src={studentAvatar || "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="90" height="90"><rect width="90" height="90" fill="#dcdcdc"/><circle cx="45" cy="34" r="16" fill="#aaa"/><path d="M12 90c0-24 15-34 33-34s33 10 33 34z" fill="#aaa"/></svg>')} alt="user-profile" data-a11y-preserve-img className="no-invert" width={90} height={90} style={{ width: 90, height: 90, border: "1px solid rgb(200, 200, 200)", marginRight: 12, filter: "none", objectFit: "cover" }} />
+                  <div style={{ fontSize: 16, marginTop: 4 }}>{studentName}</div>
+                </div>
+
+                <div style={{ padding: "0px 12px", backgroundColor: "white", flexShrink: 0 }}>
+                  <div className="row"><div className="col">
+                    <div className="row" style={{ marginTop: "2%", marginBottom: "4%", alignItems: "center", display: "flex", flexWrap: "wrap" }}>
+                      {([["answered", sc.answered, "Answered"], ["not-answered", sc.notAnswered, "Not Answered"]] as [string, number, string][]).map(([st, v, label]) => (
+                        <Fragment key={st}>
+                          <div className="col-md-2 col-3" style={{ marginBottom: 6 }}><div className="_badge_div_1fufs_1"><span className={STATUS_CLASS[st]} style={{ paddingTop: 7, transform: "scale(0.65)", transformOrigin: "center center", display: "inline-block", marginLeft: -4 }}>{v}</span></div></div>
+                          <div className="col-md-4 col-9" style={{ fontFamily: "Arial, sans-serif" }}><div className="_badge_ins_cexgz_148" style={{ color: "black" }}>{label}</div></div>
+                        </Fragment>
+                      ))}
+                    </div>
+                    <div className="row" style={{ marginBottom: "3%", alignItems: "center", display: "flex", flexWrap: "wrap" }}>
+                      <div className="col-md-2 col-3" style={{ marginBottom: 6 }}><div className="_badge_div_1fufs_1"><span className={STATUS_CLASS["not-visited"]} style={{ paddingTop: 7, transform: "scale(0.65)", transformOrigin: "center center", display: "inline-block", marginLeft: -4 }}>{sc.notVisited}</span></div></div>
+                      <div className="col-md-4 col-9" style={{ fontFamily: "Arial, sans-serif" }}><div className="_badge_ins_cexgz_148" style={{ color: "black" }}>Not Visited</div></div>
+                      <div className="col-md-2 col-3" style={{ marginBottom: 6 }}><div className="_badge_div_1fufs_1"><span className={STATUS_CLASS["marked"]} style={{ paddingTop: 7, transform: "scale(0.65)", transformOrigin: "center center", display: "inline-block", marginLeft: -4 }}>{sc.markedCount}</span></div></div>
+                      <div className="col-md-4 col-9" style={{ fontFamily: "Arial, sans-serif" }}><div className="_badge_ins_cexgz_148" style={{ color: "black" }}>Marked <span style={{ whiteSpace: "nowrap" }}>for review</span></div></div>
+                    </div>
+                    <div className="row" style={{ marginBottom: "3%", alignItems: "center", display: "flex", flexWrap: "wrap" }}>
+                      <div className="col-md-2 col-3" style={{ marginBottom: 6 }}><div className="_badge_div_1fufs_1"><span className={STATUS_CLASS["answered-marked"]} style={{ paddingTop: 7, transform: "scale(0.65)", transformOrigin: "center center", display: "inline-block", marginLeft: -4 }}>{sc.answeredMarked}</span></div></div>
+                      <div className="col-md-9 col-9" style={{ fontFamily: "Arial, sans-serif" }}><div className="_badge_ins_cexgz_148" style={{ color: "black" }}>Answered and Marked for Review (will also be evaluated)</div></div>
+                    </div>
+                  </div></div>
+                </div>
+
+                <div style={{ padding: "0px 12px", flexShrink: 0, backgroundColor: "rgb(229, 246, 253)" }}>
+                  <div className="row"><span className="_small_header_cexgz_153">{secLabel(currentSection)}</span></div>
+                  <div className="row" style={{ marginTop: "3%", marginBottom: "5%" }}><span style={{ fontSize: "0.85rem" }}>Choose a Question</span></div>
+                </div>
+
+                <div style={{ padding: "0px 12px", flex: "1 1 0%", overflowY: "auto", maxHeight: "max(138px, calc(100dvh - 500px))", backgroundColor: "rgb(229, 246, 253)" }}>
+                  <div className="_right_section_mid_cexgz_444 row">
+                    <div className="container-fluid" style={{ paddingLeft: "4%", paddingRight: "4%" }}>
+                      <div className="g-0 row">
+                        {currentSection?.questions.map((q, idx) => (
+                          <div key={q.id} className="col-xl-3 col-lg-3 col-md-3 col-4">
+                            <div className="_badge_div_1fufs_1">
+                              <span className={STATUS_CLASS[getQuestionStatus(q.id)]}
+                                style={{ paddingTop: 7, marginBottom: "7%", transform: "scale(0.9)", transformOrigin: "center center", display: "inline-block", marginLeft: -4, ...(currentQuestion?.id === q.id ? cellCur : {}) }}
+                                onClick={() => {
+                                  const nextVisited = new Set(visitedQuestions);
+                                  nextVisited.add(q.id);
+                                  navigateWithoutSavingAnswer(() => { setCurrentQuestionIndex(idx); setVisitedQuestions(nextVisited); }, nextVisited);
+                                  if (window.innerWidth <= 768) setShowPalette(false);
+                                }}>{idx + 1 + sectionOffset}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── FOOTER (full width) ── */}
-      <div style={{ background: "#fff", borderTop: "1px solid #c8c8c8", padding: "8px 14px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0, flexWrap: "wrap" }}>
-        <button onClick={markForReviewAndNext} style={{ ...ntaBtn, minWidth: 200 }}>Mark for Review &amp; Next</button>
-        <button onClick={clearResponse} style={{ ...ntaBtn, minWidth: 160 }}>Clear Response</button>
-        <button onClick={saveAndNext} style={{ ...ntaBlue, marginLeft: "auto" }}>Save &amp; Next</button>
-        <button onClick={() => setShowSubmitModal(true)} disabled={submitting || submitDisabled} style={{ ...ntaBlue, marginLeft: 40, opacity: submitting || submitDisabled ? 0.6 : 1, cursor: submitting || submitDisabled ? "not-allowed" : "pointer" }}>
-          {submitDisabled ? "Submit Disabled" : submitting ? "Submitting…" : "Submit"}
+      {/* sidebar re-open tab (only when the palette is collapsed) */}
+      {!showPalette && (
+        <button type="button" className="d-none d-lg-flex align-items-center justify-content-center btn btn-primary" onClick={() => setShowPalette(true)}
+          style={{ width: 20, height: 62, position: "fixed", top: "50%", right: 0, transform: "translateY(-50%)", borderRadius: "5px 0px 0px 5px", backgroundColor: "rgba(0, 0, 0, 0.973)", border: "1px solid rgba(200, 200, 200, 0.333)", color: "rgba(255, 255, 255, 0.392)", padding: 0, zIndex: 1000 }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: -2 }}><path d="m15 18-6-6 6-6" /></svg>
         </button>
-      </div>
+      )}
+
+      {/* Submit + footer divider (fixed, as on the NTA page) */}
+      <button type="button" className="_button_save_cexgz_203 me-md-5 btn btn-primary" onClick={() => setShowSubmitModal(true)} disabled={submitting || submitDisabled}
+        style={{ backgroundColor: "rgb(21, 126, 179)", borderColor: "rgb(21, 126, 179)", fontFamily: "Arial, sans-serif", zIndex: 1020, position: "fixed", bottom: "0vh", right: "0.6vw", order: 2 }}>
+        {submitDisabled ? "Submit Disabled" : submitting ? "Submitting…" : "Submit"}
+      </button>
+      <div style={{ position: "fixed", bottom: 76, left: 0, width: "100%", height: 1, backgroundColor: "rgb(200, 200, 200)", zIndex: 1000 }}></div>
+
+      {/* legend popup */}
+      {legendPopup && <LegendPopup pos={legendPopup} counts={legendPopup.key === "__all" ? countsOf() : countsOf(sections.find(s => s.id === legendPopup.key))} />}
 
       {/* ── INSTRUCTIONS / QUESTION PAPER POPUPS (view only) ── */}
       {showInstructions && modalShell("Instructions", "Note that the timer is ticking while you read the instructions. Close this page to return to answering the questions.", () => setShowInstructions(false), (
         <div style={{ padding: "0 24px", fontSize: 16, lineHeight: 1.9 }}>
-          <h3 style={{ fontSize: 22 }}>INSTRUCTIONS TO CANDIDATES</h3>
-          <h4 style={{ fontSize: 17 }}>GENERAL INSTRUCTIONS</h4>
-          <ol>
+          <h3 style={{ fontSize: 20, fontWeight: "bold", margin: "16px 0 12px" }}>INSTRUCTIONS TO CANDIDATES</h3>
+          <h4 style={{ fontSize: 15, fontWeight: "bold" }}>GENERAL INSTRUCTIONS</h4>
+          <ol style={{ paddingLeft: 20 }}>
             <li>Total duration of the paper is {testDuration} minutes.</li>
-            <li>The countdown timer in the top right corner of the screen displays the remaining time. When the timer reaches zero, the examination will end by itself and your answers will be submitted automatically.</li>
+            <li>The on-screen computer clock will be set at the server. The countdown timer in the top right corner of the computer screen will display the remaining time (in minutes) available for you to complete the examination. When the timer reaches zero, the examination will end by itself automatically. You will not be required to end or submit the answers of examination.</li>
             <li>The question palette shows the status of each question:</li>
           </ol>
-          <div style={{ background: N.side, padding: 8, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ background: "rgb(229, 246, 253)", padding: 8 }}>
             {([["not-visited", "You have not visited the question yet."], ["not-answered", "You have not answered the question."], ["answered", "You have answered the question."], ["marked", "You have NOT answered the question, but have marked it for review."], ["answered-marked", "You have answered the question and marked it for review (it will also be evaluated)."]] as [string, string][]).map(([s, t], i) => (
-              <div key={s} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 14 }}><NtaBadge status={s} n={i + 1} w={40} h={38} fs={13} />{t}</div>
+              <div key={s} style={{ display: "flex", alignItems: "center", fontSize: 13, minHeight: 50 }}><span className={STATUS_CLASS[s]} style={{ paddingTop: 7, display: "inline-block" }}>{i + 1}</span><span style={{ marginLeft: 8 }}>{t}</span></div>
             ))}
           </div>
         </div>
@@ -1340,13 +1417,16 @@ export default function NormalTestInterface() {
             n++;
             const opts: any[] = Array.isArray(q.options) ? q.options : [];
             return (
-              <div key={q.id} style={{ display: "flex", padding: "10px 4px", borderBottom: "1px solid #ddd" }}>
-                <b style={{ minWidth: 48, fontSize: 16 }}>Q.{n})</b>
-                <div style={{ flex: 1, minWidth: 0, fontSize: 15 }}>
-                  <div style={{ fontWeight: "bold", fontSize: 12, color: "#555", marginBottom: 4 }}>{sec.name}</div>
+              <div key={q.id} style={{ display: "flex", padding: "8px 4px", borderBottom: "1px solid #ddd" }}>
+                <b style={{ minWidth: 40, fontSize: 15, marginTop: 6 }}>Q.{n})</b>
+                <div style={{ flex: 1, minWidth: 0, fontSize: 14 }}>
+                  <div style={{ border: "2px solid #000", margin: "4px 0 8px" }}>
+                    <div style={{ textAlign: "center", fontWeight: "bold", padding: "8px 10px" }}>{secLabel(sec)} (Maximum Marks: {secMax(sec)})</div>
+                    {sectionInstructions(sec)}
+                  </div>
                   <LatexRenderer content={q.question_text} />
                   {opts.map((o, k) => <div key={k} style={{ margin: "10px 6px", display: "flex", gap: 6 }}><span>{String.fromCharCode(65 + k)}.</span><LatexRenderer content={typeof o === "object" && o ? (o.text || o.label || "") : String(o)} /></div>)}
-                  <div style={{ fontStyle: "italic", fontSize: 13, marginTop: 8 }}>Marks for correct answer: <b style={{ color: "green" }}>{q.marks}</b> ; Negative Marks: <b style={{ color: "red" }}>{fmtNeg(q.negative_marks)}</b></div>
+                  <div style={{ fontStyle: "italic", fontSize: 13, marginTop: 10 }}>Question Type: <b>{typeLabelOf(q)}</b> ; Marks for correct answer: <b style={{ color: "green" }}>{q.marks}</b> ; Negative Marks: <b style={{ color: "red" }}>{fmtNeg(q.negative_marks)}</b></div>
                 </div>
               </div>
             );
