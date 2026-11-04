@@ -152,6 +152,15 @@ export default function NormalTestInterface() {
   const [unlockDate, setUnlockDate]             = useState<string | null>((location.state as { unlockDate?: string | null } | null)?.unlockDate || null);
   const [showUnlockPopup, setShowUnlockPopup]   = useState(false);
 
+  // NTA layout: the page itself never scrolls — only the question area does
+  useEffect(() => {
+    if (currentScreen !== 4) return;
+    const html = document.documentElement, body = document.body;
+    const prev = [html.style.overflow, body.style.overflow];
+    html.style.overflow = "hidden"; body.style.overflow = "hidden";
+    return () => { html.style.overflow = prev[0]; body.style.overflow = prev[1]; };
+  }, [currentScreen]);
+
   // close the legend popup when clicking anywhere else
   useEffect(() => {
     if (!legendPopup) return;
@@ -475,6 +484,8 @@ export default function NormalTestInterface() {
       payload: { question_index: currentQuestionIndex + 1, section_id: activeSection },
     });
   }, [activeSection, currentQuestion?.subject, currentQuestionId, currentQuestionIndex, currentSection?.name, proctoring.session?.id]);
+
+  useEffect(() => { setShowSecInstr(true); }, [currentQuestionId]); // instruction box is open on every question
 
   useEffect(() => {
     if (!proctoring.session?.id || !currentSection?.name) return;
@@ -1114,7 +1125,7 @@ export default function NormalTestInterface() {
   const kb: CSSProperties = { border: "1px solid #333", borderRadius: 4, background: "#ececec", font: "bold 15px Arial", cursor: "pointer", color: "#000", height: 35, padding: 0 };
 
   const testContent = (
-    <div className="nta-root" data-test-content style={{ minHeight: "100vh" }}>
+    <div className="nta-root" data-test-content style={{ height: "100dvh", overflow: "hidden" }}>
 
       {/* ── HEADER ── */}
       <div className="_top_header_cexgz_9" style={{ overflowX: "visible", whiteSpace: "normal" }}>
@@ -1203,7 +1214,7 @@ export default function NormalTestInterface() {
             </div>
 
             {/* question container */}
-            <div className="_ques_container_cexgz_369" id="question-container" style={{ maxHeight: "calc(100dvh - 270px)", paddingBottom: 40, overflowY: "auto", position: "relative" }}>
+            <div className="_ques_container_cexgz_369" id="question-container" style={{ maxHeight: "calc(100dvh - 270px)", paddingBottom: 40, overflowY: "auto", overscrollBehavior: "contain", position: "relative" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 15px", borderBottom: "1px solid rgb(224, 224, 224)", fontSize: 14, flexWrap: "nowrap", overflowX: "auto", whiteSpace: "nowrap", gap: 0 }}>
                 <div>Question Type: {qTypeLabel}</div>
                 <div style={{ fontSize: 14 }}>
@@ -1400,7 +1411,7 @@ export default function NormalTestInterface() {
         <div style={{ padding: "0 24px", fontSize: 16, lineHeight: 1.9 }}>
           <h3 style={{ fontSize: 20, fontWeight: "bold", margin: "16px 0 12px" }}>INSTRUCTIONS TO CANDIDATES</h3>
           <h4 style={{ fontSize: 15, fontWeight: "bold" }}>GENERAL INSTRUCTIONS</h4>
-          <ol style={{ paddingLeft: 20 }}>
+          <ol style={{ paddingLeft: 20, listStyle: "decimal" }}>
             <li>Total duration of the paper is {testDuration} minutes.</li>
             <li>The on-screen computer clock will be set at the server. The countdown timer in the top right corner of the computer screen will display the remaining time (in minutes) available for you to complete the examination. When the timer reaches zero, the examination will end by itself automatically. You will not be required to end or submit the answers of examination.</li>
             <li>The question palette shows the status of each question:</li>
