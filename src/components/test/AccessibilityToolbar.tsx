@@ -12,6 +12,7 @@ const ARROW = (s: number) =>
   `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24"><path d="M3 2l7 19 3-8 8-3z" fill="#000" stroke="#fff" stroke-width="1.5"/></svg>`)}") 2 2, auto`;
 
 const GLOBAL_CSS = `
+.nta-root.dark-theme .nta-a11y-panel svg { filter: none !important; }
 html[data-nta-font="0"] #question-container { zoom: 0.9; }
 html[data-nta-font="2"] #question-container { zoom: 1.2; }
 html[data-nta-cursor="1"], html[data-nta-cursor="1"] * { cursor: ${ARROW(32)} !important; }
@@ -40,15 +41,15 @@ function Circle({ selected, onClick, children, label }: { selected: boolean; onC
 }
 
 const Arrow = ({ s, fill }: { s: number; fill: string }) => (
-  <svg width={s} height={s} viewBox="0 0 24 24"><path d="M3 2l7 19 3-8 8-3z" fill={fill} stroke="#000" strokeWidth="1.6" strokeLinejoin="round" /></svg>
+  <svg width={s} height={s} viewBox="0 0 24 24" style={{ filter: "none" }}><path d="M3 2l7 19 3-8 8-3z" fill={fill} stroke="#000" strokeWidth="1.6" strokeLinejoin="round" /></svg>
 );
 const Sun = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#222" strokeWidth="1.7" strokeLinecap="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#222" strokeWidth="1.7" strokeLinecap="round" style={{ filter: "none" }}>
     <circle cx="12" cy="12" r="4" />{[0, 45, 90, 135, 180, 225, 270, 315].map(a => <line key={a} x1="12" y1="2.5" x2="12" y2="5" transform={`rotate(${a} 12 12)`} />)}
   </svg>
 );
 const Moon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#222" strokeWidth="1.9" strokeLinejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#222" strokeWidth="1.9" strokeLinejoin="round" style={{ filter: "none" }}><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>
 );
 
 export default function AccessibilityToolbar() {
@@ -149,7 +150,7 @@ export default function AccessibilityToolbar() {
       </div>
 
       {open && (
-        <div ref={panelRef} style={{ position: "fixed", top: 80, right: 20, width: 444, maxWidth: "96vw", background: "rgb(243,243,243)", boxShadow: "0 4px 16px rgba(0,0,0,.28)", borderRadius: 3, padding: "20px 20px 20px", boxSizing: "border-box", zIndex: 1000002, fontFamily: "Arial, sans-serif", color: "#333" }}>
+        <div ref={panelRef} className="nta-a11y-panel" style={{ position: "fixed", top: 80, right: 20, width: 444, maxWidth: "96vw", background: "rgb(243,243,243)", boxShadow: "0 4px 16px rgba(0,0,0,.28)", borderRadius: 3, padding: "20px 20px 20px", boxSizing: "border-box", zIndex: 1000002, fontFamily: "Arial, sans-serif", color: "#333", filter: "none" }}>
           <div style={{ textAlign: "center", fontSize: 19, color: "#333", margin: "0 0 17px", lineHeight: "28px" }}>Accessibility Adjustments</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <div style={card}>
