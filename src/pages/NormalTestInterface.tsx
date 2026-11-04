@@ -81,7 +81,7 @@ function LegendPopup({ pos, counts }: { pos: NonNullable<LegendPopupState>; coun
       <div style={{ padding: "6px 8px 4px" }}>
         {rows.map(([st, v, label]) => (
           <div key={st} style={{ display: "flex", alignItems: "center", minHeight: 50, marginBottom: 2 }}>
-            <span className={STATUS_CLASS[st]} style={{ paddingTop: 7, display: "inline-block" }}>{v}</span>
+            <span className={STATUS_CLASS[st]} style={{ paddingTop: 7, display: "inline-block", flexShrink: 0 }}>{v}</span>
             <span style={{ marginLeft: 6 }}>{label}</span>
           </div>
         ))}
@@ -1050,6 +1050,7 @@ export default function NormalTestInterface() {
   const fmtNeg = (n?: number) => `-${Math.abs(n || 0).toFixed(1)}`;
   const qTypeLabel = typeLabelOf(currentQuestion);
   const countsOf = (s?: Section): LegendCounts => { const c = getStatusCounts(s); return { answered: c.answered, notAnswered: c.notAnswered, notVisited: c.notVisited, marked: c.markedCount, answeredMarked: c.answeredMarked }; };
+  const wq = showPalette ? "75%" : "56.25%"; // question blocks keep the same pixel width when the palette is collapsed
   const cellCur: CSSProperties = { boxShadow: "rgba(240, 255, 255, 0.4) 0px 0px 0px 100px inset", fontWeight: 800 };
 
   const openLegend = (e: RME, key: string, kind: "all" | "tab", title?: string) => {
@@ -1057,7 +1058,7 @@ export default function NormalTestInterface() {
     if (legendPopup?.key === key) { setLegendPopup(null); return; }
     const el = e.currentTarget as HTMLElement, r = el.getBoundingClientRect();
     if (kind === "all") {
-      setLegendPopup({ key, title, left: r.left - 2, top: r.bottom + 6, arrowLeft: 10 });
+      setLegendPopup({ key, title, left: r.left + 9, top: r.bottom + 6, arrowLeft: -2 });
     } else {
       const tabBottom = ((el.closest(".nav-link") as HTMLElement | null) || el).getBoundingClientRect().bottom;
       const w = 500, cx = r.left + r.width / 2;
@@ -1082,7 +1083,7 @@ export default function NormalTestInterface() {
           <li style={{ marginBottom: 6 }}>For each question, choose the option corresponding to the correct answer.</li>
         </ul>
         <ul style={{ paddingLeft: 18, listStyleType: "disc" }}>
-          <li style={{ marginBottom: 6 }}></li>
+          <li style={{ marginBottom: 6, listStyle: "none" }}></li>
           <li>Answer to each question will be evaluated <u>according to the following marking scheme</u>:</li>
           <li style={{ marginBottom: 6 }}>
             <div style={{ marginLeft: 20 }}>
@@ -1133,7 +1134,7 @@ export default function NormalTestInterface() {
 
       {/* ── STICKY: test-name pill + Sections / Time Left ── */}
       <div className="sticky-top">
-        <div className="_dropdown_section_cexgz_33 hide_on_mobile" style={{ width: "75%" }}>
+        <div className="_dropdown_section_cexgz_33 hide_on_mobile" style={{ width: showPalette ? "75%" : "100%" }}>
           <div className="_questions_status_cexgz_380">
             <div style={{ marginRight: 8, maxWidth: 150, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontWeight: "normal" }}>{testName}</div>
             <div className="instruction-icon-wrapper" data-legend-trigger style={{ display: "inline-block", position: "relative" }} onClick={e => openLegend(e, "__all", "all", testName)}>
@@ -1142,7 +1143,7 @@ export default function NormalTestInterface() {
           </div>
           <div className="_dropdown_arrow_cexgz_46"></div>
         </div>
-        <div className="_section_time_row_cexgz_61 hide_on_mobile" style={{ width: "75%", fontFamily: "OpenSans-Regular, sans-serif", fontWeight: 400 }}>
+        <div className="_section_time_row_cexgz_61 hide_on_mobile" style={{ width: showPalette ? "75%" : "100%", fontFamily: "OpenSans-Regular, sans-serif", fontWeight: 400 }}>
           <div style={{ color: "rgb(109, 109, 109)", fontSize: 16 }}>Sections</div>
           <div className="d-flex gap-2 align-items-center">
             <div><b style={{ color: timeLeft < 300 ? "#cc0000" : "rgb(54, 54, 54)", fontWeight: "normal", transition: "color 0.3s" }}>Time Left : <span className="px-1">{formatTime(timeLeft)}</span></b></div>
@@ -1152,7 +1153,7 @@ export default function NormalTestInterface() {
 
       <div className="test-container container-fluid">
         <div className="row" style={{ height: "100%", minHeight: "100vh", backgroundColor: "white" }}>
-          <div className="col-xxl-10 col-lg-9 col-md-12" style={{ paddingLeft: 0, paddingRight: 0 }}>
+          <div className={showPalette ? "col-xxl-10 col-lg-9 col-md-12" : "col-12"} style={{ paddingLeft: 0, paddingRight: 0 }}>
 
             {/* mobile palette strip */}
             <div className="custom_top_div mobile_only" style={{ display: "flex", gap: 10, alignItems: "center" }}>
@@ -1222,7 +1223,7 @@ export default function NormalTestInterface() {
               </div>
 
               {/* section instruction box */}
-              <div className="ms-md-3 ms-1" style={{ border: "2px solid rgb(51, 51, 51)", padding: 0, margin: "15px 8px", width: "75%", fontFamily: "Arial, sans-serif" }}>
+              <div className="ms-md-3 ms-1" style={{ border: "2px solid rgb(51, 51, 51)", padding: 0, margin: "15px 8px", width: wq, fontFamily: "Arial, sans-serif" }}>
                 <div className="accordion-trigger" onClick={() => setShowSecInstr(v => !v)} style={{ cursor: "pointer", padding: "12px 16px", fontSize: "clamp(14px, 3vw, 16px)", fontWeight: "bold", position: "relative", textAlign: "center", userSelect: "none", minHeight: 46, lineHeight: 1.4 }}>
                   <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", display: "flex", alignItems: "center" }}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={showSecInstr ? "m18 15-6-6-6 6" : "m6 9 6 6 6-6"} /></svg>
@@ -1234,12 +1235,12 @@ export default function NormalTestInterface() {
 
               <div className="position-relative ps-md-3 ps-1" style={{ marginBottom: 100 }}>
                 {currentQuestion?.paragraph_text && (
-                  <div style={{ width: "75%", margin: "0 8px 14px", padding: "10px 14px", background: "#fffde7", border: "1px solid #f0c040", lineHeight: 1.7 }}>
+                  <div style={{ width: wq, margin: "0 8px 14px", padding: "10px 14px", background: "#fffde7", border: "1px solid #f0c040", lineHeight: 1.7 }}>
                     <LatexRenderer content={currentQuestion.paragraph_text} />
                     {currentQuestion.paragraph_image_urls?.map((img, i) => <img key={i} src={img} alt="" style={{ maxWidth: "min(100%, 420px)", maxHeight: 260, objectFit: "contain", marginTop: 6, display: "block" }} />)}
                   </div>
                 )}
-                <div className="_question_cexgz_89" style={{ width: "75%", margin: "0 8px", padding: 0, fontFamily: "Arial, sans-serif" }}>
+                <div className="_question_cexgz_89" style={{ width: wq, margin: "0 8px", padding: 0, fontFamily: "Arial, sans-serif" }}>
                   {currentQuestion?.question_text && <div><LatexRenderer content={currentQuestion.question_text} /></div>}
                   {(() => {
                     const imgs = currentQuestion?.image_urls?.length ? currentQuestion.image_urls : currentQuestion?.image_url ? [currentQuestion.image_url] : [];
@@ -1247,7 +1248,7 @@ export default function NormalTestInterface() {
                   })()}
                 </div>
 
-                <form className="_options_cexgz_284" id="option-form" onSubmit={e => e.preventDefault()} style={{ width: "75%", margin: "0 8px", padding: 0, fontFamily: "Arial, sans-serif" }}>
+                <form className="_options_cexgz_284" id="option-form" onSubmit={e => e.preventDefault()} style={{ width: wq, margin: "0 8px", padding: 0, fontFamily: "Arial, sans-serif" }}>
                   {isIntegerQuestion ? (
                     <div style={{ width: 150, marginTop: 14 }}>
                       <input
@@ -1264,10 +1265,10 @@ export default function NormalTestInterface() {
                           {["7", "8", "9", "4", "5", "6", "1", "2", "3", "0", ".", "-"].map(k => <button key={k} type="button" onClick={() => handleIntegerKeypadInsert(k)} style={kb}>{k}</button>)}
                         </div>
                         <div style={{ margin: "9px 0 6px" }}>
-                          <button type="button" onClick={() => moveIntegerCursor("left")} style={{ ...kb, width: 40, marginRight: 6 }}>Left</button>
-                          <button type="button" onClick={() => moveIntegerCursor("right")} style={{ ...kb, width: 48 }}>Right</button>
+                          <button type="button" onClick={() => moveIntegerCursor("left")} style={{ ...kb, width: 41, marginRight: 6 }}>Left</button>
+                          <button type="button" onClick={() => moveIntegerCursor("right")} style={{ ...kb, width: 53 }}>Right</button>
                         </div>
-                        <button type="button" onClick={clearIntegerAnswer} style={{ ...kb, width: 62 }}>Clear All</button>
+                        <button type="button" onClick={clearIntegerAnswer} style={{ ...kb, width: 75, whiteSpace: "nowrap" }}>Clear All</button>
                       </div>
                     </div>
                   ) : (
@@ -1308,7 +1309,7 @@ export default function NormalTestInterface() {
           </div>
 
           {/* ── SIDEBAR ── */}
-          <div className="d-none d-lg-block col-xxl-2 col-lg-3" style={{ paddingLeft: 0, paddingRight: 0, zIndex: 1000, ...(showPalette ? {} : { display: "none" }) }}>
+          <div className={showPalette ? "d-none d-lg-block col-xxl-2 col-lg-3" : "d-none"} style={{ paddingLeft: 0, paddingRight: 0, zIndex: 1000 }}>
             <div className="container-fluid" style={{ padding: 0, position: "relative", margin: "-90px 0px 0px", height: "100%", borderLeft: "1px solid rgb(200, 200, 200)", backgroundColor: "rgb(229, 246, 253)", color: "rgb(0, 0, 0)" }}>
               <button type="button" className="d-none d-lg-flex align-items-center justify-content-center btn btn-primary" onClick={() => setShowPalette(false)}
                 style={{ width: 20, height: 62, position: "absolute", top: "50%", left: -20, right: "auto", transform: "translateY(-50%)", borderRadius: "5px 0px 0px 5px", backgroundColor: "rgba(0, 0, 0, 0.973)", border: "1px solid rgba(200, 200, 200, 0.333)", color: "rgba(255, 255, 255, 0.392)", padding: 0, zIndex: 1000 }}>
@@ -1406,7 +1407,7 @@ export default function NormalTestInterface() {
           </ol>
           <div style={{ background: "rgb(229, 246, 253)", padding: 8 }}>
             {([["not-visited", "You have not visited the question yet."], ["not-answered", "You have not answered the question."], ["answered", "You have answered the question."], ["marked", "You have NOT answered the question, but have marked it for review."], ["answered-marked", "You have answered the question and marked it for review (it will also be evaluated)."]] as [string, string][]).map(([s, t], i) => (
-              <div key={s} style={{ display: "flex", alignItems: "center", fontSize: 13, minHeight: 50 }}><span className={STATUS_CLASS[s]} style={{ paddingTop: 7, display: "inline-block" }}>{i + 1}</span><span style={{ marginLeft: 8 }}>{t}</span></div>
+              <div key={s} style={{ display: "flex", alignItems: "center", fontSize: 13, minHeight: 50 }}><span className={STATUS_CLASS[s]} style={{ paddingTop: 7, display: "inline-block", flexShrink: 0 }}>{i + 1}</span><span style={{ marginLeft: 8 }}>{t}</span></div>
             ))}
           </div>
         </div>
