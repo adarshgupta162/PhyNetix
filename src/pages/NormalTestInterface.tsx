@@ -75,7 +75,7 @@ function LegendPopup({ pos, counts }: { pos: NonNullable<LegendPopupState>; coun
     ["answered-marked", counts.answeredMarked, "Answered and Marked for Review (will also be evaluated)"],
   ];
   return (
-    <div data-legend-popup style={{ position: "fixed", left: pos.left, top: pos.top, zIndex: 1000000, background: "rgb(229, 239, 249)", border: "1px solid rgb(204,204,204)", boxShadow: "0 4px 14px rgba(0,0,0,.2)", fontFamily: "Arial, sans-serif", color: "#000", fontSize: 12, width: pos.wide ? 500 : 238, maxWidth: "96vw" }}>
+    <div data-legend-popup className="nta-legend-popup" style={{ position: "fixed", left: pos.left, top: pos.top, zIndex: 1000000, background: "rgb(229, 239, 249)", border: "1px solid rgb(204,204,204)", boxShadow: "0 4px 14px rgba(0,0,0,.2)", fontFamily: "Arial, sans-serif", color: "#000", fontSize: 12, width: pos.wide ? 500 : 238, maxWidth: "96vw" }}>
       <div style={{ position: "absolute", top: -6, left: pos.arrowLeft, width: 10, height: 10, background: "rgb(229, 239, 249)", borderLeft: "1px solid rgb(204,204,204)", borderTop: "1px solid rgb(204,204,204)", transform: "rotate(45deg)" }} />
       {pos.title && <div style={{ background: "rgb(240,246,252)", borderBottom: "1px solid rgb(204,204,204)", padding: "6px 8px", fontWeight: "bold", fontSize: 13, whiteSpace: "nowrap" }}>{pos.title}</div>}
       <div style={{ padding: "6px 8px 4px" }}>
@@ -1111,13 +1111,12 @@ export default function NormalTestInterface() {
 
   const modalShell = (title: string, note: string, onClose: () => void, body: ReactNode) => (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", zIndex: 1000001, display: "flex", justifyContent: "center", alignItems: "center" }}>
-      <div onClick={e => e.stopPropagation()} style={{ width: 500, maxWidth: "96vw", maxHeight: "82vh", background: "#fff", display: "flex", flexDirection: "column", fontFamily: "Arial, sans-serif", color: "#000" }}>
-        <div style={{ background: "#4285f4", color: "#fff", padding: "4px 6px", display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: "bold", fontSize: 16 }}>
+      <div className="nta-modal" onClick={e => e.stopPropagation()} style={{ width: 500, maxWidth: "96vw", maxHeight: "82vh", display: "flex", flexDirection: "column", fontFamily: "Arial, sans-serif" }}>
+        <div style={{ background: "#4285f4", color: "#fff", padding: "4px 6px", display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: "bold", fontSize: 16, flexShrink: 0 }}>
           <span>{title}</span><span onClick={onClose} style={{ fontWeight: 400, fontSize: 14, cursor: "pointer" }}>Close ✕</span>
         </div>
-        <div style={{ overflowY: "auto", padding: "0 3px 10px" }}>
-          <p style={{ color: "#f00", fontSize: 19, lineHeight: 1.2, margin: "2px 2px 8px" }}>{note}</p>{body}
-        </div>
+        <div style={{ background: "#fff", color: "#f00", fontSize: 19, lineHeight: 1.2, padding: "2px 3px 8px", flexShrink: 0 }}>{note}</div>
+        <div className="nta-modal-body" style={{ overflowY: "auto", padding: "0 3px 10px", flex: "1 1 auto" }}>{body}</div>
       </div>
     </div>
   );
@@ -1157,7 +1156,7 @@ export default function NormalTestInterface() {
         <div className="_section_time_row_cexgz_61 hide_on_mobile" style={{ width: showPalette ? "75%" : "100%", fontFamily: "OpenSans-Regular, sans-serif", fontWeight: 400 }}>
           <div style={{ color: "rgb(109, 109, 109)", fontSize: 16 }}>Sections</div>
           <div className="d-flex gap-2 align-items-center">
-            <div><b style={{ color: timeLeft < 300 ? "#cc0000" : "rgb(54, 54, 54)", fontWeight: "normal", transition: "color 0.3s" }}>Time Left : <span className="px-1">{formatTime(timeLeft)}</span></b></div>
+            <div><b className="nta-timeleft" style={{ color: timeLeft < 300 ? "#cc0000" : "rgb(54, 54, 54)", fontWeight: "normal", transition: "color 0.3s" }}>Time Left : <span className="px-1">{formatTime(timeLeft)}</span></b></div>
           </div>
         </div>
       </div>
@@ -1234,14 +1233,14 @@ export default function NormalTestInterface() {
               </div>
 
               {/* section instruction box */}
-              <div className="ms-md-3 ms-1" style={{ border: "2px solid rgb(51, 51, 51)", padding: 0, margin: "15px 8px", width: wq, fontFamily: "Arial, sans-serif" }}>
+              <div className="ms-md-3 ms-1 nta-instr-box" style={{ border: "2px solid rgb(51, 51, 51)", padding: 0, margin: "15px 8px", width: wq, fontFamily: "Arial, sans-serif" }}>
                 <div className="accordion-trigger" onClick={() => setShowSecInstr(v => !v)} style={{ cursor: "pointer", padding: "12px 16px", fontSize: "clamp(14px, 3vw, 16px)", fontWeight: "bold", position: "relative", textAlign: "center", userSelect: "none", minHeight: 46, lineHeight: 1.4 }}>
                   <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", display: "flex", alignItems: "center" }}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={showSecInstr ? "m18 15-6-6-6 6" : "m6 9 6 6 6-6"} /></svg>
                   </span>
                   {secLabel(currentSection)} (Maximum Marks: {secMax(currentSection)})
                 </div>
-                <div id="instructionsCollapse" className={"collapse" + (showSecInstr ? " show" : "")}>{sectionInstructions(currentSection)}</div>
+                <div id="instructionsCollapse" className={"nta-collapse" + (showSecInstr ? " show" : "")}>{sectionInstructions(currentSection)}</div>
               </div>
 
               <div className="position-relative ps-md-3 ps-1" style={{ marginBottom: 100 }}>
@@ -1321,18 +1320,18 @@ export default function NormalTestInterface() {
 
           {/* ── SIDEBAR ── */}
           <div className={showPalette ? "d-none d-lg-block col-xxl-2 col-lg-3" : "d-none"} style={{ paddingLeft: 0, paddingRight: 0, zIndex: 1000 }}>
-            <div className="container-fluid" style={{ padding: 0, position: "relative", margin: "-90px 0px 0px", height: "100%", borderLeft: "1px solid rgb(200, 200, 200)", backgroundColor: "rgb(229, 246, 253)", color: "rgb(0, 0, 0)" }}>
-              <button type="button" className="d-none d-lg-flex align-items-center justify-content-center btn btn-primary" onClick={() => setShowPalette(false)}
+            <div className="container-fluid nta-sidebar" style={{ padding: 0, position: "relative", margin: "-90px 0px 0px", height: "100%", borderLeft: "1px solid rgb(200, 200, 200)", backgroundColor: "rgb(229, 246, 253)", color: "rgb(0, 0, 0)" }}>
+              <button type="button" className="nta-edge-tab d-none d-lg-flex align-items-center justify-content-center btn btn-primary" onClick={() => setShowPalette(false)}
                 style={{ width: 20, height: 62, position: "absolute", top: "50%", left: -20, right: "auto", transform: "translateY(-50%)", borderRadius: "5px 0px 0px 5px", backgroundColor: "rgba(0, 0, 0, 0.973)", border: "1px solid rgba(200, 200, 200, 0.333)", color: "rgba(255, 255, 255, 0.392)", padding: 0, zIndex: 1000 }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: -2 }}><path d="m9 18 6-6-6-6" /></svg>
               </button>
               <div className="d-md-block" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", padding: 15, borderBottom: "1px solid rgb(200, 200, 200)", color: "rgb(0, 0, 0)", flexShrink: 0 }}>
+                <div className="nta-sb-photo" style={{ display: "flex", alignItems: "flex-start", padding: 15, borderBottom: "1px solid rgb(200, 200, 200)", color: "rgb(0, 0, 0)", flexShrink: 0 }}>
                   <img src={studentAvatar || "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="90" height="90"><rect width="90" height="90" fill="#dcdcdc"/><circle cx="45" cy="34" r="16" fill="#aaa"/><path d="M12 90c0-24 15-34 33-34s33 10 33 34z" fill="#aaa"/></svg>')} alt="user-profile" data-a11y-preserve-img className="no-invert" width={90} height={90} style={{ width: 90, height: 90, border: "1px solid rgb(200, 200, 200)", marginRight: 12, filter: "none", objectFit: "cover" }} />
                   <div style={{ fontSize: 16, marginTop: 4 }}>{studentName}</div>
                 </div>
 
-                <div style={{ padding: "0px 12px", backgroundColor: "white", flexShrink: 0 }}>
+                <div className="nta-sb-legend" style={{ padding: "0px 12px", backgroundColor: "white", flexShrink: 0 }}>
                   <div className="row"><div className="col">
                     <div className="row" style={{ marginTop: "2%", marginBottom: "4%", alignItems: "center", display: "flex", flexWrap: "wrap" }}>
                       {([["answered", sc.answered, "Answered"], ["not-answered", sc.notAnswered, "Not Answered"]] as [string, number, string][]).map(([st, v, label]) => (
@@ -1355,12 +1354,12 @@ export default function NormalTestInterface() {
                   </div></div>
                 </div>
 
-                <div style={{ padding: "0px 12px", flexShrink: 0, backgroundColor: "rgb(229, 246, 253)" }}>
+                <div className="nta-sb-head" style={{ padding: "0px 12px", flexShrink: 0, backgroundColor: "rgb(229, 246, 253)" }}>
                   <div className="row"><span className="_small_header_cexgz_153">{secLabel(currentSection)}</span></div>
                   <div className="row" style={{ marginTop: "3%", marginBottom: "5%" }}><span style={{ fontSize: "0.85rem" }}>Choose a Question</span></div>
                 </div>
 
-                <div style={{ padding: "0px 12px", flex: "1 1 0%", overflowY: "auto", maxHeight: "max(138px, calc(100dvh - 500px))", backgroundColor: "rgb(229, 246, 253)" }}>
+                <div className="nta-sb-pal" style={{ padding: "0px 12px", flex: "1 1 0%", overflowY: "auto", maxHeight: "max(138px, calc(100dvh - 500px))", backgroundColor: "rgb(229, 246, 253)" }}>
                   <div className="_right_section_mid_cexgz_444 row">
                     <div className="container-fluid" style={{ paddingLeft: "4%", paddingRight: "4%" }}>
                       <div className="g-0 row">
@@ -1390,7 +1389,7 @@ export default function NormalTestInterface() {
 
       {/* sidebar re-open tab (only when the palette is collapsed) */}
       {!showPalette && (
-        <button type="button" className="d-none d-lg-flex align-items-center justify-content-center btn btn-primary" onClick={() => setShowPalette(true)}
+        <button type="button" className="nta-edge-tab d-none d-lg-flex align-items-center justify-content-center btn btn-primary" onClick={() => setShowPalette(true)}
           style={{ width: 20, height: 62, position: "fixed", top: "50%", right: 0, transform: "translateY(-50%)", borderRadius: "5px 0px 0px 5px", backgroundColor: "rgba(0, 0, 0, 0.973)", border: "1px solid rgba(200, 200, 200, 0.333)", color: "rgba(255, 255, 255, 0.392)", padding: 0, zIndex: 1000 }}>
           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: -2 }}><path d="m15 18-6-6 6-6" /></svg>
         </button>
@@ -1416,7 +1415,7 @@ export default function NormalTestInterface() {
             <li>The on-screen computer clock will be set at the server. The countdown timer in the top right corner of the computer screen will display the remaining time (in minutes) available for you to complete the examination. When the timer reaches zero, the examination will end by itself automatically. You will not be required to end or submit the answers of examination.</li>
             <li>The question palette shows the status of each question:</li>
           </ol>
-          <div style={{ background: "rgb(229, 246, 253)", padding: 8 }}>
+          <div className="nta-modal-legend" style={{ background: "rgb(229, 246, 253)", padding: 8 }}>
             {([["not-visited", "You have not visited the question yet."], ["not-answered", "You have not answered the question."], ["answered", "You have answered the question."], ["marked", "You have NOT answered the question, but have marked it for review."], ["answered-marked", "You have answered the question and marked it for review (it will also be evaluated)."]] as [string, string][]).map(([s, t], i) => (
               <div key={s} style={{ display: "flex", alignItems: "center", fontSize: 13, minHeight: 50 }}><span className={STATUS_CLASS[s]} style={{ paddingTop: 7, display: "inline-block", flexShrink: 0 }}>{i + 1}</span><span style={{ marginLeft: 8 }}>{t}</span></div>
             ))}
@@ -1425,14 +1424,16 @@ export default function NormalTestInterface() {
       ))}
       {showQuestionPaper && modalShell("Question Paper", "Note that the timer is ticking while you read the questions. Close this page to return to answering the questions.", () => setShowQuestionPaper(false), (
         <div>
-          {(() => { let n = 0; return sections.map(sec => sec.questions.map(q => {
+          {(() => { let n = 0; return sections.map(sec => sec.questions.map((q, qi) => {
             n++;
             const opts: any[] = Array.isArray(q.options) ? q.options : [];
             return (
-              <div key={q.id} style={{ display: "flex", padding: "8px 4px", borderBottom: "1px solid #ddd" }}>
+              <div key={q.id}>
+              {qi === 0 && <div style={{ color: "rgb(55, 120, 189)", fontSize: 16, padding: "6px 8px 0" }}>{secLabel(sec)}</div>}
+              <div style={{ display: "flex", padding: "8px 4px", borderBottom: "1px solid #ddd" }}>
                 <b style={{ minWidth: 40, fontSize: 15, marginTop: 6 }}>Q.{n})</b>
                 <div style={{ flex: 1, minWidth: 0, fontSize: 14 }}>
-                  <div style={{ border: "2px solid #000", margin: "4px 0 8px" }}>
+                  <div className="nta-qp-box" style={{ border: "2px solid #000", margin: "4px 0 8px" }}>
                     <div style={{ textAlign: "center", fontWeight: "bold", padding: "8px 10px" }}>{secLabel(sec)} (Maximum Marks: {secMax(sec)})</div>
                     {sectionInstructions(sec)}
                   </div>
@@ -1440,6 +1441,7 @@ export default function NormalTestInterface() {
                   {opts.map((o, k) => <div key={k} style={{ margin: "10px 6px", display: "flex", gap: 6 }}><span>{String.fromCharCode(65 + k)}.</span><LatexRenderer content={typeof o === "object" && o ? (o.text || o.label || "") : String(o)} /></div>)}
                   <div style={{ fontStyle: "italic", fontSize: 13, marginTop: 10 }}>Question Type: <b>{typeLabelOf(q)}</b> ; Marks for correct answer: <b style={{ color: "green" }}>{q.marks}</b> ; Negative Marks: <b style={{ color: "red" }}>{fmtNeg(q.negative_marks)}</b></div>
                 </div>
+              </div>
               </div>
             );
           })); })()}
@@ -1485,43 +1487,35 @@ export default function NormalTestInterface() {
         )}
       </AnimatePresence>
 
-      {/* ── SUBMIT MODAL ── */}
-      <AnimatePresence>
-        {showSubmitModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.55)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}
-            onClick={() => setShowSubmitModal(false)}>
-            <motion.div initial={{ scale: .95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: .95, opacity: 0 }}
-              onClick={e => e.stopPropagation()}
-              style={{ background: "#fff", border: "1px solid #bbb", borderRadius: 4, padding: 22, width: 420, fontFamily: "Arial,sans-serif", boxShadow: "0 8px 32px rgba(0,0,0,.25)" }}>
-              <div style={{ borderBottom: "2px solid #2979c5", paddingBottom: 8, marginBottom: 14, fontSize: 15, fontWeight: "bold", color: "#1a3a5c" }}>⚠ Submit Test — Confirmation</div>
-              <p style={{ fontSize: 12, color: "#555", marginBottom: 12 }}>Are you sure you want to submit? Once submitted, you cannot change your answers.</p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
-                {[
-                  { bg: "#e8f5e9", color: "#2e7d32", val: sc.answered,                  lbl: "Answered" },
-                  { bg: "#ffebee", color: "#c62828", val: questions.length - sc.answered, lbl: "Not Answered" },
-                  { bg: "#f3e5f5", color: "#6a1b9a", val: sc.markedCount,                lbl: "Marked for Review" },
-                  { bg: "#eceff1", color: "#455a64", val: sc.notVisited,                 lbl: "Not Visited" },
-                ].map((s, i) => (
-                  <div key={i} style={{ background: s.bg, padding: "10px 8px", textAlign: "center", borderRadius: 3 }}>
-                    <div style={{ fontSize: 24, fontWeight: "bold", color: s.color }}>{s.val}</div>
-                    <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>{s.lbl}</div>
-                  </div>
-                ))}
-              </div>
-              <p style={{ fontSize: 11, color: "#888", marginBottom: 14 }}>Answered &amp; Marked for Review questions will also be evaluated.</p>
-              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                <button onClick={() => setShowSubmitModal(false)}
-                  style={{ padding: "8px 20px", background: "#fff", border: "1px solid #aaa", fontSize: 13, cursor: "pointer", borderRadius: 2, color: "#333" }}>Cancel</button>
-                <button onClick={() => handleSubmit()} disabled={submitting || submitDisabled}
-                  style={{ padding: "8px 20px", background: "#cc0000", border: "none", color: "#fff", fontSize: 13, fontWeight: "bold", cursor: "pointer", borderRadius: 2 }}>
-                  {submitDisabled ? "Submit Disabled" : submitting ? "Submitting…" : "Yes, Submit"}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* ── SUBMIT SUMMARY PAGE (NTA) ── */}
+      {showSubmitModal && (
+        <div className="nta-submit-screen" style={{ position: "fixed", top: 30, left: 0, right: 0, bottom: 0, zIndex: 1100, overflowY: "auto", fontFamily: "Arial, sans-serif" }}>
+          <div className="nta-submit-top" style={{ minHeight: "55vh", padding: "38px 11px 24px" }}>
+            <table className="nta-submit-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>{["Section Name", "No. of Questions", "Answered", "Not Answered", "Marked for Review", "Answered and Marked for Review", "Not Visited"].map(h => <th key={h}>{h}</th>)}</tr>
+              </thead>
+              <tbody>
+                {sections.map(sec => {
+                  const c = getStatusCounts(sec);
+                  return (
+                    <tr key={sec.id}>
+                      <td>{secLabel(sec)}</td><td>{sec.questions.length}</td><td>{c.answered - c.answeredMarked}</td><td>{c.notAnswered}</td><td>{c.markedCount - c.answeredMarked}</td><td>{c.answeredMarked}</td><td>{c.notVisited}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <p style={{ textAlign: "center", margin: "64px 0 0", fontSize: 16 }}>Are you sure wish to submit this group of questions for marking ?</p>
+            <div style={{ display: "flex", justifyContent: "center", gap: 25, marginTop: 20, flexWrap: "wrap" }}>
+              <button type="button" onClick={() => setShowSubmitModal(false)} style={{ width: 200, height: 60, borderRadius: 8, border: "none", background: "rgb(108, 117, 125)", color: "#fff", fontSize: 17, cursor: "pointer", fontFamily: "Arial, sans-serif" }}>No! Go Back to Paper</button>
+              <button type="button" onClick={() => handleSubmit()} disabled={submitting || submitDisabled} style={{ width: 200, height: 60, borderRadius: 8, border: "none", background: "rgb(220, 53, 69)", color: "#fff", fontSize: 17, cursor: submitting || submitDisabled ? "not-allowed" : "pointer", opacity: submitting || submitDisabled ? 0.7 : 1, fontFamily: "Arial, sans-serif" }}>
+                {submitDisabled ? "Submit Disabled" : submitting ? "Submitting…" : "Yes! Submit the Test"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
