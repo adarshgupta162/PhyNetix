@@ -11,7 +11,7 @@ const REQUIRED: Record<string, string> = {
   "/institute/students": "students.view",
   "/institute/batches": "batches.view",
   "/institute/tests": "tests.view",
-  "/institute/dpps": "dpps.view",
+  "/institute/dpps": "dpps.view",\n  "/institute/proctoring": "proctoring.view",
   "/institute/results": "results.view",
 };
 
@@ -32,7 +32,7 @@ export default function InstituteRoute({ children }: { children: ReactNode }) {
 
   const path = location.pathname.replace(/\/$/, "") || "/institute";
   const required = REQUIRED[path];
-  if ((path === "/institute/staff" || path === "/institute/settings") && !isInstituteAdmin) {
+  if ((path === "/institute/staff" || path === "/institute/settings" || path === "/institute/audit") && !isInstituteAdmin) {
     return <Centered icon={<ShieldAlert className="w-10 h-10 text-destructive" />} title="Institute admin only" body="Only the institute owner or administrator can open this section." action={<Button variant="outline" onClick={() => navigate("/institute")}>Back to institute</Button>} />;
   }
   if (required && !can(required)) return <Centered icon={<ShieldAlert className="w-10 h-10 text-destructive" />} title="Permission required" body={`Your institute role does not include ${required} access.`} action={<Button variant="outline" onClick={() => navigate("/institute")}>Back to institute</Button>} />;
