@@ -154,24 +154,36 @@ export default function TestLibrary() {
         selectedId={selectedCategory}
         onSelect={setSelectedCategory}
       />
-      <div className="p-4 lg:p-6 max-w-5xl mx-auto">
+      <div className="mx-auto max-w-6xl space-y-5 px-1 py-2 sm:px-2">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-400">Your preparation</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-3xl">Test Library</h1>
+            <p className="mt-1 text-xs text-slate-500">Pick up where you left off, or start your next practice test.</p>
+          </div>
+          <div className="rounded-xl border border-white/[0.08] bg-[#0B1725] px-4 py-2.5">
+            <p className="text-[9px] uppercase tracking-wider text-slate-500">Showing</p>
+            <p className="mt-0.5 text-sm font-semibold tabular-nums text-white">{visibleTests.length} <span className="text-[10px] font-normal text-slate-500">tests</span></p>
+          </div>
+        </div>
+
         <button
           onClick={() => setSidebarOpen(true)}
-          className="w-full flex items-center justify-between p-3 rounded-lg border border-border bg-secondary/30 mb-4 hover:bg-secondary/50 transition"
+          className="group flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-[#0B1725] px-4 py-3.5 text-left transition hover:border-sky-400/25 hover:bg-[#0E1C2B]"
         >
-          <span className="flex items-center gap-2 text-sm font-medium"><Menu className="w-4 h-4" /> Select Test Category</span>
-          <span className="text-xs text-muted-foreground truncate max-w-[40%]">{selectedName}</span>
+          <span className="flex items-center gap-3 text-xs font-medium text-slate-200"><span className="grid h-8 w-8 place-items-center rounded-lg bg-sky-400/10 text-sky-300"><Menu className="h-4 w-4" /></span><span><span className="block">Test category</span><span className="mt-0.5 block text-[10px] font-normal text-slate-500">Choose a subject or section</span></span></span>
+          <span className="flex items-center gap-2 text-xs text-slate-400">{selectedName}<span className="text-sky-300 transition group-hover:translate-x-0.5">→</span></span>
         </button>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <h1 className="text-xl lg:text-2xl font-bold">{selectedName}</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold text-slate-200">{selectedName}</h2>
           <div className="relative w-full sm:w-64">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search Tests"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 rounded-full bg-secondary/30 border-border"
+              className="h-10 rounded-xl border-white/10 bg-[#0B1725] pl-9 text-xs text-slate-200 placeholder:text-slate-600"
             />
           </div>
         </div>
@@ -182,10 +194,10 @@ export default function TestLibrary() {
               key={f}
               onClick={() => setFilter(f)}
               className={cn(
-                "px-3 py-1.5 text-xs rounded-full border transition",
+                "rounded-full border px-3.5 py-2 text-[11px] font-medium transition",
                 filter === f
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-secondary/30 border-border text-muted-foreground hover:text-foreground"
+                  ? "border-sky-400/30 bg-sky-400/10 text-sky-200"
+                  : "border-white/[0.08] bg-[#0B1725] text-slate-500 hover:border-white/15 hover:text-slate-200"
               )}
             >
               {f === "all" ? "All" : f === "not-attempted" ? "Not Attempted" : f === "attempted" ? "Attempted" : f === "upcoming" ? "Upcoming" : "Resume"}
@@ -204,7 +216,7 @@ export default function TestLibrary() {
           </div>
         ) : (
           <div className="space-y-3">
-            {visibleTests.map(t => <TestListCard key={t.id} test={t} />)}
+            {visibleTests.map((t, index) => <div key={t.id} className="animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: `${Math.min(index * 35, 210)}ms` }}><TestListCard test={t} /></div>)}
           </div>
         )}
       </div>
