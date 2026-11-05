@@ -79,8 +79,8 @@ export function PaymentReceiptAction({ payment, userId, email, buttonLabel = "Vi
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
           <DialogHeader>
-            <div className="mb-2 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary"><FileText className="h-5 w-5" /></div>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <img src="/logo.png" alt="PhyNetix" className="h-9 max-w-36 object-contain object-left" />
               <Badge variant="secondary" className="capitalize">{payment.status}</Badge>
             </div>
             <DialogTitle>PhyNetix payment receipt</DialogTitle>
