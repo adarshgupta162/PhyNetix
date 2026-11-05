@@ -35,7 +35,8 @@ export default function InstituteDashboard() {
   });
 
   const cards = [
-    { label: "Enrolled Students", value: stats?.students, icon: Users },\n    { label: "Active Batches", value: stats?.batches, icon: Layers },
+    { label: "Enrolled Students", value: stats?.students, icon: Users },
+    { label: "Active Batches", value: stats?.batches, icon: Layers },
     { label: "Total Tests", value: stats?.tests, icon: ClipboardList },
     { label: "Test Attempts", value: stats?.attempts, icon: Activity },
     { label: "Average Score", value: stats?.avg_score, icon: Target },
