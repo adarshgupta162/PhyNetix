@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Calendar, ChevronRight, CircleAlert, Layers3, SlidersHorizontal } from "lucide-react";
+import { Calendar, CircleAlert, Layers3, SlidersHorizontal } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,15 +53,15 @@ type QuestionMeta = {
 };
 
 const COLORS = {
-  bg: "#050B16",
-  card: "#0B1A2E",
-  cardAlt: "#10233B",
+  bg: "#000000",
+  card: "#0D1D2B",
+  cardAlt: "#152C3F",
   text: "#F4F7FF",
-  textMuted: "#B8C7DB",
-  border: "#2A4A6B",
-  blue: "#168BFF",
-  cyan: "#18D5F5",
-  purple: "#805BFF",
+  textMuted: "#91A8BB",
+  border: "#1D364A",
+  blue: "#1697E8",
+  cyan: "#5CB8E9",
+  purple: "#7594A9",
   correct: "#22C982",
   incorrect: "#F05268",
   unattempted: "#8199B8",
@@ -463,35 +463,34 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="dashboard-page p-3 sm:p-4 lg:p-5 xl:h-[calc(100vh-4rem)] xl:overflow-hidden">
-        <div className="grid xl:grid-cols-[1.05fr_1fr] gap-4 xl:h-full">
-          <section className="min-h-0 flex flex-col gap-3">
+      <div className="dashboard-page mx-auto max-w-[1040px] bg-black p-3 sm:p-5 lg:p-7 xl:h-[calc(100vh-4rem)] xl:overflow-hidden">
+        <div className="grid xl:grid-cols-[0.92fr_1.08fr] gap-3 xl:h-full">
+          <section className="min-h-0 flex flex-col gap-2.5">
             <div
-              className="shrink-0 rounded-2xl border p-4"
+              className="shrink-0 rounded-[10px] border p-3"
               style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 40px rgba(3, 11, 26, 0.45)" }}
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold" style={{ color: COLORS.text }}>
+                <h2 className="text-[13px] font-medium tracking-tight" style={{ color: COLORS.text }}>
                   Previous Exams
                 </h2>
-                <Link to="/tests" className="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs hover:bg-[#10233B] transition" style={{ borderColor: COLORS.border, color: COLORS.textMuted }}>
+                <Link to="/tests" className="inline-flex items-center rounded-full border px-2 py-0.5 text-[9px] hover:bg-[#10233B] transition" style={{ borderColor: COLORS.border, color: COLORS.textMuted }}>
                   View all
-                  <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
 
             {attempts.length === 0 ? (
-              <div className="rounded-2xl border border-[#2A4A6B] bg-[#0E2138] p-6 text-center">
-                <p className="text-[#F4F7FF] text-lg font-medium">No completed tests yet</p>
-                <p className="text-[#B8C7DB] mt-2">Complete your first test to start seeing analytics here.</p>
-                <Link to="/tests" className="inline-flex mt-5 rounded-lg bg-[#168BFF] text-white px-4 py-2 text-sm font-medium hover:bg-[#157de6] transition">
+              <div className="rounded-[10px] border bg-[#0D1D2B] p-5 text-center" style={{ borderColor: COLORS.border }}>
+                <p className="text-sm font-medium text-[#F4F7FF]">No completed tests yet</p>
+                <p className="mt-1.5 text-[11px] text-[#91A8BB]">Complete your first test to start seeing analytics here.</p>
+                <Link to="/tests" className="inline-flex mt-4 rounded-md bg-[#168BFF] text-white px-3 py-1.5 text-[11px] font-medium hover:bg-[#157de6] transition">
                   Go to Test Library
                 </Link>
               </div>
             ) : (
-              <div className="min-h-0 flex-1 space-y-3 overflow-hidden">
-              {attempts.slice(0, 2).map((attempt) => {
+              <div className="min-h-0 flex-1 space-y-2 overflow-hidden">
+              {attempts.slice(0, 3).map((attempt, index) => {
                 const badge = getBadge(attempt.scorePercentage);
 
                 return (
@@ -499,24 +498,24 @@ export default function Dashboard() {
                     key={attempt.id}
                     type="button"
                     onClick={() => navigate(`/test/${attempt.testId}/analysis?attemptId=${attempt.id}`)}
-                    className="w-full text-left rounded-2xl border p-3.5 transition hover:-translate-y-0.5"
+                    className="w-full text-left rounded-[10px] border p-2.5 transition hover:-translate-y-0.5"
                     style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 32px rgba(4, 12, 30, 0.42)" }}
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <h3 className="text-xl font-semibold leading-tight text-[#F4F7FF]">{attempt.testName}</h3>
-                        <p className="text-xs text-[#B8C7DB] mt-1">Performance summary of your completed attempt.</p>
+                        <h3 className="text-[13px] font-medium leading-tight text-[#E8F1F8]">{attempt.testName}</h3>
+                        <p className="text-[10px] text-[#91A8BB] mt-0.5">{index === 0 ? "Performance summary of your recent exam." : "Detailed insight into your mid-term performance."}</p>
                       </div>
-                      <span className={cn("text-xs px-2.5 py-1 rounded-full border font-medium", badge.className)}>{badge.label}</span>
+                      <span className={cn("text-[9px] px-2 py-0.5 rounded-full border font-medium", badge.className)}>{badge.label}</span>
                     </div>
 
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-[#B8C7DB]">
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#203B5C] bg-[#10233B] px-3 py-1">
-                        <Calendar className="w-3.5 h-3.5" />
+                    <div className="mt-2 flex flex-wrap gap-1.5 text-[9px] text-[#91A8BB]">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[#1D364A] bg-[#152C3F] px-2 py-0.5">
+                        <Calendar className="w-3 h-3" />
                         {new Date(attempt.completedAt).toLocaleString()}
                       </span>
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#203B5C] bg-[#10233B] px-3 py-1">
-                        <Layers3 className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[#1D364A] bg-[#152C3F] px-2 py-0.5">
+                        <Layers3 className="w-3 h-3" />
                         {attempt.testTypeLabel}
                       </span>
                     </div>
@@ -543,13 +542,13 @@ export default function Dashboard() {
             )}
           </section>
 
-          <section className="min-h-0 grid xl:grid-rows-[minmax(0,1fr)_minmax(0,0.82fr)] gap-4">
+          <section className="min-h-0 grid xl:grid-rows-[minmax(0,1fr)_minmax(0,0.82fr)] gap-3">
             <div
               className="min-h-0 rounded-2xl border p-4 overflow-hidden"
               style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 38px rgba(4, 12, 30, 0.44)" }}
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-xl font-semibold text-[#F4F7FF]">Subject Wise Analysis · {rightPanelTitle}</h2>
+                <h2 className="text-[13px] font-medium text-[#F4F7FF]">Question Bank Analysis</h2>
 
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="relative">
@@ -557,7 +556,7 @@ export default function Dashboard() {
                     <select
                       value={filter}
                       onChange={(event) => setFilter(event.target.value as FilterOption)}
-                      className="pl-9 pr-8 py-2 rounded-lg border bg-[#10233B] text-[#F4F7FF] text-sm"
+                      className="pl-7 pr-5 py-1 rounded-md border bg-[#152C3F] text-[#DDEAF3] text-[10px]"
                       style={{ borderColor: COLORS.border }}
                     >
                       <option value="all">All Tests</option>
@@ -588,8 +587,8 @@ export default function Dashboard() {
                 </div>
               )}
 
-              <div className="mt-4 grid md:grid-cols-[1fr_150px] gap-4 items-end">
-                <div className="h-48 border border-[#2A4A6B] rounded-xl p-3 bg-[#10233B]/50">
+              <div className="mt-3 grid md:grid-cols-[1fr_132px] gap-3 items-end">
+                <div className="h-40 border border-[#1D364A] rounded-md p-2.5 bg-[#152C3F]/70">
                   <div className="h-full flex items-end justify-around gap-4">
                     {SUBJECTS.map((subject) => {
                       const value = aggregate.subjectAccuracy[subject];
@@ -602,12 +601,12 @@ export default function Dashboard() {
                             : "linear-gradient(180deg,#18D5F5,#1296B3)";
 
                       return (
-                        <div key={subject} className="flex flex-col items-center flex-1 h-full justify-end gap-2">
-                          <span className="text-2xl font-semibold text-[#F4F7FF]">{Math.round(value)}%</span>
-                          <div className="w-full max-w-[90px] h-[78%] rounded-xl bg-[#0B1A2E] border border-[#203B5C] flex items-end p-1">
+                        <div key={subject} className="flex flex-col items-center flex-1 h-full justify-end gap-1.5">
+                          <span className="text-[9px] text-[#DDEAF3]">{Math.round(value)}</span>
+                          <div className="w-full max-w-[60px] h-[78%] rounded-md bg-[#0B1A2E] border border-[#1D364A] flex items-end p-1">
                             <div className="w-full rounded-lg" style={{ height: barHeight, background: gradient }} />
                           </div>
-                          <span className="text-sm text-[#D9E5F4]">{subject}</span>
+                          <span className="text-[9px] text-[#BBD0DF]">{subject}</span>
                         </div>
                       );
                     })}
@@ -616,8 +615,8 @@ export default function Dashboard() {
 
                 <div className="space-y-3">
                   <div>
-                    <p className="text-4xl font-semibold text-[#F4F7FF]">{aggregate.totalAttempts}</p>
-                    <p className="text-sm text-[#B8C7DB]">Total Tests</p>
+                    <p className="text-2xl font-semibold text-[#F4F7FF]">{aggregate.totalAttempts}</p>
+                    <p className="text-[9px] text-[#91A8BB]">Total Exams</p>
                   </div>
                   <div className="h-px bg-[#203B5C]" />
                   <div className="space-y-1.5 text-sm">
@@ -635,15 +634,15 @@ export default function Dashboard() {
               style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 38px rgba(4, 12, 30, 0.44)" }}
             >
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <h2 className="text-xl font-semibold text-[#F4F7FF]">Questions Breakdown · {rightPanelTitle}</h2>
+                <h2 className="text-[13px] font-medium text-[#F4F7FF]">Exams Vs Topper</h2>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-[#C9D7EA]">
-                  <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.correct }} />Correct</span>
-                  <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.incorrect }} />Incorrect</span>
-                  <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.unattempted }} />Unattempted</span>
+                  <span className="inline-flex items-center gap-1 text-[9px]"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.blue }} />Topper</span>
+                  <span className="inline-flex items-center gap-1 text-[9px]"><span className="w-1.5 h-1.5 rounded-full bg-[#DDEAF3]" />Average</span>
+                  <span className="inline-flex items-center gap-1 text-[9px]"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.cyan }} />Low</span>
                 </div>
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {breakdownRows.map((row) => {
                   const total = row.stats.total || 1;
                   const correctWidth = (row.stats.correct / total) * 100;
@@ -651,9 +650,9 @@ export default function Dashboard() {
                   const unattemptedWidth = (row.stats.unattempted / total) * 100;
 
                   return (
-                    <div key={row.key} className="grid grid-cols-[90px_1fr_58px] sm:grid-cols-[120px_1fr_70px] gap-2 items-center">
-                      <span className="text-sm text-[#F4F7FF] font-medium">{row.label}</span>
-                      <div className="h-8 rounded-full overflow-hidden border border-[#203B5C] bg-[#10233B] flex text-sm font-semibold">
+                    <div key={row.key} className="grid grid-cols-[84px_1fr] gap-2 items-center">
+                      <span className="truncate text-[11px] text-[#DDEAF3] font-medium">{row.label}</span>
+                      <div className="h-5 rounded-full overflow-hidden border border-[#1D364A] bg-[#152C3F] flex text-[8px] font-semibold">
                         <div className="h-full flex items-center justify-center text-white" style={{ width: `${correctWidth}%`, backgroundColor: COLORS.correct }}>
                           {correctWidth > 12 ? row.stats.correct.toLocaleString() : ""}
                         </div>
@@ -664,16 +663,15 @@ export default function Dashboard() {
                           {unattemptedWidth > 12 ? row.stats.unattempted.toLocaleString() : ""}
                         </div>
                       </div>
-                      <span className="text-right text-sm text-[#B8C7DB]">({row.stats.total.toLocaleString()})</span>
                     </div>
                   );
                 })}
 
                 <div className="h-px bg-[#203B5C] my-2" />
 
-                <div className="grid grid-cols-[90px_1fr_58px] sm:grid-cols-[120px_1fr_70px] gap-2 items-center">
-                  <span className="text-base text-[#F4F7FF] font-semibold">Overall</span>
-                  <div className="h-9 rounded-full overflow-hidden border border-[#203B5C] bg-[#10233B] flex text-sm font-semibold">
+                <div className="grid grid-cols-[84px_1fr] gap-2 items-center">
+                  <span className="text-[11px] text-[#F4F7FF] font-semibold">Overall</span>
+                  <div className="h-6 rounded-full overflow-hidden border border-[#1D364A] bg-[#152C3F] flex text-[8px] font-semibold">
                     <div className="h-full flex items-center justify-center text-white" style={{ width: `${aggregate.overall.total ? (aggregate.overall.correct / aggregate.overall.total) * 100 : 0}%`, backgroundColor: COLORS.correct }}>
                       {aggregate.overall.correct.toLocaleString()}
                     </div>
@@ -684,7 +682,6 @@ export default function Dashboard() {
                       {aggregate.overall.unattempted.toLocaleString()}
                     </div>
                   </div>
-                  <span className="text-right text-sm text-[#B8C7DB]">({aggregate.overall.total.toLocaleString()})</span>
                 </div>
               </div>
             </div>
