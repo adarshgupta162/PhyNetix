@@ -43,19 +43,19 @@ export default function TestListCard({ test, onAttempt, primaryLabel, hideAttemp
 
   return (
     <>
-      <div className="rounded-xl border border-border bg-secondary/30 overflow-hidden">
-        <div className="p-4 space-y-3">
+      <div className="group overflow-hidden rounded-xl border border-white/[0.08] bg-[#0B1725] transition-colors duration-200 hover:border-sky-400/20">
+        <div className="space-y-3 p-4">
           <div>
-            <h3 className="font-semibold text-base leading-tight">{test.name}</h3>
+            <h3 className="text-sm font-semibold leading-tight text-slate-100 transition-colors group-hover:text-white">{test.name}</h3>
             {test.syllabus_subtitle && (
-              <p className="text-xs text-muted-foreground mt-0.5">{test.syllabus_subtitle}</p>
+              <p className="mt-1 text-xs text-slate-500">{test.syllabus_subtitle}</p>
             )}
           </div>
           <div className={hideAttempt ? "" : "grid grid-cols-2 gap-2"}>
             <Button
               variant="outline"
               size="sm"
-              className="rounded-full w-full"
+              className="w-full rounded-lg border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.07] hover:text-white"
               onClick={() => setSyllabusOpen(true)}
             >
               View Syllabus
@@ -63,7 +63,7 @@ export default function TestListCard({ test, onAttempt, primaryLabel, hideAttemp
             {!hideAttempt && (
               <Button
                 size="sm"
-                className="rounded-full"
+                className="rounded-lg bg-[#1687C9] text-white hover:bg-[#2099DB]"
                 disabled={!!isUpcoming}
                 onClick={handleAttempt}
               >
@@ -72,16 +72,16 @@ export default function TestListCard({ test, onAttempt, primaryLabel, hideAttemp
             )}
           </div>
         </div>
-        <div className="px-4 py-2.5 bg-background/40 border-t border-border/50 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/[0.06] bg-black/10 px-4 py-2.5 text-[10px] text-slate-500">
           {test.total_questions != null && (
-            <span className="flex items-center gap-1"><HelpCircle className="w-3.5 h-3.5" /><b className="text-foreground">{test.total_questions} Qs</b></span>
+            <span className="flex items-center gap-1"><HelpCircle className="w-3.5 h-3.5" /><b className="text-slate-300">{test.total_questions} Qs</b></span>
           )}
           <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /><b className="text-foreground">{test.duration_minutes} Min</b></span>
           {test.total_marks != null && (
             <span className="flex items-center gap-1"><FileText className="w-3.5 h-3.5" />Total Marks: <b className="text-foreground">{test.total_marks}</b></span>
           )}
           {isUpcoming && (
-            <span className="ml-auto px-2 py-0.5 rounded bg-primary/15 text-primary font-medium">
+            <span className="ml-auto rounded bg-sky-400/10 px-2 py-0.5 font-medium text-sky-300">
               Releasing: {format(new Date(test.scheduled_at!), "d MMM (EEE), hh:mm a")}
             </span>
           )}
