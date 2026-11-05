@@ -20,7 +20,7 @@ const blank = { title: "", description: "", subject: "Physics", chapter: "", top
 export default function InstituteDPPs() {
   const qc = useQueryClient();
   const { user } = useAuth();
-  const { institutionId, isActive } = useInstitute();
+  const { institutionId, isActive, can } = useInstitute();
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState({ ...blank });
   const [questionsFor, setQuestionsFor] = useState<any>(null);
@@ -78,7 +78,7 @@ export default function InstituteDPPs() {
   return <div className="p-6 space-y-6">
     <div className="flex items-start justify-between gap-4 flex-wrap">
       <div><h1 className="text-2xl font-bold flex items-center gap-2"><FileText className="w-6 h-6" /> Daily Practice Problems</h1><p className="text-sm text-muted-foreground">Create practice sets, add questions from your institute library, and publish them to students or batches.</p></div>
-      <Button onClick={() => setCreateOpen(true)} disabled={!isActive}><Plus className="w-4 h-4 mr-2" />Create DPP</Button>
+      <Button onClick={() => setCreateOpen(true)} disabled={!isActive || !can("dpps.manage")}><Plus className="w-4 h-4 mr-2" />Create DPP</Button>
     </div>
     <div className="relative max-w-md"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input className="pl-9" placeholder="Search DPPs" value={search} onChange={e => setSearch(e.target.value)} /></div>
     {isLoading ? <div className="py-16 flex justify-center"><Loader2 className="w-6 h-6 animate-spin" /></div> : !visible.length ? <Card><CardContent className="py-16 text-center text-sm text-muted-foreground">No DPPs yet. Create your first practice set.</CardContent></Card> :
@@ -86,7 +86,7 @@ export default function InstituteDPPs() {
         <CardHeader className="pb-3"><div className="flex justify-between gap-3"><div className="min-w-0"><CardTitle className="text-base">{d.title}</CardTitle><p className="text-xs text-muted-foreground mt-1">{[d.subject,d.chapter,d.topic].filter(Boolean).join(" · ") || "No topic selected"}</p></div><Badge variant={d.is_published ? "default" : "secondary"}>{d.is_published ? "Published" : "Draft"}</Badge></div></CardHeader>
         <CardContent className="space-y-3"><p className="text-sm text-muted-foreground line-clamp-2">{d.description || "No description"}</p>
           <div className="flex gap-2 flex-wrap text-xs text-muted-foreground"><span>{d.difficulty || "medium"}</span><span>· {d.duration_minutes || 30} min</span><span>· {d.batches?.name || "Institute-wide"}</span></div>
-          <div className="flex items-center justify-between border-t pt-3"><Button size="sm" variant="outline" onClick={() => setQuestionsFor(d)} disabled={!isActive}><ListPlus className="w-4 h-4 mr-2" />Manage questions</Button><div className="flex items-center gap-2 text-xs"><span>Publish</span><Switch checked={!!d.is_published} disabled={!isActive} onCheckedChange={value => publish.mutate({id:d.id,value})} /></div></div>
+          <div className="flex items-center justify-between border-t pt-3"><Button size="sm" variant="outline" onClick={() => setQuestionsFor(d)} disabled={!isActive || !can("dpps.manage")}><ListPlus className="w-4 h-4 mr-2" />Manage questions</Button><div className="flex items-center gap-2 text-xs"><span>Publish</span><Switch checked={!!d.is_published} disabled={!isActive || !can("dpps.manage")} onCheckedChange={value => publish.mutate({id:d.id,value})} /></div></div>
         </CardContent></Card>)}</div>}
 
     <Dialog open={createOpen} onOpenChange={setCreateOpen}><DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Create DPP</DialogTitle><DialogDescription>New DPPs start as drafts. Add questions before publishing.</DialogDescription></DialogHeader>
@@ -101,7 +101,7 @@ export default function InstituteDPPs() {
         <div className="sm:col-span-2"><Label>Description</Label><Textarea rows={3} value={form.description} onChange={e=>setForm({...form,description:e.target.value})} /></div>
         <label className="sm:col-span-2 flex items-center justify-between rounded-md border p-3 text-sm">Timed practice<Switch checked={form.is_timed} onCheckedChange={v=>setForm({...form,is_timed:v})} /></label>
       </div>
-      <DialogFooter><Button variant="outline" onClick={()=>setCreateOpen(false)}>Cancel</Button><Button onClick={()=>create.mutate()} disabled={create.isPending}>{create.isPending&&<Loader2 className="w-4 h-4 mr-2 animate-spin" />}Create DPP</Button></DialogFooter>
+      <DialogFooter><Button variant="outline" onClick={()=>setCreateOpen(false)}>Cancel</Button><Button onClick={()=>create.mutate()} disabled={create.isPending || !isActive || !can("dpps.manage")}>{create.isPending&&<Loader2 className="w-4 h-4 mr-2 animate-spin" />}Create DPP</Button></DialogFooter>
     </Dialog>
     {questionsFor && <QuestionDialog dpp={questionsFor} institutionId={institutionId!} onClose={()=>setQuestionsFor(null)} />}
   </div>;
