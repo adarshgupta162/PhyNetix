@@ -102,11 +102,12 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
         {mobile && <button type="button" onClick={() => setDrawerOpen(false)} aria-label="Close navigation" className="ml-auto rounded-lg p-2 text-slate-400 hover:bg-white/5"><X size={18} /></button>}
       </div>
       <div className="px-3.5 pt-5 pb-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">{(!collapsed || mobile) ? "Workspace" : " "}</div>
-      <nav className="flex-1 space-y-1 px-2.5">
+      <nav className={cn("flex-1 space-y-1", collapsed && !mobile ? "px-1" : "px-2.5")}>
         {navItems.map(({ label, path, icon: Icon }) => {
           const active = location.pathname === path || (path !== "/dashboard" && location.pathname.startsWith(path + "/"));
           return <Link key={path} to={path} title={collapsed && !mobile ? label : undefined}
-            className={cn("group flex items-center gap-3 rounded-lg border px-2.5 py-2.5 text-[12px] font-medium transition-all",
+            className={cn("group flex items-center rounded-lg border py-2.5 text-[12px] font-medium transition-all",
+              collapsed && !mobile ? "justify-center px-0" : "gap-3 px-2.5",
               active ? "border-[#258DD2]/30 bg-[#0E3450] text-white shadow-[inset_2px_0_0_#38A8F4]" : "border-transparent text-slate-400 hover:border-white/[0.06] hover:bg-white/[0.04] hover:text-slate-100")}>
             <Icon size={17} strokeWidth={1.8} className={active ? "text-[#58B9FF]" : "text-slate-500 group-hover:text-slate-300"} />
             {(!collapsed || mobile) && <span>{label}</span>}
@@ -118,8 +119,8 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
           <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#123B5A] text-xs font-semibold text-[#A9DDFF]">{initials}</div>
           {(!collapsed || mobile) && <div className="min-w-0"><p className="truncate text-xs font-medium text-slate-200">{name}</p><p className="text-[10px] text-slate-500">{roleLabel}</p></div>}
         </div>
-        <button onClick={logout} className={cn("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs text-slate-500 transition hover:bg-rose-500/10 hover:text-rose-300", collapsed && !mobile && "justify-center")}><LogOut size={16} />{(!collapsed || mobile) && "Sign out"}</button>
-        {!mobile && <button onClick={() => setCollapsed((value) => !value)} className="mt-2 hidden w-full items-center justify-center rounded-lg p-2 text-slate-500 hover:bg-white/5 hover:text-slate-200 lg:flex" aria-label="Collapse sidebar">{collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}</button>}
+        <button onClick={logout} className={cn("flex w-full items-center gap-3 rounded-xl py-2.5 text-xs text-slate-500 transition hover:bg-rose-500/10 hover:text-rose-300", collapsed && !mobile ? "justify-center px-1" : "px-3")}><LogOut size={16} />{(!collapsed || mobile) && "Sign out"}</button>
+        {!mobile && <button onClick={() => setCollapsed((value) => !value)} className={cn("mt-2 hidden w-full items-center justify-center rounded-lg text-slate-500 hover:bg-white/5 hover:text-slate-200 lg:flex", collapsed ? "p-1" : "p-2")} aria-label="Collapse sidebar">{collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}</button>}
       </div>
     </div>
   );
