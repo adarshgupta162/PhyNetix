@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -21,24 +22,26 @@ interface FormState {
   state: string;
   country: string;
   website: string;
-  password: string;
-  confirmPassword: string;
   description: string;
   acceptedTerms: boolean;
 }
 
 const initial: FormState = {
   instituteName: "", logoUrl: "", adminFullName: "", adminEmail: "", phone: "",
-  city: "", state: "", country: "India", website: "", password: "",
-  confirmPassword: "", description: "", acceptedTerms: false,
+  city: "", state: "", country: "India", website: "", description: "", acceptedTerms: false,
 };
 
 export default function RegisterInstitutePage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [form, setForm] = useState<FormState>(initial);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) setForm((f) => ({ ...f, adminEmail: user.email ?? "", adminFullName: f.adminFullName || user.user_metadata?.full_name || "" }));
+  }, [user]);
 
   const set = (k: keyof FormState, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -52,8 +55,6 @@ export default function RegisterInstitutePage() {
     if (!form.state.trim()) e.state = "State is required";
     if (!form.country.trim()) e.country = "Country is required";
     if (form.website.trim() && !/^https?:\/\/.+/.test(form.website.trim())) e.website = "Must start with http:// or https://";
-    if (form.password.length < 8) e.password = "Password must be at least 8 characters";
-    if (form.password !== form.confirmPassword) e.confirmPassword = "Passwords do not match";
     if (form.logoUrl.trim() && !/^https?:\/\/.+/.test(form.logoUrl.trim())) e.logoUrl = "Must be a valid image URL";
     if (!form.acceptedTerms) e.acceptedTerms = "You must accept the terms";
     setErrors(e);
@@ -76,7 +77,6 @@ export default function RegisterInstitutePage() {
           state: form.state,
           country: form.country,
           website: form.website,
-          password: form.password,
           description: form.description,
           acceptedTerms: form.acceptedTerms,
         },
@@ -94,6 +94,10 @@ export default function RegisterInstitutePage() {
       setSubmitting(false);
     }
   };
+
+  if (!user) {
+    return <main className="min-h-screen flex items-center justify-center p-6 bg-background"><Card className="max-w-md w-full"><CardContent className="py-10 text-center space-y-4"><Building2 className="w-10 h-10 mx-auto text-primary" /><h1 className="text-xl font-semibold">Sign in before registering</h1><p className="text-sm text-muted-foreground">Institute ownership is attached to your verified PhyNetix account. This prevents someone from registering an institute using another person's email.</p><Button onClick={() => navigate("/auth")}>Sign in to continue</Button></CardContent></Card></main>;
+  }
 
   if (done) {
     return (
@@ -146,8 +150,8 @@ export default function RegisterInstitutePage() {
                 <Field label="Admin full name" error={errors.adminFullName}>
                   <Input value={form.adminFullName} onChange={(e) => set("adminFullName", e.target.value)} />
                 </Field>
-                <Field label="Admin email" error={errors.adminEmail}>
-                  <Input type="email" value={form.adminEmail} onChange={(e) => set("adminEmail", e.target.value)} />
+                <Field label="Signed-in admin email" error={errors.adminEmail}>
+                  <Input type="email" value={form.adminEmail} disabled />
                 </Field>
                 <Field label="Phone number" error={errors.phone}>
                   <Input value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+91 98765 43210" />
@@ -170,12 +174,6 @@ export default function RegisterInstitutePage() {
                 </Field>
                 <Field label="Website" error={errors.website} optional>
                   <Input value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://abcinstitute.com" />
-                </Field>
-                <Field label="Password" error={errors.password}>
-                  <Input type="password" value={form.password} onChange={(e) => set("password", e.target.value)} />
-                </Field>
-                <Field label="Confirm password" error={errors.confirmPassword}>
-                  <Input type="password" value={form.confirmPassword} onChange={(e) => set("confirmPassword", e.target.value)} />
                 </Field>
               </div>
 
