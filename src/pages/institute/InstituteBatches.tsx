@@ -216,13 +216,13 @@ export default function InstituteBatches() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {membersFor && <MembersDialog batch={membersFor} onClose={() => setMembersFor(null)} />}
+      {membersFor && <MembersDialog batch={membersFor} canManage={can("students.manage")} onClose={() => setMembersFor(null)} />}
       {testsFor && <AssignTestsDialog batch={testsFor} institutionId={institutionId!} onClose={() => setTestsFor(null)} />}
     </div>
   );
 }
 
-function MembersDialog({ batch, onClose }: { batch: any; onClose: () => void }) {
+function MembersDialog({ batch, canManage, onClose }: { batch: any; canManage: boolean; onClose: () => void }) {
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["batch-members", batch.id],
@@ -268,7 +268,7 @@ function MembersDialog({ batch, onClose }: { batch: any; onClose: () => void }) 
                     {m.profiles?.roll_number} · joined {format(new Date(m.enrolled_at), "dd MMM yyyy")} · {m.enrollment_type || "manual"}
                   </div>
                 </div>
-                <Button size="sm" variant="ghost" onClick={() => remove.mutate(m.id)}>Remove</Button>
+                {canManage && <Button size="sm" variant="ghost" onClick={() => remove.mutate(m.id)}>Remove</Button>}
               </div>
             ))}
           </div>
