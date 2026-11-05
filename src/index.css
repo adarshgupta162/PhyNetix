@@ -449,3 +449,12 @@
 
 .landing-page { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
 .landing-page h1, .landing-page h2, .landing-page h3 { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+
+.student-workspace [class*="bg-[#0B1725]"],
+.student-workspace [class*="bg-[#0D1D2B]"],
+.student-workspace [class*="bg-[#152C3F]"] { background-color: #141a19 !important; }
+.student-workspace [class*="border-white/"] { border-color: #29312e !important; }
+.student-workspace [class*="text-sky-"] { color: #8bbdb2 !important; }
+.student-workspace [class*="bg-sky-"] { background-color: rgba(110,170,160,.12) !important; }
+.student-workspace [class*="border-sky-"] { border-color: rgba(110,170,160,.3) !important; }
+.student-workspace [class*="shadow-["] { box-shadow: none !important; }
