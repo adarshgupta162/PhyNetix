@@ -85,8 +85,8 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
 
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <div className="flex h-full flex-col">
-      <div className="flex h-[64px] items-center border-b border-white/[0.07] px-4">
-        <Link to="/dashboard" aria-label="PhyNetix home" className={cn("flex min-w-0 items-center", collapsed && !mobile ? "justify-center" : "gap-2")}>
+      <div className={cn("flex h-[56px] items-center border-b border-white/[0.07]", collapsed && !mobile ? "justify-center px-2" : "px-3")}>
+        <Link to="/dashboard" aria-label="PhyNetix home" className={cn("flex min-w-0 items-center", collapsed && !mobile ? "justify-center" : "gap-1.5")}>
           <AnimatePresence mode="wait" initial={false}>
             {collapsed && !mobile ? (
               <motion.div key="compact-mark" initial={{ opacity: 0, scale: 0.78, rotate: -8 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} exit={{ opacity: 0, scale: 0.82, rotate: 8 }} transition={{ duration: 0.18, ease: "easeOut" }}>
@@ -126,15 +126,15 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
 
   return <div className="min-h-screen bg-[#050A12] text-[#EAF2FA]">
     <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_70%_0%,rgba(21,112,177,0.12),transparent_38%),radial-gradient(ellipse_at_0%_100%,rgba(22,80,125,0.08),transparent_35%)]" />
-    <aside className={cn("fixed inset-y-0 left-0 z-40 hidden border-r border-white/[0.07] bg-[#08111D]/95 backdrop-blur-xl transition-[width] duration-200 lg:block", collapsed ? "w-[64px]" : "w-[208px]")}><Sidebar /></aside>
+    <aside className={cn("fixed inset-y-0 left-0 z-40 hidden border-r border-white/[0.07] bg-[#08111D]/95 backdrop-blur-xl transition-[width] duration-200 lg:block", collapsed ? "w-[56px]" : "w-[184px]")}><Sidebar /></aside>
     <AnimatePresence>
       {drawerOpen && <>
         <motion.button aria-label="Close navigation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDrawerOpen(false)} className="fixed inset-0 z-50 bg-black/70 lg:hidden" />
-        <motion.aside initial={{ x: -300 }} animate={{ x: 0 }} exit={{ x: -300 }} transition={{ type: "spring", damping: 28, stiffness: 300 }} className="fixed inset-y-0 left-0 z-[60] w-[280px] border-r border-white/10 bg-[#08111D] lg:hidden"><Sidebar mobile /></motion.aside>
+        <motion.aside initial={{ x: -300 }} animate={{ x: 0 }} exit={{ x: -300 }} transition={{ type: "spring", damping: 28, stiffness: 300 }} className="fixed inset-y-0 left-0 z-[60] w-[260px] border-r border-white/10 bg-[#08111D] lg:hidden"><Sidebar mobile /></motion.aside>
       </>}
     </AnimatePresence>
-    <div className={cn("relative min-h-screen transition-[margin] duration-200", collapsed ? "lg:ml-[64px]" : "lg:ml-[208px]")}>
-      <header className="sticky top-0 z-30 flex h-[64px] items-center gap-2.5 border-b border-white/[0.07] bg-[#07101B]/85 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+    <div className={cn("relative min-h-screen transition-[margin] duration-200", collapsed ? "lg:ml-[56px]" : "lg:ml-[184px]")}>
+      <header className="sticky top-0 z-30 flex h-[56px] items-center gap-2.5 border-b border-white/[0.07] bg-[#07101B]/85 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
         <button onClick={() => setDrawerOpen(true)} className="rounded-lg border border-white/10 p-2 text-slate-300 hover:bg-white/5 lg:hidden" aria-label="Open navigation"><Menu size={18} /></button>
         <div className="min-w-0"><p className="hidden text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:block">Student workspace</p><h1 className="truncate text-[16px] font-semibold text-white sm:text-[17px]">{title}</h1></div>
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
@@ -170,7 +170,7 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
           </DropdownMenu>
         </div>
       </header>
-      <main className="relative min-h-[calc(100vh-64px)] p-4 sm:p-6 lg:p-8">{children}</main>
+      <main className="relative min-h-[calc(100vh-56px)] p-4 sm:p-6 lg:p-8">{children}</main>
     </div>
   </div>;
 }
