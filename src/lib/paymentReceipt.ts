@@ -20,7 +20,6 @@ export interface ReceiptStudent {
   address: string | null;
   city: string | null;
   state: string | null;
-  country: string | null;
   roll_number: string | null;
   academic_status?: string | null;
 }
@@ -111,7 +110,7 @@ export async function buildPaymentReceiptDocument(payment: ReceiptPayment, stude
   if (student?.phone) y = label("Phone", student.phone, y);
   if (student?.academic_status) y = label("Class / status", student.academic_status, y);
   if (student?.roll_number) y = label("Roll number", student.roll_number, y);
-  const address = [student?.address, student?.city, student?.state, student?.country].filter(Boolean).join(", ");
+  const address = [student?.address, student?.city, student?.state].filter(Boolean).join(", ");
   if (address) y = label("Address", address, y);
 
   line(y + 2); y += 16;
