@@ -64,7 +64,12 @@ export default function ProfilePage() {
         const totalMarks = valid.reduce((sum: number, a: any) => sum + Number(a.total_marks || 0), 0);
         const questionsAttempted = valid.reduce((sum: number, a: any) => {
           const answers = a.answers && typeof a.answers === "object" ? Object.values(a.answers) : [];
-          return sum + answers.filter((answer: any) => answer !== null && answer !== undefined && answer !== "").length;
+          const hasAnswer = (answer: any) => Array.isArray(answer)
+            ? answer.length > 0
+            : answer && typeof answer === "object"
+              ? Object.keys(answer).length > 0
+              : answer !== null && answer !== undefined && answer !== "";
+          return sum + answers.filter(hasAnswer).length;
         }, 0);
         setStats({
           testsCompleted: valid.length,
