@@ -493,3 +493,30 @@
 .institute-layout [class*="border-b"] { border-color: hsl(var(--border)); }
 .institute-layout [data-card],
 .institute-layout [class*="shadow"] { box-shadow: none; }
+
+/* Shared minimal workspace polish. Keep every rule scoped outside the NTA test root. */
+.admin-layout,.student-workspace,.institute-layout,.auth-page,.landing-page {
+  font-family: Inter,ui-sans-serif,system-ui,sans-serif;
+  -webkit-user-select:text; -moz-user-select:text; -ms-user-select:text; user-select:text;
+}
+.admin-layout :is(h1,h2,h3,h4,h5,h6),.student-workspace :is(h1,h2,h3,h4,h5,h6),.institute-layout :is(h1,h2,h3,h4,h5,h6),.auth-page :is(h1,h2,h3,h4,h5,h6) {
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif; letter-spacing:-.025em;
+}
+.student-workspace .glass-card,.student-workspace .stat-card,.student-workspace .gradient-border {
+  background:#141a19; border:1px solid #29312e; border-radius:10px; box-shadow:none; backdrop-filter:none;
+}
+.student-workspace .glass-card::before,.student-workspace .gradient-border::before {display:none;}
+.student-workspace .stat-card:hover {transform:none;box-shadow:none;border-color:#3b514a;}
+.student-workspace .gradient-text,.student-workspace .gradient-icon {background:none;color:#e8ecea;-webkit-text-fill-color:currentColor;}
+.student-workspace .btn-gradient {background:#326e62;color:#fff;box-shadow:none;border-radius:8px;}
+.student-workspace .btn-gradient:hover {transform:none;filter:brightness(1.06);box-shadow:none;}
+.student-workspace .btn-glass {background:#171e1c;border-color:#29312e;box-shadow:none;backdrop-filter:none;}
+.institute-layout .glass-card,.institute-layout .stat-card {background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:10px;box-shadow:none;backdrop-filter:none;}
+.institute-layout .glass-card::before {display:none;}
+.institute-layout .gradient-text {background:none;color:hsl(var(--foreground));-webkit-text-fill-color:currentColor;}
+.institute-layout .floating-orb,.admin-layout .floating-orb,.student-workspace .floating-orb {display:none;}
+.institute-layout .btn-gradient {background:hsl(var(--primary));box-shadow:none;}
+.institute-layout .btn-gradient:hover {transform:none;box-shadow:none;}
+.admin-layout ::-webkit-scrollbar-track,.student-workspace ::-webkit-scrollbar-track,.institute-layout ::-webkit-scrollbar-track {background:transparent;}
+.admin-layout ::-webkit-scrollbar-thumb,.institute-layout ::-webkit-scrollbar-thumb {background:#d4d8d2;}
+.student-workspace ::-webkit-scrollbar-thumb {background:#303a36;}
