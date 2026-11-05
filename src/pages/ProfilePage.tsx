@@ -1,373 +1,196 @@
-import { useState, useEffect, useRef, type ChangeEvent } from "react";
-import { motion } from "framer-motion";
-import { 
-  User, 
-  Mail, 
-  GraduationCap,
-  Edit3,
-  Trophy,
-  Target,
-  Clock,
-  BookOpen,
-  Save,
-  X,
-  Hash,
-  Upload
-} from "lucide-react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { CalendarDays, Camera, Check, Clock3, GraduationCap, Mail, Pencil, Phone, Save, Target, Trophy, UserRound, X, BookOpen, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import StudentWorkspaceLayout from "@/components/layout/StudentWorkspaceLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
-interface Profile {
+type Profile = {
   full_name: string | null;
   avatar_url: string | null;
   target_exam: string | null;
   roll_number: string | null;
   phone: string | null;
   academic_status: string | null;
-  country: string | null;
   state: string | null;
   city: string | null;
-}
+};
+type RecentAttempt = { id: string; score: number | null; total_marks: number | null; completed_at: string; test: { name: string } | null };
+type Stats = { testsCompleted: number; questionsAttempted: number; scorePercent: number; studyMinutes: number };
 
-interface Stats {
-  testsCompleted: number;
-  questionsSolved: number;
-  avgAccuracy: number;
-  totalTime: number;
-}
+const panel = "rounded-2xl border border-white/[0.08] bg-[#0B1725]/90 shadow-[0_16px_48px_rgba(0,0,0,0.18)]";
+const fieldLabel = "mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-slate-500";
 
 export default function ProfilePage() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [stats, setStats] = useState<Stats>({ testsCompleted: 0, questionsSolved: 0, avgAccuracy: 0, totalTime: 0 });
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
-    full_name: "", target_exam: "", phone: "", academic_status: "", country: "", state: "", city: "",
-  });
+  const [recent, setRecent] = useState<RecentAttempt[]>([]);
+  const [stats, setStats] = useState<Stats>({ testsCompleted: 0, questionsAttempted: 0, scorePercent: 0, studyMinutes: 0 });
+  const [edit, setEdit] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const photoInputRef = useRef<HTMLInputElement>(null);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const photoRef = useRef<HTMLInputElement>(null);
+  const [form, setForm] = useState({ full_name: "", target_exam: "", phone: "", academic_status: "", state: "", city: "" });
 
   useEffect(() => {
-    if (user) {
-      fetchProfile();
-      fetchStats();
-    }
+    if (!user) return;
+    let active = true;
+    const load = async () => {
+      setLoading(true);
+      try {
+        const [{ data: p, error: profileError }, { data: attempts, error: attemptsError }] = await Promise.all([
+          supabase.from("profiles").select("full_name, avatar_url, target_exam, roll_number, phone, academic_status, state, city").eq("id", user.id).maybeSingle(),
+          supabase.from("test_attempts").select("id, score, total_marks, time_taken_seconds, answers, completed_at, awaiting_result, test:tests(name)")
+            .eq("user_id", user.id).not("completed_at", "is", null).order("completed_at", { ascending: false }),
+        ]);
+        if (profileError) throw profileError;
+        if (attemptsError) throw attemptsError;
+        if (!active) return;
+        const safeProfile = p as Profile | null;
+        setProfile(safeProfile);
+        setForm({
+          full_name: safeProfile?.full_name || "",
+          target_exam: safeProfile?.target_exam || "",
+          phone: safeProfile?.phone || "",
+          academic_status: safeProfile?.academic_status || "",
+          state: safeProfile?.state || "",
+          city: safeProfile?.city || "",
+        });
+        const valid = (attempts || []).filter((a: any) => a.completed_at && a.awaiting_result !== true && a.score !== null && a.total_marks !== null);
+        const totalScore = valid.reduce((sum: number, a: any) => sum + Number(a.score || 0), 0);
+        const totalMarks = valid.reduce((sum: number, a: any) => sum + Number(a.total_marks || 0), 0);
+        const questionsAttempted = valid.reduce((sum: number, a: any) => {
+          const answers = a.answers && typeof a.answers === "object" ? Object.values(a.answers) : [];
+          return sum + answers.filter((answer: any) => answer !== null && answer !== undefined && answer !== "").length;
+        }, 0);
+        setStats({
+          testsCompleted: valid.length,
+          questionsAttempted,
+          scorePercent: totalMarks > 0 ? Math.round((totalScore / totalMarks) * 100) : 0,
+          studyMinutes: Math.round(valid.reduce((sum: number, a: any) => sum + Number(a.time_taken_seconds || 0), 0) / 60),
+        });
+        setRecent(valid.slice(0, 5) as RecentAttempt[]);
+      } catch (error) {
+        console.error(error);
+        toast({ title: "Couldn't load profile", description: "Please refresh and try again.", variant: "destructive" });
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    void load();
+    return () => { active = false; };
   }, [user]);
 
-  const fetchProfile = async () => {
+  const saveProfile = async () => {
     if (!user) return;
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("full_name, avatar_url, target_exam, roll_number, phone, academic_status, country, state, city")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (!error && data) {
-      setProfile(data);
-      setEditForm({
-        full_name: data.full_name || "",
-        target_exam: data.target_exam || "",
-        phone: data.phone || "",
-        academic_status: data.academic_status || "",
-        country: data.country || "",
-        state: data.state || "",
-        city: data.city || "",
-      });
-    }
-    setLoading(false);
-  };
-
-  const fetchStats = async () => {
-    if (!user) return;
-    const { data: attempts } = await supabase
-      .from("test_attempts")
-      .select("score, total_marks, time_taken_seconds, test:tests(id)")
-      .eq("user_id", user.id)
-      .not("completed_at", "is", null);
-
-    if (attempts) {
-      const testsCompleted = attempts.length;
-      const totalTime = attempts.reduce((acc, a) => acc + (a.time_taken_seconds || 0), 0);
-      const totalScore = attempts.reduce((acc, a) => acc + (a.score || 0), 0);
-      const totalMarks = attempts.reduce((acc, a) => acc + (a.total_marks || 0), 0);
-      const avgAccuracy = totalMarks > 0 ? Math.round((totalScore / totalMarks) * 100) : 0;
-
-      // Estimate questions solved based on average 30 questions per test
-      const questionsSolved = testsCompleted * 30;
-
-      setStats({ testsCompleted, questionsSolved, avgAccuracy, totalTime: Math.round(totalTime / 60) });
-    }
-  };
-
-  const handleSave = async () => {
-    if (!user) return;
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        full_name: editForm.full_name.trim(),
-        target_exam: editForm.target_exam.trim() || null,
-        phone: editForm.phone.trim() || null,
-        academic_status: editForm.academic_status.trim() || null,
-        country: editForm.country.trim() || null,
-        state: editForm.state.trim() || null,
-        city: editForm.city.trim() || null,
-      })
-      .eq("id", user.id);
-
+    setSaving(true);
+    const { data, error } = await supabase.from("profiles").update({
+      full_name: form.full_name.trim(),
+      target_exam: form.target_exam.trim() || null,
+      phone: form.phone.trim() || null,
+      academic_status: form.academic_status.trim() || null,
+      state: form.state.trim() || null,
+      city: form.city.trim() || null,
+    }).eq("id", user.id).select("full_name, avatar_url, target_exam, roll_number, phone, academic_status, state, city").maybeSingle();
+    setSaving(false);
     if (error) {
-      toast({ title: "Error", description: "Failed to update profile", variant: "destructive" });
-    } else {
-      setProfile({ ...profile, ...editForm } as Profile);
-      setIsEditing(false);
-      toast({ title: "Success", description: "Profile updated successfully" });
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+      return;
     }
+    if (data) setProfile(data as Profile);
+    setEdit(false);
+    toast({ title: "Profile updated", description: "Your changes have been saved." });
   };
 
-  const handlePhotoUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+  const uploadPhoto = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !user) return;
-
-    setUploadingPhoto(true);
+    if (!file.type.startsWith("image/") || file.size > 3 * 1024 * 1024) {
+      toast({ title: "Choose an image under 3 MB", variant: "destructive" });
+      event.target.value = "";
+      return;
+    }
+    setUploading(true);
     try {
-      const photoDataUrl = await new Promise<string>((resolve, reject) => {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(String(reader.result || ""));
-        reader.onerror = () => reject(new Error("Failed to read file"));
+        reader.onerror = () => reject(new Error("Could not read image"));
         reader.readAsDataURL(file);
       });
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({ avatar_url: photoDataUrl })
-        .eq("id", user.id);
-
+      const { error } = await supabase.from("profiles").update({ avatar_url: dataUrl }).eq("id", user.id);
       if (error) throw error;
-
-      setProfile((prev) => prev ? { ...prev, avatar_url: photoDataUrl } : prev);
-      toast({ title: "Success", description: "Profile photo updated successfully" });
-    } catch (error) {
-      console.error(error);
-      toast({ title: "Error", description: "Failed to upload profile photo", variant: "destructive" });
+      setProfile((previous) => previous ? { ...previous, avatar_url: dataUrl } : previous);
+      toast({ title: "Profile photo updated" });
+    } catch (error: any) {
+      toast({ title: "Photo upload failed", description: error?.message || "Try again.", variant: "destructive" });
     } finally {
-      setUploadingPhoto(false);
-      if (photoInputRef.current) photoInputRef.current.value = "";
+      setUploading(false);
+      event.target.value = "";
     }
   };
 
-  const displayName = profile?.full_name || user?.email?.split("@")[0] || "Student";
-  const initials = displayName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  const name = profile?.full_name || user?.email?.split("@")[0] || "Student";
+  const initials = name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
+  const dateJoined = user?.created_at ? new Date(user.created_at).toLocaleDateString("en-IN", { month: "long", year: "numeric" }) : null;
 
-  const statItems = [
-    { label: "Tests Completed", value: stats.testsCompleted.toString() },
-    { label: "Questions Solved", value: stats.questionsSolved.toLocaleString() },
-    { label: "Avg Accuracy", value: `${stats.avgAccuracy}%` },
-    { label: "Study Hours", value: Math.round(stats.totalTime / 60).toString() },
-  ];
+  if (loading) return <StudentWorkspaceLayout><div className="mx-auto max-w-6xl space-y-5"><div className="h-48 animate-pulse rounded-2xl bg-white/[0.04]" /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[1,2,3,4].map((i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-white/[0.04]" />)}</div></div></StudentWorkspaceLayout>;
 
-  if (loading) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  return (
-    <DashboardLayout>
-      <div className="p-6 lg:p-8">
-        {/* Profile Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="glass-card p-6 lg:p-8 mb-8"
-        >
-          <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
-            <div className="relative">
-              <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-2xl bg-gradient-primary flex items-center justify-center text-3xl lg:text-4xl font-bold overflow-hidden">
-                {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  initials
-                )}
-              </div>
-              <input
-                ref={photoInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handlePhotoUpload}
-              />
-              <Button
-                type="button"
-                variant="glass"
-                size="sm"
-                className="mt-3"
-                onClick={() => photoInputRef.current?.click()}
-                disabled={uploadingPhoto}
-              >
-                <Upload className="w-4 h-4" />
-                {uploadingPhoto ? "Uploading..." : "Upload Photo"}
-              </Button>
-            </div>
-
-            <div className="flex-1">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
-                <div>
-                  {isEditing ? (
-                    <Input
-                      value={editForm.full_name}
-                      onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
-                      className="text-2xl font-bold mb-1"
-                      placeholder="Your name"
-                    />
-                  ) : (
-                    <h1 className="text-2xl lg:text-3xl font-bold font-display mb-1">{displayName}</h1>
-                  )}
-                  {isEditing ? (
-                    <Input
-                      value={editForm.target_exam}
-                      onChange={(e) => setEditForm({ ...editForm, target_exam: e.target.value })}
-                      className="text-sm"
-                      placeholder="Target exam (e.g., JEE Advanced 2025)"
-                    />
-                  ) : (
-                    <p className="text-muted-foreground">{profile?.target_exam || "No target exam set"}</p>
-                  )}
-                </div>
-                {isEditing ? (
-                  <div className="flex gap-2">
-                    <Button variant="glass" onClick={() => setIsEditing(false)}>
-                      <X className="w-4 h-4" />
-                      Cancel
-                    </Button>
-                    <Button variant="gradient" onClick={handleSave}>
-                      <Save className="w-4 h-4" />
-                      Save
-                    </Button>
-                  </div>
-                ) : (
-                  <Button variant="glass" onClick={() => setIsEditing(true)}>
-                    <Edit3 className="w-4 h-4" />
-                    Edit Profile
-                  </Button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {statItems.map((stat, index) => (
-                  <div key={index} className="text-center p-3 rounded-xl bg-secondary/50">
-                    <div className="text-xl lg:text-2xl font-bold font-display gradient-text">
-                      {stat.value}
-                    </div>
-                    <div className="text-xs text-muted-foreground">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        <div className="grid lg:grid-cols-2 gap-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="glass-card p-6"
-          >
-            <h2 className="text-lg font-semibold font-display mb-6">Personal Information</h2>
-            {isEditing ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="space-y-1.5 text-sm">
-                  <span className="text-muted-foreground">Phone number</span>
-                  <Input autoComplete="tel" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} placeholder="Phone number" />
-                </label>
-                <label className="space-y-1.5 text-sm">
-                  <span className="text-muted-foreground">Class / academic status</span>
-                  <Input value={editForm.academic_status} onChange={(e) => setEditForm({ ...editForm, academic_status: e.target.value })} placeholder="For example, Class 12" />
-                </label>
-                <label className="space-y-1.5 text-sm">
-                  <span className="text-muted-foreground">Country</span>
-                  <Input autoComplete="country-name" value={editForm.country} onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} placeholder="Country" />
-                </label>
-                <label className="space-y-1.5 text-sm">
-                  <span className="text-muted-foreground">State</span>
-                  <Input autoComplete="address-level1" value={editForm.state} onChange={(e) => setEditForm({ ...editForm, state: e.target.value })} placeholder="State" />
-                </label>
-                <label className="space-y-1.5 text-sm sm:col-span-2">
-                  <span className="text-muted-foreground">City</span>
-                  <Input autoComplete="address-level2" value={editForm.city} onChange={(e) => setEditForm({ ...editForm, city: e.target.value })} placeholder="City" />
-                </label>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                  <User className="w-5 h-5 text-primary" />
-                  <div className="flex-1"><div className="text-xs text-muted-foreground">Full Name</div><div className="font-medium">{displayName}</div></div>
-                </div>
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                  <Mail className="w-5 h-5 text-primary" />
-                  <div className="flex-1 min-w-0"><div className="text-xs text-muted-foreground">Email</div><div className="font-medium break-words">{user?.email}</div></div>
-                </div>
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                  <GraduationCap className="w-5 h-5 text-primary" />
-                  <div className="flex-1"><div className="text-xs text-muted-foreground">Target Exam</div><div className="font-medium">{profile?.target_exam || "Not set"}</div></div>
-                </div>
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                  <Hash className="w-5 h-5 text-primary" />
-                  <div className="flex-1"><div className="text-xs text-muted-foreground">Roll Number</div><div className="font-medium font-mono">{profile?.roll_number || "Generating..."}</div></div>
-                </div>
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                  <User className="w-5 h-5 text-primary" />
-                  <div className="flex-1 min-w-0"><div className="text-xs text-muted-foreground">Phone number</div><div className="font-medium break-words">{profile?.phone || "Not set"}</div></div>
-                </div>
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                  <GraduationCap className="w-5 h-5 text-primary" />
-                  <div className="flex-1 min-w-0"><div className="text-xs text-muted-foreground">Class / academic status</div><div className="font-medium break-words">{profile?.academic_status || "Not set"}</div></div>
-                </div>
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30">
-                  <Target className="w-5 h-5 text-primary" />
-                  <div className="flex-1 min-w-0"><div className="text-xs text-muted-foreground">Location</div><div className="font-medium break-words">{[profile?.city, profile?.state, profile?.country].filter(Boolean).join(", ") || "Not set"}</div></div>
-                </div>
-              </div>
-            )}
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            className="glass-card p-6"
-          >
-            <h2 className="text-lg font-semibold font-display mb-6">Performance Summary</h2>
-            <div className="space-y-4">
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-secondary/30">
-                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center"><Trophy className="w-6 h-6 text-primary-foreground" /></div>
-                <div className="flex-1"><div className="font-semibold mb-1">Tests Completed</div><div className="text-sm text-muted-foreground">You've completed {stats.testsCompleted} tests so far</div></div>
-              </div>
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-secondary/30">
-                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center"><Target className="w-6 h-6 text-primary-foreground" /></div>
-                <div className="flex-1"><div className="font-semibold mb-1">Average Accuracy</div><div className="text-sm text-muted-foreground">Your average accuracy is {stats.avgAccuracy}%</div></div>
-              </div>
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-secondary/30">
-                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center"><Clock className="w-6 h-6 text-primary-foreground" /></div>
-                <div className="flex-1"><div className="font-semibold mb-1">Study Time</div><div className="text-sm text-muted-foreground">You've spent {Math.round(stats.totalTime / 60)} hours practicing</div></div>
-              </div>
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-secondary/30">
-                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center"><BookOpen className="w-6 h-6 text-primary-foreground" /></div>
-                <div className="flex-1"><div className="font-semibold mb-1">Questions Solved</div><div className="text-sm text-muted-foreground">Approximately {stats.questionsSolved.toLocaleString()} questions attempted</div></div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
+  return <StudentWorkspaceLayout>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-400">Your workspace</p><h1 className="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-3xl">Student Profile</h1><p className="mt-1 text-sm text-slate-500">Your account and academic activity in one place.</p></div>
+        {!edit ? <Button onClick={() => setEdit(true)} className="rounded-xl bg-[#167CC0] text-white hover:bg-[#208FD5]"><Pencil size={15} className="mr-2" />Edit profile</Button> : <div className="flex gap-2"><Button variant="outline" onClick={() => { setEdit(false); setForm({ full_name: profile?.full_name || "", target_exam: profile?.target_exam || "", phone: profile?.phone || "", academic_status: profile?.academic_status || "", state: profile?.state || "", city: profile?.city || "" }); }} className="rounded-xl border-white/10 bg-white/[0.03] text-slate-300"><X size={15} className="mr-2" />Cancel</Button><Button onClick={saveProfile} disabled={saving} className="rounded-xl bg-[#167CC0] text-white hover:bg-[#208FD5]"><Save size={15} className="mr-2" />{saving ? "Saving..." : "Save changes"}</Button></div>}
       </div>
-    </DashboardLayout>
-  );
+
+      <section className={panel + " relative overflow-hidden p-5 sm:p-7"}>
+        <div className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-sky-500/[0.08] blur-3xl" />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
+          <div className="relative h-24 w-24 shrink-0">
+            {profile?.avatar_url ? <img src={profile.avatar_url} alt={name} className="h-24 w-24 rounded-2xl border border-white/10 object-cover" /> : <div className="grid h-24 w-24 place-items-center rounded-2xl border border-sky-400/20 bg-[#123B5A] text-2xl font-semibold text-sky-100">{initials}</div>}
+            <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={uploadPhoto} />
+            <button onClick={() => photoRef.current?.click()} disabled={uploading} aria-label="Change profile photo" className="absolute -bottom-2 -right-2 rounded-xl border border-white/10 bg-[#13263A] p-2 text-sky-300 shadow-lg hover:bg-[#1A3A55]"><Camera size={15} /></button>
+          </div>
+          <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 className="truncate text-xl font-semibold text-white sm:text-2xl">{name}</h2><span className="rounded-full border border-sky-400/20 bg-sky-400/10 px-2.5 py-1 text-[10px] font-medium text-sky-300">Student</span></div>
+            <p className="mt-1 flex items-center gap-2 break-all text-sm text-slate-400"><Mail size={14} />{user?.email}</p>
+            <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-slate-500">{profile?.target_exam && <span className="inline-flex items-center gap-1.5"><Target size={13} />{profile.target_exam}</span>}{dateJoined && <span className="inline-flex items-center gap-1.5"><CalendarDays size={13} />Joined {dateJoined}</span>}</div>
+          </div>
+          <div className="hidden h-16 w-px bg-white/[0.08] sm:block" />
+          <div className="min-w-[110px]"><p className="text-[10px] uppercase tracking-wider text-slate-500">Account status</p><p className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-emerald-300"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Active</p></div>
+        </div>
+      </section>
+
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[{ label: "Completed tests", value: stats.testsCompleted.toLocaleString(), icon: Trophy, hint: "Evaluated submissions" }, { label: "Questions attempted", value: stats.questionsAttempted.toLocaleString(), icon: BookOpen, hint: "Based on saved answers" }, { label: "Average score", value: stats.scorePercent + "%", icon: Target, hint: "Total marks earned / available" }, { label: "Study time", value: stats.studyMinutes >= 60 ? (stats.studyMinutes / 60).toFixed(1) + "h" : stats.studyMinutes + "m", icon: Clock3, hint: "Recorded test time" }].map((item) => <div key={item.label} className={panel + " p-4 sm:p-5"}><div className="flex items-center justify-between"><span className="text-xs text-slate-400">{item.label}</span><item.icon size={17} className="text-sky-400" /></div><p className="mt-3 text-2xl font-semibold tracking-tight text-white">{item.value}</p><p className="mt-1 text-[10px] text-slate-600">{item.hint}</p></div>)}
+      </section>
+
+      <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
+        <section className={panel + " p-5 sm:p-6"}>
+          <div className="mb-5 flex items-center justify-between"><div><h3 className="font-semibold text-white">Personal information</h3><p className="mt-1 text-xs text-slate-500">Keep your student details up to date.</p></div><UserRound size={18} className="text-slate-500" /></div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div><label className={fieldLabel}>Full name</label>{edit ? <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="border-white/10 bg-[#07111D] text-white" /> : <p className="text-sm text-slate-200">{profile?.full_name || "Not provided"}</p>}</div>
+            <div><label className={fieldLabel}>Email address</label><p className="break-all text-sm text-slate-400">{user?.email || "—"}</p></div>
+            <div><label className={fieldLabel}>Phone number</label>{edit ? <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="border-white/10 bg-[#07111D] text-white" /> : <p className="text-sm text-slate-200">{profile?.phone || "Not provided"}</p>}</div>
+            <div><label className={fieldLabel}>Academic status</label>{edit ? <Input value={form.academic_status} onChange={(e) => setForm({ ...form, academic_status: e.target.value })} placeholder="e.g. Class 12 / Dropper" className="border-white/10 bg-[#07111D] text-white" /> : <p className="text-sm text-slate-200">{profile?.academic_status || "Not provided"}</p>}</div>
+            <div><label className={fieldLabel}>Target exam</label>{edit ? <Input value={form.target_exam} onChange={(e) => setForm({ ...form, target_exam: e.target.value })} placeholder="e.g. JEE Advanced" className="border-white/10 bg-[#07111D] text-white" /> : <p className="text-sm text-slate-200">{profile?.target_exam || "Not provided"}</p>}</div>
+            <div><label className={fieldLabel}>Roll number</label><p className="text-sm text-slate-200">{profile?.roll_number || "Not provided"}</p></div>
+            <div><label className={fieldLabel}>City</label>{edit ? <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="border-white/10 bg-[#07111D] text-white" /> : <p className="text-sm text-slate-200">{profile?.city || "Not provided"}</p>}</div>
+            <div><label className={fieldLabel}>State</label>{edit ? <Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} className="border-white/10 bg-[#07111D] text-white" /> : <p className="text-sm text-slate-200">{profile?.state || "Not provided"}</p>}</div>
+          </div>
+          {edit && <p className="mt-4 text-[10px] text-slate-600">Email and roll number are managed by your account and cannot be edited here.</p>}
+        </section>
+
+        <section className={panel + " p-5 sm:p-6"}>
+          <div className="mb-5 flex items-center justify-between"><div><h3 className="font-semibold text-white">Recent academic activity</h3><p className="mt-1 text-xs text-slate-500">Your latest evaluated tests.</p></div><GraduationCap size={19} className="text-slate-500" /></div>
+          {recent.length === 0 ? <div className="rounded-xl border border-dashed border-white/10 px-4 py-10 text-center"><BookOpen size={22} className="mx-auto text-slate-600" /><p className="mt-3 text-sm text-slate-400">No completed tests yet</p><p className="mt-1 text-xs text-slate-600">Your test history will appear here.</p></div> : <div className="space-y-2">{recent.map((attempt) => {
+            const percent = attempt.total_marks && attempt.total_marks > 0 ? Math.round((Number(attempt.score || 0) / attempt.total_marks) * 100) : 0;
+            return <div key={attempt.id} className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-sky-400/10 text-sky-300"><BookOpen size={16} /></div><div className="min-w-0 flex-1"><p className="truncate text-xs font-medium text-slate-200">{attempt.test?.name || "Completed test"}</p><p className="mt-1 text-[10px] text-slate-500">{new Date(attempt.completed_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p></div><span className="text-sm font-semibold text-sky-300">{percent}%</span></div>;
+          })}</div>}
+        </section>
+      </div>
+      <p className="flex items-center gap-2 pb-2 text-[10px] text-slate-600"><MapPin size={12} />Only information available in your PhyNetix profile is shown. No institution or streak data is fabricated.</p>
+    </div>
+  </StudentWorkspaceLayout>;
 }
