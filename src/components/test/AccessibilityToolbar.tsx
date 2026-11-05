@@ -40,16 +40,16 @@ function Circle({ selected, onClick, children, label }: { selected: boolean; onC
   );
 }
 
-const Arrow = ({ s, fill }: { s: number; fill: string }) => (
-  <svg width={s} height={s} viewBox="0 0 24 24" style={{ filter: "none" }}><path d="M3 2l7 19 3-8 8-3z" fill={fill} stroke="#000" strokeWidth="1.6" strokeLinejoin="round" /></svg>
+const Arrow = ({ s, fill, stroke = "#000" }: { s: number; fill: string; stroke?: string }) => (
+  <svg width={s} height={s} viewBox="0 0 24 24" style={{ filter: "none" }}><path d="M3 2l7 19 3-8 8-3z" fill={fill} stroke={stroke} strokeWidth="1.6" strokeLinejoin="round" /></svg>
 );
-const Sun = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#222" strokeWidth="1.7" strokeLinecap="round" style={{ filter: "none" }}>
+const Sun = ({ c = "#222" }: { c?: string }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" style={{ filter: "none" }}>
     <circle cx="12" cy="12" r="4" />{[0, 45, 90, 135, 180, 225, 270, 315].map(a => <line key={a} x1="12" y1="2.5" x2="12" y2="5" transform={`rotate(${a} 12 12)`} />)}
   </svg>
 );
-const Moon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#222" strokeWidth="1.9" strokeLinejoin="round" style={{ filter: "none" }}><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>
+const Moon = ({ c = "#222" }: { c?: string }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.9" strokeLinejoin="round" style={{ filter: "none" }}><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>
 );
 
 export default function AccessibilityToolbar() {
@@ -129,7 +129,8 @@ export default function AccessibilityToolbar() {
     return () => { clearInterval(iv); document.removeEventListener("mousemove", move); if (lensRef.current) lensRef.current.style.display = "none"; };
   }, [mag]);
 
-  const card: CSSProperties = { background: "#fff", borderRadius: 3, padding: "20px 8px 0", textAlign: "center", fontSize: 14, color: "#333", height: 108, boxSizing: "border-box" };
+  const fg = dark ? "#fff" : "#333";
+  const card: CSSProperties = { background: dark ? "rgb(36,36,36)" : "#fff", borderRadius: 3, padding: "20px 8px 0", textAlign: "center", fontSize: 14, color: fg, height: 108, boxSizing: "border-box" };
 
   return (
     <>
@@ -150,13 +151,13 @@ export default function AccessibilityToolbar() {
       </div>
 
       {open && (
-        <div ref={panelRef} className="nta-a11y-panel" style={{ position: "fixed", top: 80, right: 20, width: 444, maxWidth: "96vw", background: "rgb(243,243,243)", boxShadow: "0 4px 16px rgba(0,0,0,.28)", borderRadius: 3, padding: "20px 20px 20px", boxSizing: "border-box", zIndex: 1000002, fontFamily: "Arial, sans-serif", color: "#333", filter: "none" }}>
-          <div style={{ textAlign: "center", fontSize: 19, color: "#333", margin: "0 0 17px", lineHeight: "28px" }}>Accessibility Adjustments</div>
+        <div ref={panelRef} className="nta-a11y-panel" style={{ position: "fixed", top: 80, right: 20, width: 444, maxWidth: "96vw", background: dark ? "rgb(27,27,27)" : "rgb(243,243,243)", boxShadow: "0 4px 16px rgba(0,0,0,.45)", borderRadius: 3, padding: "20px 20px 20px", boxSizing: "border-box", zIndex: 1000002, fontFamily: "Arial, sans-serif", color: fg, filter: "none" }}>
+          <div style={{ textAlign: "center", fontSize: 19, color: fg, margin: "0 0 17px", lineHeight: "28px" }}>Accessibility Adjustments</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <div style={card}>
               Switch to Dark Mode
               <div style={{ marginTop: 18, display: "flex", alignItems: "center", justifyContent: "center", gap: 9 }}>
-                <Sun /><Switch on={dark} onClick={() => setDark(d => !d)} label="Dark mode" /><Moon />
+                <Sun c={dark ? "#fff" : "#222"} /><Switch on={dark} onClick={() => setDark(d => !d)} label="Dark mode" /><Moon c={dark ? "#fff" : "#222"} />
               </div>
             </div>
             <div style={{ ...card, paddingTop: 12 }}>
@@ -168,7 +169,7 @@ export default function AccessibilityToolbar() {
             <div style={card}>
               Enable Cursor Trail
               <div style={{ marginTop: 18, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-                <Arrow s={22} fill="#fff" /><Switch on={trail} onClick={() => setTrail(t => !t)} label="Cursor trail" />
+                <Arrow s={22} fill={dark ? "none" : "#fff"} stroke={dark ? "#fff" : "#000"} /><Switch on={trail} onClick={() => setTrail(t => !t)} label="Cursor trail" />
               </div>
             </div>
             <div style={{ ...card, paddingTop: 12 }}>
