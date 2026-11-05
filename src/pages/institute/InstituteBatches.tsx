@@ -28,7 +28,7 @@ const emptyBatch = {
 
 export default function InstituteBatches() {
   const qc = useQueryClient();
-  const { institutionId, isSuspended } = useInstitute();
+  const { institutionId, isSuspended, can } = useInstitute();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ ...emptyBatch });
   const [regenFor, setRegenFor] = useState<any>(null);
@@ -152,13 +152,13 @@ export default function InstituteBatches() {
                       <Copy className="w-3 h-3" />
                     </Button>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => setRegenFor(b)} disabled={isSuspended}>
+                  <Button variant="outline" size="sm" onClick={() => setRegenFor(b)} disabled={isSuspended || !can("batches.manage")}>
                     <RefreshCw className="w-4 h-4 mr-2" /> Regenerate
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => setMembersFor(b)}>
+                  <Button variant="outline" size="sm" onClick={() => setMembersFor(b)} disabled={!can("students.view")}>
                     <Users className="w-4 h-4 mr-2" /> Members ({b.current_students ?? 0})
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => setTestsFor(b)}>
+                  <Button variant="outline" size="sm" onClick={() => setTestsFor(b)} disabled={!can("tests.edit")}>
                     <ClipboardList className="w-4 h-4 mr-2" /> Assigned Tests
                   </Button>
                 </div>
@@ -193,7 +193,7 @@ export default function InstituteBatches() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => createBatch.mutate()} disabled={createBatch.isPending}>
+            <Button onClick={() => createBatch.mutate()} disabled={createBatch.isPending || isSuspended || !can("batches.manage")}>
               {createBatch.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Create batch
             </Button>
           </DialogFooter>
@@ -216,13 +216,13 @@ export default function InstituteBatches() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {membersFor && <MembersDialog batch={membersFor} onClose={() => setMembersFor(null)} />}
+      {membersFor && <MembersDialog batch={membersFor} canManage={can("students.manage")} onClose={() => setMembersFor(null)} />}
       {testsFor && <AssignTestsDialog batch={testsFor} institutionId={institutionId!} onClose={() => setTestsFor(null)} />}
     </div>
   );
 }
 
-function MembersDialog({ batch, onClose }: { batch: any; onClose: () => void }) {
+function MembersDialog({ batch, canManage, onClose }: { batch: any; canManage: boolean; onClose: () => void }) {
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["batch-members", batch.id],
@@ -268,7 +268,7 @@ function MembersDialog({ batch, onClose }: { batch: any; onClose: () => void }) 
                     {m.profiles?.roll_number} · joined {format(new Date(m.enrolled_at), "dd MMM yyyy")} · {m.enrollment_type || "manual"}
                   </div>
                 </div>
-                <Button size="sm" variant="ghost" onClick={() => remove.mutate(m.id)}>Remove</Button>
+                {canManage && <Button size="sm" variant="ghost" onClick={() => remove.mutate(m.id)}>Remove</Button>}
               </div>
             ))}
           </div>
