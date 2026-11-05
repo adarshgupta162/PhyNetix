@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Building2, Copy, Loader2, Search, CheckCircle2, XCircle, PauseCircle, PlayCircle, Users, Plus } from "lucide-react";
+import { Building2, Copy, Loader2, Search, CheckCircle2, XCircle, PauseCircle, PlayCircle, Plus } from "lucide-react";
 import { INDIAN_STATES } from "@/lib/indiaGeo";
 
 const STATUS_TABS = ["all", "pending", "active", "suspended", "rejected"] as const;
@@ -82,11 +82,10 @@ export default function InstitutionsManager() {
           <Button onClick={() => setAddOpen(true)}><Plus className="w-4 h-4 mr-2" />Add institute</Button>
         </div>
 
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
           {[
             { label: "Institutes", value: stats?.total },
             { label: "Pending approval", value: stats?.pending },
-            { label: "Students", value: stats?.students },
             { label: "Attempts", value: stats?.attempts },
           ].map((s) => (
             <Card key={s.label}>
@@ -151,7 +150,6 @@ export default function InstitutionsManager() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex gap-4 text-xs text-muted-foreground flex-wrap">
-                    <span>{Number(i.students ?? 0)} students</span>
                     <span>{Number(i.batches ?? 0)} batches</span>
                     <span>{Number(i.tests ?? 0)} tests</span>
                     <span>{Number(i.attempts ?? 0)} attempts</span>
