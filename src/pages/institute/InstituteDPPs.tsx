@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { FileText, Plus, Loader2, BookOpen, Search, ListPlus } from "lucide-react";
+import { FileText, Plus, Loader2, Search, ListPlus } from "lucide-react";
 
 const blank = { title: "", description: "", subject: "Physics", chapter: "", topic: "", difficulty: "medium", duration_minutes: 30, is_timed: true, batch_id: "none" };
 
