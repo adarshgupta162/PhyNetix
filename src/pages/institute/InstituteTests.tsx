@@ -18,7 +18,7 @@ import { ClipboardList, Loader2, Plus, Layers, Trash2 } from "lucide-react";
 export default function InstituteTests() {
   const qc = useQueryClient();
   const { user } = useAuth();
-  const { institutionId, isActive } = useInstitute();
+  const { institutionId, isActive, can } = useInstitute();
   const [open, setOpen] = useState(false);
   const [assignFor, setAssignFor] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", exam_type: "jee-main", duration_minutes: 180 });
@@ -88,7 +88,7 @@ export default function InstituteTests() {
           <h1 className="text-2xl font-bold flex items-center gap-2"><ClipboardList className="w-6 h-6" /> Tests</h1>
           <p className="text-sm text-muted-foreground">Create tests and assign them to your batches. Only assigned batch members can attempt them.</p>
         </div>
-        <Button onClick={() => setOpen(true)} disabled={!isActive}><Plus className="w-4 h-4 mr-2" />New test</Button>
+        <Button onClick={() => setOpen(true)} disabled={!isActive || !can("tests.create")}><Plus className="w-4 h-4 mr-2" />New test</Button>
       </div>
 
       {isLoading ? (
@@ -119,7 +119,7 @@ export default function InstituteTests() {
                 </div>
               </CardHeader>
               <CardContent className="flex gap-2 flex-wrap">
-                <Button variant="outline" size="sm" onClick={() => setAssignFor(t.id)} disabled={!isActive}>
+                <Button variant="outline" size="sm" onClick={() => setAssignFor(t.id)} disabled={!isActive || !can("tests.edit")}>
                   <Layers className="w-4 h-4 mr-2" />Assign to batches
                 </Button>
                 <Button
@@ -160,7 +160,7 @@ export default function InstituteTests() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => createTest.mutate()} disabled={createTest.isPending}>
+            <Button onClick={() => createTest.mutate()} disabled={createTest.isPending || !isActive || !can("tests.create")}>
               {createTest.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Create
             </Button>
           </DialogFooter>
