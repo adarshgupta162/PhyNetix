@@ -11,7 +11,8 @@ const REQUIRED: Record<string, string> = {
   "/institute/students": "students.view",
   "/institute/batches": "batches.view",
   "/institute/tests": "tests.view",
-  "/institute/dpps": "dpps.view",\n  "/institute/proctoring": "proctoring.view",
+  "/institute/dpps": "dpps.view",
+  "/institute/proctoring": "proctoring.view",
   "/institute/results": "results.view",
 };
 
