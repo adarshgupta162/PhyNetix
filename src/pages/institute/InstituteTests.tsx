@@ -20,7 +20,8 @@ export default function InstituteTests() {
   const { user } = useAuth();
   const { institutionId, isActive, can } = useInstitute();
   const [open, setOpen] = useState(false);
-  const [assignFor, setAssignFor] = useState<string | null>(null);\n  const [questionsFor, setQuestionsFor] = useState<any>(null);
+  const [assignFor, setAssignFor] = useState<string | null>(null);
+  const [questionsFor, setQuestionsFor] = useState<any>(null);
   const [form, setForm] = useState({ name: "", exam_type: "jee-main", duration_minutes: 180 });
 
   const { data: tests, isLoading } = useQuery({
@@ -119,7 +120,8 @@ export default function InstituteTests() {
                 </div>
               </CardHeader>
               <CardContent className="flex gap-2 flex-wrap">
-                <Button variant="outline" size="sm" onClick={() => setQuestionsFor(t)} disabled={!isActive || !(can("questions.manage") || can("tests.edit"))}><ListPlus className="w-4 h-4 mr-2" />Manage questions</Button>\n                <Button variant="outline" size="sm" onClick={() => setAssignFor(t.id)} disabled={!isActive || !can("tests.edit")}>
+                <Button variant="outline" size="sm" onClick={() => setQuestionsFor(t)} disabled={!isActive || !(can("questions.manage") || can("tests.edit"))}><ListPlus className="w-4 h-4 mr-2" />Manage questions</Button>
+                <Button variant="outline" size="sm" onClick={() => setAssignFor(t.id)} disabled={!isActive || !can("tests.edit")}>
                   <Layers className="w-4 h-4 mr-2" />Assign to batches
                 </Button>
                 <Button
@@ -167,7 +169,8 @@ export default function InstituteTests() {
         </DialogContent>
       </Dialog>
 
-      {assignFor && <AssignDialog testId={assignFor} institutionId={institutionId!} onClose={() => setAssignFor(null)} />}\n      {questionsFor && <TestQuestionDialog test={questionsFor} institutionId={institutionId!} onClose={() => setQuestionsFor(null)} />}
+      {assignFor && <AssignDialog testId={assignFor} institutionId={institutionId!} onClose={() => setAssignFor(null)} />}
+      {questionsFor && <TestQuestionDialog test={questionsFor} institutionId={institutionId!} onClose={() => setQuestionsFor(null)} />}
     </div>
   );
 }
@@ -227,7 +230,8 @@ function TestQuestionDialog({ test, institutionId, onClose }: { test:any; instit
     <DialogFooter><Button variant="outline" onClick={onClose}>Close</Button><Button onClick={()=>add.mutate()} disabled={add.isPending||!selected.length}>{add.isPending&&<Loader2 className="w-4 h-4 mr-2 animate-spin"/>}Add selected</Button></DialogFooter>
   </DialogContent></Dialog>;
 }
-\nfunction AssignDialog({ testId, institutionId, onClose }: { testId: string; institutionId: string; onClose: () => void }) {
+
+function AssignDialog({ testId, institutionId, onClose }: { testId: string; institutionId: string; onClose: () => void }) {
   const qc = useQueryClient();
 
   const { data: batches } = useQuery({
