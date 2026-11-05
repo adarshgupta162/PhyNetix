@@ -79,7 +79,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
   const { user, isLoading, signOut, isAdmin } = useAuth();
   const { userRoles } = useStaffRoles();
-  const isDashboard = location.pathname === "/dashboard";
 
   const canManageUsers = useMemo(
     () => isAdmin || userRoles.some((role) => ["operations_admin", "head", "manager"].includes(role)),
@@ -175,8 +174,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     .slice(0, 2);
 
   const SidebarContent = () => (
-      <div className="flex flex-col h-full">
-      <Link to="/dashboard" className="flex items-center gap-3 px-4 py-5 border-b border-[#1D364A]">
+    <div className="flex flex-col h-full">
+      <Link to="/dashboard" className="flex items-center gap-3 px-4 py-5 border-b border-[#203B5C]">
         <BrandLogo compact={collapsed && !mobileOpen} />
         <AnimatePresence mode="wait">
           {(!collapsed || mobileOpen) && (
@@ -184,7 +183,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
               exit={{ opacity: 0, width: 0 }}
-                className="text-lg font-semibold tracking-tight text-[#F4F7FF] whitespace-nowrap overflow-hidden"
+              className="text-lg font-semibold text-[#F4F7FF] whitespace-nowrap overflow-hidden"
             >
               PhyNetix
             </motion.span>
@@ -202,8 +201,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 border border-transparent",
                 isActive
-                  ? "text-[#F4F7FF] bg-[#123552] border-[#2A82B8] shadow-[0_0_18px_rgba(22,151,232,0.12)]"
-                  : "text-[#91A8BB] hover:text-[#F4F7FF] hover:bg-[#10283B] hover:border-[#1D364A]",
+                  ? "text-[#F4F7FF] bg-gradient-to-r from-[#168BFF] to-[#18D5F5]/70 border-[#168BFF]/40"
+                  : "text-[#9AADC5] hover:text-[#F4F7FF] hover:bg-[#10233B] hover:border-[#203B5C]",
               )}
             >
               <item.icon className="w-[18px] h-[18px] flex-shrink-0" />
@@ -225,13 +224,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         })}
       </nav>
 
-      <div className="border-t border-[#1D364A] px-3 py-3 space-y-2">
+      <div className="border-t border-[#203B5C] px-3 py-3 space-y-2">
         <div className="flex items-center justify-between px-2">
           <ThemeToggle />
           {!mobileOpen && (
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="p-1.5 rounded-md text-[#91A8BB] hover:text-[#F4F7FF] hover:bg-[#10283B] transition-colors hidden lg:block"
+              className="p-1.5 rounded-md text-[#9AADC5] hover:text-[#F4F7FF] hover:bg-[#10233B] transition-colors hidden lg:block"
               aria-label="Toggle sidebar"
             >
               {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -241,7 +240,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-[#91A8BB] hover:text-[#F4F7FF] hover:bg-[#10283B] transition-colors w-full"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-[#9AADC5] hover:text-[#F4F7FF] hover:bg-[#10233B] transition-colors w-full"
         >
           <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
           <AnimatePresence mode="wait">
@@ -257,10 +256,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   );
 
   return (
-    <div className="min-h-screen bg-black flex text-[#F4F7FF] selection:bg-[#1697E8]/30">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(22,151,232,0.06),transparent_38%),radial-gradient(circle_at_0%_100%,rgba(92,184,233,0.04),transparent_34%)]" />
+    <div className="min-h-screen bg-[#050B16] flex text-[#F4F7FF]">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(22,139,255,0.14),transparent_42%),radial-gradient(circle_at_85%_0%,rgba(24,213,245,0.08),transparent_38%)]" />
 
-      <div className={cn("lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#050D14]/95 border-b border-[#1D364A] z-50 items-center px-4 gap-3", isDashboard ? "hidden" : "flex")}>
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#071426] border-b border-[#203B5C] z-50 flex items-center px-4 gap-3">
         <button onClick={() => setMobileOpen(true)} className="p-2 rounded-lg hover:bg-[#10233B] text-[#F4F7FF]" aria-label="Open menu">
           <Menu className="w-5 h-5" />
         </button>
@@ -285,7 +284,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               animate={{ x: 0 }}
               exit={{ x: -300 }}
               transition={{ type: "spring", damping: 26, stiffness: 300 }}
-              className="lg:hidden fixed left-0 top-0 h-screen w-[285px] bg-[#07131D] border-r border-[#1D364A] z-[60]"
+              className="lg:hidden fixed left-0 top-0 h-screen w-[285px] bg-[#071426] border-r border-[#203B5C] z-[60]"
             >
               <div className="absolute top-3 right-3">
                 <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg hover:bg-[#10233B] text-[#9AADC5]">
@@ -302,19 +301,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         initial={false}
         animate={{ width: collapsed ? 82 : 225 }}
         transition={{ duration: 0.25, ease: "easeInOut" }}
-        className={cn("hidden lg:block fixed left-0 top-0 h-screen bg-[#07131D] border-r border-[#1D364A] z-40", isDashboard && "lg:hidden")}
+        className="hidden lg:block fixed left-0 top-0 h-screen bg-[#071426] border-r border-[#203B5C] z-40"
       >
         <SidebarContent />
       </motion.aside>
 
       <main
         className={cn(
-          "relative flex-1 transition-all duration-300",
-          isDashboard ? "pt-0 ml-0" : "pt-16 lg:pt-0",
-          !isDashboard && (collapsed ? "lg:ml-[82px]" : "lg:ml-[225px]"),
+          "relative flex-1 transition-all duration-300 pt-16 lg:pt-0",
+          collapsed ? "lg:ml-[82px]" : "lg:ml-[225px]",
         )}
       >
-        <header className={cn("hidden lg:flex sticky top-0 z-30 h-16 border-b border-[#1D364A] bg-[#050D14]/90 backdrop-blur-xl items-center px-6 gap-4", isDashboard && "lg:hidden")}>
+        <header className="hidden lg:flex sticky top-0 z-30 h-16 border-b border-[#203B5C] bg-[#071426]/95 backdrop-blur-sm items-center px-6 gap-4">
           <button
             onClick={() => setCollapsed((value) => !value)}
             className="p-2 rounded-lg text-[#9AADC5] hover:text-[#F4F7FF] hover:bg-[#10233B]"
@@ -431,7 +429,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </header>
 
-        <div className={cn("relative", isDashboard ? "min-h-screen" : "min-h-[calc(100vh-4rem)]")}>{children}</div>
+        <div className="relative min-h-[calc(100vh-4rem)]">{children}</div>
       </main>
     </div>
   );
