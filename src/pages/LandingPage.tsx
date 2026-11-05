@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { ArrowRight, Menu, X, BookOpen, ChartNoAxesColumn, ClipboardList, Building2 } from "lucide-react";
-import { BrandLogo } from "@/components/BrandLogo";
+import { BrandLogo } from "@/components/BrandLogo";\nimport study from "@/assets/landing-study.jpg";
 import { TestSeriesSection } from "@/components/landing/TestSeriesSection";
 
 const features = [
