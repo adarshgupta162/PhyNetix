@@ -20,7 +20,7 @@ export function BrandLogo({ className, compact = false }: { className?: string; 
       {!loaded && !failed && (
         <span className={cn("absolute inset-0 flex items-center", compact ? "justify-center" : "gap-2")}>
           <Atom className="h-6 w-6 shrink-0 animate-[spin_7s_linear_infinite] text-[#13DCCB]" strokeWidth={1.6} />
-          {!compact && <span className="h-3 w-20 overflow-hidden rounded-sm bg-white/[0.06]"><span className="block h-full w-1/2 animate-[brand-shimmer_1.4s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-[#13DCCB]/35 to-transparent" /></span>}
+          {!compact && <span className="h-3 w-20 overflow-hidden rounded-sm bg-white/[0.06]"><span className="block h-full w-1/2 animate-pulse bg-gradient-to-r from-transparent via-[#13DCCB]/35 to-transparent" /></span>}
         </span>
       )}
       {!failed ? (
