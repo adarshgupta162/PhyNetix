@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useInstitute } from "@/hooks/useInstitute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Layers, ClipboardList, Activity, Target, History } from "lucide-react";
+import { Layers, ClipboardList, Activity, Target, History, Users } from "lucide-react";
 import { format } from "date-fns";
 
 export default function InstituteDashboard() {
@@ -35,7 +35,7 @@ export default function InstituteDashboard() {
   });
 
   const cards = [
-    { label: "Active Batches", value: stats?.batches, icon: Layers },
+    { label: "Enrolled Students", value: stats?.students, icon: Users },\n    { label: "Active Batches", value: stats?.batches, icon: Layers },
     { label: "Total Tests", value: stats?.tests, icon: ClipboardList },
     { label: "Test Attempts", value: stats?.attempts, icon: Activity },
     { label: "Average Score", value: stats?.avg_score, icon: Target },
@@ -50,7 +50,7 @@ export default function InstituteDashboard() {
         </p>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {cards.map((c) => (
           <Card key={c.label}>
             <CardContent className="p-4">
@@ -61,7 +61,7 @@ export default function InstituteDashboard() {
               {isLoading ? (
                 <Skeleton className="h-8 w-16 mt-2" />
               ) : (
-                <div className="text-2xl font-bold mt-1">{c.value ?? 0}</div>
+                <div className="text-2xl font-bold mt-1">{c.value ?? 0}{c.label === "Average Score" ? "%" : ""}</div>
               )}
             </CardContent>
           </Card>
