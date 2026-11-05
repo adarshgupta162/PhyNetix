@@ -28,7 +28,7 @@ const emptyBatch = {
 
 export default function InstituteBatches() {
   const qc = useQueryClient();
-  const { institutionId, isSuspended } = useInstitute();
+  const { institutionId, isSuspended, can } = useInstitute();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ ...emptyBatch });
   const [regenFor, setRegenFor] = useState<any>(null);
@@ -152,13 +152,13 @@ export default function InstituteBatches() {
                       <Copy className="w-3 h-3" />
                     </Button>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => setRegenFor(b)} disabled={isSuspended}>
+                  <Button variant="outline" size="sm" onClick={() => setRegenFor(b)} disabled={isSuspended || !can("batches.manage")}>
                     <RefreshCw className="w-4 h-4 mr-2" /> Regenerate
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => setMembersFor(b)}>
+                  <Button variant="outline" size="sm" onClick={() => setMembersFor(b)} disabled={!can("students.view")}>
                     <Users className="w-4 h-4 mr-2" /> Members ({b.current_students ?? 0})
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => setTestsFor(b)}>
+                  <Button variant="outline" size="sm" onClick={() => setTestsFor(b)} disabled={!can("tests.edit")}>
                     <ClipboardList className="w-4 h-4 mr-2" /> Assigned Tests
                   </Button>
                 </div>
@@ -193,7 +193,7 @@ export default function InstituteBatches() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => createBatch.mutate()} disabled={createBatch.isPending}>
+            <Button onClick={() => createBatch.mutate()} disabled={createBatch.isPending || isSuspended || !can("batches.manage")}>
               {createBatch.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Create batch
             </Button>
           </DialogFooter>
