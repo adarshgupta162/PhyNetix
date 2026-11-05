@@ -85,11 +85,13 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
 
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <div className="flex h-full flex-col">
-      <Link to="/dashboard" className="flex h-[76px] items-center gap-3 border-b border-white/[0.07] px-5">
-        <BrandLogo compact={collapsed && !mobile} />
-        {(!collapsed || mobile) && <span className="text-[17px] font-semibold tracking-tight text-white">PhyNetix</span>}
-        {mobile && <button type="button" onClick={(e) => { e.preventDefault(); setDrawerOpen(false); }} className="ml-auto rounded-lg p-2 text-slate-400 hover:bg-white/5"><X size={18} /></button>}
-      </Link>
+      <div className="flex h-[76px] items-center border-b border-white/[0.07] px-5">
+        <Link to="/dashboard" className="flex min-w-0 items-center gap-3">
+          <BrandLogo compact={collapsed && !mobile} />
+          {(!collapsed || mobile) && <span className="text-[17px] font-semibold tracking-tight text-white">PhyNetix</span>}
+        </Link>
+        {mobile && <button type="button" onClick={() => setDrawerOpen(false)} aria-label="Close navigation" className="ml-auto rounded-lg p-2 text-slate-400 hover:bg-white/5"><X size={18} /></button>}
+      </div>
       <div className="px-4 pt-6 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{(!collapsed || mobile) ? "Workspace" : " "}</div>
       <nav className="flex-1 space-y-1 px-3">
         {navItems.map(({ label, path, icon: Icon }) => {
