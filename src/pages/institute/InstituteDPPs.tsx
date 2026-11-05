@@ -66,7 +66,7 @@ export default function InstituteDPPs() {
 
   const publish = useMutation({
     mutationFn: async ({ id, value }: { id: string; value: boolean }) => {
-      const { error } = await supabase.from("dpps").update({ is_published: value, publish_date: value ? new Date().toISOString() : null }).eq("id", id);
+      const { error } = await supabase.from("dpps").update({ is_published: value, publish_date: value ? new Date().toISOString().slice(0, 10) : null }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["institute-dpps", institutionId] }),
@@ -116,7 +116,7 @@ function QuestionDialog({ dpp, institutionId, onClose }: { dpp:any; institutionI
     queryFn:async()=>{
       const {data,error}=await supabase.from("phynetix_library")
         .select("id,question_text,question_image_url,question_type,options,correct_answer,marks,negative_marks,solution_text,solution_image_url,difficulty,time_seconds,subject,chapter")
-        .not("question_text","is",null).or(`institution_id.eq.${institutionId},and(institution_id.is.null,is_published.eq.true)`)
+        .not("question_text","is",null).not("correct_answer","is",null).or(`institution_id.eq.${institutionId},and(institution_id.is.null,is_published.eq.true)`)
         .ilike("question_text",`%${search}%`).order("created_at",{ascending:false}).limit(100);
       if(error) throw error;
       return data??[];
@@ -134,7 +134,7 @@ function QuestionDialog({ dpp, institutionId, onClose }: { dpp:any; institutionI
       const rows=picked.map((q:any,i:number)=>({
         dpp_id:dpp.id, question_number:start+i+1, order_index:start+i,
         question_text:q.question_text, question_image_url:q.question_image_url,
-        question_type:q.question_type||"single_choice", options:q.options,
+        question_type:q.question_type||"mcq", options:q.options,
         correct_answer:q.correct_answer, marks:q.marks??4, negative_marks:q.negative_marks??1,
         solution_text:q.solution_text, solution_image_url:q.solution_image_url,
         difficulty:q.difficulty||"medium",
