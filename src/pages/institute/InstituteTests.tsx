@@ -204,13 +204,13 @@ function TestQuestionDialog({ test, institutionId, onClose }: { test:any; instit
       if(!subject){const created=await supabase.from("test_subjects").insert({test_id:test.id,name:"Questions",order_index:0}).select("id").single();if(created.error)throw created.error;subject=created.data;}
       let {data:section,error:sectionError}=await supabase.from("test_sections").select("id").eq("subject_id",subject.id).order("order_index").limit(1).maybeSingle();
       if(sectionError)throw sectionError;
-      if(!section){const created=await supabase.from("test_sections").insert({subject_id:subject.id,name:"Section A",section_type:"standard",order_index:0}).select("id").single();if(created.error)throw created.error;section=created.data;}
+      if(!section){const created=await supabase.from("test_sections").insert({subject_id:subject.id,name:"Section A",section_type:"single_choice",order_index:0}).select("id").single();if(created.error)throw created.error;section=created.data;}
       const start=count??0;
       const rows=chosen.map((q:any,i:number)=>({
         test_id:test.id,section_id:section!.id,question_number:start+i+1,order_index:start+i,
         question_text:q.question_text,options:q.options,correct_answer:q.correct_answer,
         marks:q.marks??4,negative_marks:q.negative_marks??1,difficulty:q.difficulty??"medium",
-        chapter:q.chapter??null,topic:q.topic??null,question_type:q.question_type??"single_choice",
+        chapter:q.chapter??null,topic:q.topic??null,question_type:q.question_type??"mcq",
         image_urls:q.question_image_url?[q.question_image_url]:[],solution_text:q.solution_text??null,
         solution_image_urls:q.solution_image_url?[q.solution_image_url]:[],time_seconds:q.time_seconds??null,library_question_id:q.id,
       }));
