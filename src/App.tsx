@@ -89,7 +89,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <ProfileGuard>
-              <Suspense fallback={<div className="min-h-screen bg-[#050A12] px-6 py-8"><div className="mx-auto max-w-6xl animate-pulse space-y-4"><div className="h-7 w-44 rounded-lg bg-white/[0.07]" /><div className="h-32 rounded-2xl bg-white/[0.04]" /><div className="h-56 rounded-2xl bg-white/[0.04]" /></div></div>}>
+              <Suspense fallback={<div className="min-h-screen bg-[#FAFAF8] px-6 py-8"><div className="mx-auto max-w-6xl space-y-4"><div className="h-6 w-36 animate-pulse rounded bg-[#E9ECE7]" /><div className="h-32 animate-pulse rounded-lg bg-[#F0F1ED]" /><div className="h-56 animate-pulse rounded-lg bg-[#F0F1ED]" /></div></div>}>
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/dev" element={<DevPortfolio />} />
