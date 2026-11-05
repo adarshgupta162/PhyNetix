@@ -32,7 +32,7 @@ export function PaymentReceiptAction({ payment, userId, email, buttonLabel = "Vi
 
   const loadStudent = async () => {
     const { data, error } = await supabase.from("profiles")
-      .select("full_name, phone, address, city, state, country, roll_number, academic_status")
+      .select("full_name, phone, address, city, state, roll_number, academic_status")
       .eq("id", userId).maybeSingle();
     if (error) throw error;
     const profile = data as ReceiptStudent | null;
@@ -68,7 +68,7 @@ export function PaymentReceiptAction({ payment, userId, email, buttonLabel = "Vi
 
   const orderId = readMetadata(payment.metadata, "razorpay_order_id") || payment.provider_order_id;
   const coupon = readMetadata(payment.metadata, "coupon_code");
-  const address = [student?.address, student?.city, student?.state, student?.country].filter(Boolean).join(", ");
+  const address = [student?.address, student?.city, student?.state].filter(Boolean).join(", ");
 
   return (
     <>
