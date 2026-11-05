@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
+import { useLocation, useNavigate, useParams, Link, useSearchParams } from "react-router-dom";
 import { 
   Trophy, 
   Clock, 
@@ -83,6 +83,7 @@ interface Question {
 
 export default function NormalTestAnalysis() {
   const { testId } = useParams();
+  const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
@@ -96,6 +97,7 @@ export default function NormalTestAnalysis() {
   const [loading, setLoading] = useState(true);
   const [testType, setTestType] = useState<string>("normal");
   const testName = location.state?.testName || "Test Analysis";
+  const selectedAttemptId = searchParams.get("attemptId");
 
   useEffect(() => {
     if (authLoading) return;
@@ -192,7 +194,7 @@ export default function NormalTestAnalysis() {
     }
 
     navigate("/tests");
-  }, [location.state, testId, user, navigate, authLoading]);
+  }, [location.state, testId, user, navigate, authLoading, selectedAttemptId]);
 
   const fetchTestType = async () => {
     if (!testId) return;
@@ -223,8 +225,8 @@ export default function NormalTestAnalysis() {
       const { data: attempt, error } = await supabase
         .from("test_attempts")
         .select("*")
-        .eq("test_id", testId)
         .eq("user_id", user!.id)
+        .eq(selectedAttemptId ? "id" : "test_id", selectedAttemptId || testId)
         .order("completed_at", { ascending: false })
         .limit(1)
         .single();
