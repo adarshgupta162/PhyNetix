@@ -7,7 +7,7 @@ import { TestSeriesSection } from "@/components/landing/TestSeriesSection";
 
 const features = [
   { icon: ClipboardList, title: "Exam-style tests", text: "Timed tests with a familiar computer-based exam layout." },
-  { icon: ChartNoAxesColumn, title: "Useful analysis", text: "Review scores, accuracy and time spent after an attempt." },
+  { icon: BarChart3, title: "Useful analysis", text: "Review scores, accuracy and time spent after an attempt." },
   { icon: BookOpen, title: "Solutions and practice", text: "Review worked solutions and continue with daily practice problems." },
   { icon: Building2, title: "Institute workspace", text: "Tools for institutes to organise batches, tests and student work." },
 ];
