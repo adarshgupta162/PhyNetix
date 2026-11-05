@@ -638,10 +638,10 @@ export default function Dashboard() {
             >
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <h2 className="text-sm font-semibold tracking-tight text-[#F4F7FF]">Questions Breakdown <span className="font-normal text-[#91A8BB]">· {rightPanelTitle}</span></h2>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-[#C9D7EA]">
-                  <span className="inline-flex items-center gap-1 text-[9px]"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.blue }} />Topper</span>
-                  <span className="inline-flex items-center gap-1 text-[9px]"><span className="w-1.5 h-1.5 rounded-full bg-[#DDEAF3]" />Average</span>
-                  <span className="inline-flex items-center gap-1 text-[9px]"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.cyan }} />Low</span>
+                <div className="flex flex-wrap items-center gap-3 text-[9px] text-[#9AADC5]">
+                  <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm" style={{ backgroundColor: COLORS.correct }} />Correct</span>
+                  <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm" style={{ backgroundColor: COLORS.incorrect }} />Incorrect</span>
+                  <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm" style={{ backgroundColor: COLORS.unattempted }} />Unattempted</span>
                 </div>
               </div>
 
@@ -653,7 +653,7 @@ export default function Dashboard() {
                   const unattemptedWidth = (row.stats.unattempted / total) * 100;
 
                   return (
-                    <div key={row.key} className="grid grid-cols-[84px_1fr] gap-2 items-center">
+                    <div key={row.key} className="grid grid-cols-[76px_minmax(0,1fr)_38px] items-center gap-2">
                       <span className="truncate text-[11px] text-[#DDEAF3] font-medium">{row.label}</span>
                       <div className="h-5 rounded-full overflow-hidden border border-[#1D364A] bg-[#152C3F] flex text-[8px] font-semibold">
                         <div className="h-full flex items-center justify-center text-white" style={{ width: `${correctWidth}%`, backgroundColor: COLORS.correct }}>
@@ -666,13 +666,14 @@ export default function Dashboard() {
                           {unattemptedWidth > 12 ? row.stats.unattempted.toLocaleString() : ""}
                         </div>
                       </div>
+                      <span className="text-right text-[10px] tabular-nums text-slate-500">{row.stats.total.toLocaleString()}</span>
                     </div>
                   );
                 })}
 
                 <div className="h-px bg-[#203B5C] my-2" />
 
-                <div className="grid grid-cols-[84px_1fr] gap-2 items-center">
+                <div className="grid grid-cols-[76px_minmax(0,1fr)_38px] items-center gap-2">
                   <span className="text-[11px] text-[#F4F7FF] font-semibold">Overall</span>
                   <div className="h-6 rounded-full overflow-hidden border border-[#1D364A] bg-[#152C3F] flex text-[8px] font-semibold">
                     <div className="h-full flex items-center justify-center text-white" style={{ width: `${aggregate.overall.total ? (aggregate.overall.correct / aggregate.overall.total) * 100 : 0}%`, backgroundColor: COLORS.correct }}>
@@ -685,6 +686,7 @@ export default function Dashboard() {
                       {aggregate.overall.unattempted.toLocaleString()}
                     </div>
                   </div>
+                  <span className="text-right text-[10px] tabular-nums font-semibold text-slate-300">{aggregate.overall.total.toLocaleString()}</span>
                 </div>
               </div>
             </div>
