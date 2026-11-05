@@ -232,7 +232,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <Link to="/admin" className="flex items-center gap-3 px-4 py-5 border-b border-border/60">
-        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0 shadow-sm shadow-primary/30">
+        <div className="w-8 h-8 rounded-md bg-accent flex items-center justify-center flex-shrink-0">
           <AtomIcon className="w-5 h-5 text-primary-foreground" />
         </div>
         <AnimatePresence mode="wait">
