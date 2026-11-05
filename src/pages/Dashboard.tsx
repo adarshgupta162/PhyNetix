@@ -595,7 +595,7 @@ export default function Dashboard() {
                   <div className="h-full flex items-end justify-around gap-4">
                     {SUBJECTS.map((subject) => {
                       const value = aggregate.subjectAccuracy[subject];
-                      const barHeight = `${Math.max(6, value)}%`;
+                      const barHeight = `${Math.max(0, Math.min(100, value))}%`;
                       const gradient =
                         subject === "Physics"
                           ? "linear-gradient(180deg,#168BFF,#0F5DB3)"
