@@ -57,8 +57,8 @@ const COLORS = {
   card: "#0B1A2E",
   cardAlt: "#10233B",
   text: "#F4F7FF",
-  textMuted: "#9AADC5",
-  border: "#203B5C",
+  textMuted: "#B8C7DB",
+  border: "#2A4A6B",
   blue: "#168BFF",
   cyan: "#18D5F5",
   purple: "#805BFF",
@@ -463,18 +463,18 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="p-4 lg:p-6 space-y-6">
-        <div className="grid xl:grid-cols-[1.05fr_1fr] gap-6">
-          <section className="space-y-4">
+      <div className="dashboard-page p-3 sm:p-4 lg:p-5 xl:h-[calc(100vh-4rem)] xl:overflow-hidden">
+        <div className="grid xl:grid-cols-[1.05fr_1fr] gap-4 xl:h-full">
+          <section className="min-h-0 flex flex-col gap-3">
             <div
-              className="rounded-2xl border p-4 lg:p-5"
+              className="shrink-0 rounded-2xl border p-4"
               style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 40px rgba(3, 11, 26, 0.45)" }}
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-semibold" style={{ color: COLORS.text }}>
+                <h2 className="text-2xl font-semibold" style={{ color: COLORS.text }}>
                   Previous Exams
                 </h2>
-                <Link to="/tests" className="inline-flex items-center gap-1 rounded-full border px-4 py-2 text-sm hover:bg-[#10233B] transition" style={{ borderColor: COLORS.border, color: COLORS.textMuted }}>
+                <Link to="/tests" className="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs hover:bg-[#10233B] transition" style={{ borderColor: COLORS.border, color: COLORS.textMuted }}>
                   View all
                   <ChevronRight className="w-4 h-4" />
                 </Link>
@@ -482,15 +482,16 @@ export default function Dashboard() {
             </div>
 
             {attempts.length === 0 ? (
-              <div className="rounded-2xl border border-[#203B5C] bg-[#0B1A2E] p-8 text-center">
+              <div className="rounded-2xl border border-[#2A4A6B] bg-[#0E2138] p-6 text-center">
                 <p className="text-[#F4F7FF] text-lg font-medium">No completed tests yet</p>
-                <p className="text-[#9AADC5] mt-2">Complete your first test to start seeing analytics here.</p>
+                <p className="text-[#B8C7DB] mt-2">Complete your first test to start seeing analytics here.</p>
                 <Link to="/tests" className="inline-flex mt-5 rounded-lg bg-[#168BFF] text-white px-4 py-2 text-sm font-medium hover:bg-[#157de6] transition">
                   Go to Test Library
                 </Link>
               </div>
             ) : (
-              attempts.slice(0, 5).map((attempt) => {
+              <div className="min-h-0 flex-1 space-y-3 overflow-hidden">
+              {attempts.slice(0, 2).map((attempt) => {
                 const badge = getBadge(attempt.scorePercentage);
 
                 return (
@@ -498,18 +499,18 @@ export default function Dashboard() {
                     key={attempt.id}
                     type="button"
                     onClick={() => navigate(`/test/${attempt.testId}/analysis?attemptId=${attempt.id}`)}
-                    className="w-full text-left rounded-2xl border p-4 lg:p-5 transition hover:-translate-y-0.5"
+                    className="w-full text-left rounded-2xl border p-3.5 transition hover:-translate-y-0.5"
                     style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 32px rgba(4, 12, 30, 0.42)" }}
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <h3 className="text-2xl font-semibold leading-tight text-[#F4F7FF]">{attempt.testName}</h3>
-                        <p className="text-sm text-[#9AADC5] mt-1">Performance summary of your completed attempt.</p>
+                        <h3 className="text-xl font-semibold leading-tight text-[#F4F7FF]">{attempt.testName}</h3>
+                        <p className="text-xs text-[#B8C7DB] mt-1">Performance summary of your completed attempt.</p>
                       </div>
-                      <span className={cn("text-sm px-3 py-1 rounded-full border font-medium", badge.className)}>{badge.label}</span>
+                      <span className={cn("text-xs px-2.5 py-1 rounded-full border font-medium", badge.className)}>{badge.label}</span>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap gap-3 text-sm text-[#9AADC5]">
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-[#B8C7DB]">
                       <span className="inline-flex items-center gap-1.5 rounded-full border border-[#203B5C] bg-[#10233B] px-3 py-1">
                         <Calendar className="w-3.5 h-3.5" />
                         {new Date(attempt.completedAt).toLocaleString()}
@@ -520,13 +521,13 @@ export default function Dashboard() {
                       </span>
                     </div>
 
-                    <div className="mt-5 grid sm:grid-cols-[130px_1fr] gap-5 items-center">
-                      <CircularScore score={attempt.scorePercentage} />
+                    <div className="mt-3 grid sm:grid-cols-[104px_1fr] gap-4 items-center">
+                      <div className="scale-[0.88] origin-left"><CircularScore score={attempt.scorePercentage} /></div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-1.5">
                         {SUBJECTS.map((subject) => (
-                          <div key={subject} className="flex items-center justify-between text-base">
-                            <span className="inline-flex items-center gap-2 text-[#C9D7EA]">
+                          <div key={subject} className="flex items-center justify-between text-sm">
+                            <span className="inline-flex items-center gap-2 text-[#D9E5F4]">
                               <span className="w-3 h-3 rounded-full" style={{ background: subject === "Physics" ? COLORS.blue : subject === "Chemistry" ? COLORS.purple : COLORS.cyan }} />
                               {subject}
                             </span>
@@ -537,17 +538,18 @@ export default function Dashboard() {
                     </div>
                   </button>
                 );
-              })
+              })}
+              </div>
             )}
           </section>
 
-          <section className="space-y-5">
+          <section className="min-h-0 grid xl:grid-rows-[minmax(0,1fr)_minmax(0,0.82fr)] gap-4">
             <div
-              className="rounded-2xl border p-5"
+              className="min-h-0 rounded-2xl border p-4 overflow-hidden"
               style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 38px rgba(4, 12, 30, 0.44)" }}
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-[2rem] font-semibold text-[#F4F7FF]">Subject Wise Analysis · {rightPanelTitle}</h2>
+                <h2 className="text-xl font-semibold text-[#F4F7FF]">Subject Wise Analysis · {rightPanelTitle}</h2>
 
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="relative">
@@ -586,8 +588,8 @@ export default function Dashboard() {
                 </div>
               )}
 
-              <div className="mt-5 grid md:grid-cols-[1fr_190px] gap-6 items-end">
-                <div className="h-64 border border-[#203B5C] rounded-xl p-4 bg-[#10233B]/50">
+              <div className="mt-4 grid md:grid-cols-[1fr_150px] gap-4 items-end">
+                <div className="h-48 border border-[#2A4A6B] rounded-xl p-3 bg-[#10233B]/50">
                   <div className="h-full flex items-end justify-around gap-4">
                     {SUBJECTS.map((subject) => {
                       const value = aggregate.subjectAccuracy[subject];
@@ -601,11 +603,11 @@ export default function Dashboard() {
 
                       return (
                         <div key={subject} className="flex flex-col items-center flex-1 h-full justify-end gap-2">
-                          <span className="text-3xl font-semibold text-[#F4F7FF]">{Math.round(value)}%</span>
+                          <span className="text-2xl font-semibold text-[#F4F7FF]">{Math.round(value)}%</span>
                           <div className="w-full max-w-[90px] h-[78%] rounded-xl bg-[#0B1A2E] border border-[#203B5C] flex items-end p-1">
                             <div className="w-full rounded-lg" style={{ height: barHeight, background: gradient }} />
                           </div>
-                          <span className="text-xl text-[#D3E0F2]">{subject}</span>
+                          <span className="text-sm text-[#D9E5F4]">{subject}</span>
                         </div>
                       );
                     })}
@@ -614,12 +616,12 @@ export default function Dashboard() {
 
                 <div className="space-y-3">
                   <div>
-                    <p className="text-5xl font-semibold text-[#F4F7FF]">{aggregate.totalAttempts}</p>
-                    <p className="text-xl text-[#9AADC5]">Total Tests</p>
+                    <p className="text-4xl font-semibold text-[#F4F7FF]">{aggregate.totalAttempts}</p>
+                    <p className="text-sm text-[#B8C7DB]">Total Tests</p>
                   </div>
                   <div className="h-px bg-[#203B5C]" />
-                  <div className="space-y-2 text-base">
-                    <p className="text-[#9AADC5]">Total Questions <span className="text-[#F4F7FF] font-semibold float-right">{aggregate.overall.total.toLocaleString()}</span></p>
+                  <div className="space-y-1.5 text-sm">
+                    <p className="text-[#B8C7DB]">Total Questions <span className="text-[#F4F7FF] font-semibold float-right">{aggregate.overall.total.toLocaleString()}</span></p>
                     <p className="text-[#9AADC5]">Correct <span className="text-[#22C982] font-semibold float-right">{aggregate.overall.correct.toLocaleString()}</span></p>
                     <p className="text-[#9AADC5]">Incorrect <span className="text-[#F05268] font-semibold float-right">{aggregate.overall.incorrect.toLocaleString()}</span></p>
                     <p className="text-[#9AADC5]">Unattempted <span className="text-[#8199B8] font-semibold float-right">{aggregate.overall.unattempted.toLocaleString()}</span></p>
@@ -629,11 +631,11 @@ export default function Dashboard() {
             </div>
 
             <div
-              className="rounded-2xl border p-5"
+              className="min-h-0 rounded-2xl border p-4 overflow-hidden"
               style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 38px rgba(4, 12, 30, 0.44)" }}
             >
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <h2 className="text-[2rem] font-semibold text-[#F4F7FF]">Questions Breakdown · {rightPanelTitle}</h2>
+                <h2 className="text-xl font-semibold text-[#F4F7FF]">Questions Breakdown · {rightPanelTitle}</h2>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-[#C9D7EA]">
                   <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.correct }} />Correct</span>
                   <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.incorrect }} />Incorrect</span>
@@ -641,7 +643,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-2.5">
                 {breakdownRows.map((row) => {
                   const total = row.stats.total || 1;
                   const correctWidth = (row.stats.correct / total) * 100;
@@ -649,9 +651,9 @@ export default function Dashboard() {
                   const unattemptedWidth = (row.stats.unattempted / total) * 100;
 
                   return (
-                    <div key={row.key} className="grid grid-cols-[110px_1fr_72px] sm:grid-cols-[140px_1fr_88px] gap-3 items-center">
-                      <span className="text-xl text-[#F4F7FF] font-medium">{row.label}</span>
-                      <div className="h-11 rounded-full overflow-hidden border border-[#203B5C] bg-[#10233B] flex text-lg font-semibold">
+                    <div key={row.key} className="grid grid-cols-[90px_1fr_58px] sm:grid-cols-[120px_1fr_70px] gap-2 items-center">
+                      <span className="text-sm text-[#F4F7FF] font-medium">{row.label}</span>
+                      <div className="h-8 rounded-full overflow-hidden border border-[#203B5C] bg-[#10233B] flex text-sm font-semibold">
                         <div className="h-full flex items-center justify-center text-white" style={{ width: `${correctWidth}%`, backgroundColor: COLORS.correct }}>
                           {correctWidth > 12 ? row.stats.correct.toLocaleString() : ""}
                         </div>
@@ -662,16 +664,16 @@ export default function Dashboard() {
                           {unattemptedWidth > 12 ? row.stats.unattempted.toLocaleString() : ""}
                         </div>
                       </div>
-                      <span className="text-right text-xl text-[#9AADC5]">({row.stats.total.toLocaleString()})</span>
+                      <span className="text-right text-sm text-[#B8C7DB]">({row.stats.total.toLocaleString()})</span>
                     </div>
                   );
                 })}
 
                 <div className="h-px bg-[#203B5C] my-2" />
 
-                <div className="grid grid-cols-[110px_1fr_72px] sm:grid-cols-[140px_1fr_88px] gap-3 items-center">
-                  <span className="text-2xl text-[#F4F7FF] font-semibold">Overall</span>
-                  <div className="h-12 rounded-full overflow-hidden border border-[#203B5C] bg-[#10233B] flex text-xl font-semibold">
+                <div className="grid grid-cols-[90px_1fr_58px] sm:grid-cols-[120px_1fr_70px] gap-2 items-center">
+                  <span className="text-base text-[#F4F7FF] font-semibold">Overall</span>
+                  <div className="h-9 rounded-full overflow-hidden border border-[#203B5C] bg-[#10233B] flex text-sm font-semibold">
                     <div className="h-full flex items-center justify-center text-white" style={{ width: `${aggregate.overall.total ? (aggregate.overall.correct / aggregate.overall.total) * 100 : 0}%`, backgroundColor: COLORS.correct }}>
                       {aggregate.overall.correct.toLocaleString()}
                     </div>
@@ -682,7 +684,7 @@ export default function Dashboard() {
                       {aggregate.overall.unattempted.toLocaleString()}
                     </div>
                   </div>
-                  <span className="text-right text-xl text-[#9AADC5]">({aggregate.overall.total.toLocaleString()})</span>
+                  <span className="text-right text-sm text-[#B8C7DB]">({aggregate.overall.total.toLocaleString()})</span>
                 </div>
               </div>
             </div>
