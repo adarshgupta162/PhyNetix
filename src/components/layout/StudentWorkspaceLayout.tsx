@@ -86,9 +86,18 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <div className="flex h-full flex-col">
       <div className="flex h-[64px] items-center border-b border-white/[0.07] px-4">
-        <Link to="/dashboard" className="flex min-w-0 items-center gap-3">
-          <BrandLogo compact={collapsed && !mobile} />
-          {(!collapsed || mobile) && <span className="text-[17px] font-semibold tracking-tight text-white">PhyNetix</span>}
+        <Link to="/dashboard" aria-label="PhyNetix home" className={cn("flex min-w-0 items-center", collapsed && !mobile ? "justify-center" : "gap-2")}>
+          <AnimatePresence mode="wait" initial={false}>
+            {collapsed && !mobile ? (
+              <motion.div key="compact-mark" initial={{ opacity: 0, scale: 0.78, rotate: -8 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} exit={{ opacity: 0, scale: 0.82, rotate: 8 }} transition={{ duration: 0.18, ease: "easeOut" }}>
+                <BrandLogo compact />
+              </motion.div>
+            ) : (
+              <motion.div key="full-wordmark" initial={{ opacity: 0, x: -8, filter: "blur(3px)" }} animate={{ opacity: 1, x: 0, filter: "blur(0px)" }} exit={{ opacity: 0, x: -6, filter: "blur(2px)" }} transition={{ duration: 0.22, ease: "easeOut" }}>
+                <BrandLogo />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </Link>
         {mobile && <button type="button" onClick={() => setDrawerOpen(false)} aria-label="Close navigation" className="ml-auto rounded-lg p-2 text-slate-400 hover:bg-white/5"><X size={18} /></button>}
       </div>
