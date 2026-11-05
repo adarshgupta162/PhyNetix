@@ -16,7 +16,7 @@ export function BrandLogo({ className, compact = false }: { className?: string; 
           onError={() => setMissing(true)}
           className={cn(
             "absolute left-0 top-1/2 max-w-none -translate-y-1/2 object-contain",
-            compact ? "h-36 w-36" : "h-[164px] w-[164px]"
+            compact ? "left-[-12px] h-36 w-36 mix-blend-screen" : "h-[164px] w-[164px] mix-blend-screen"
           )}
         />
       ) : (
