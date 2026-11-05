@@ -458,3 +458,38 @@
 .student-workspace [class*="bg-sky-"] { background-color: rgba(110,170,160,.12) !important; }
 .student-workspace [class*="border-sky-"] { border-color: rgba(110,170,160,.3) !important; }
 .student-workspace [class*="shadow-["] { box-shadow: none !important; }
+
+/* Institute workspace: neutral, consistent product surfaces. */
+.institute-layout {
+  --background: 40 20% 98%;
+  --foreground: 220 10% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 10% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 10% 14%;
+  --primary: 172 42% 30%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 40 12% 95%;
+  --secondary-foreground: 220 10% 20%;
+  --muted: 40 12% 95%;
+  --muted-foreground: 220 6% 46%;
+  --accent: 172 25% 94%;
+  --accent-foreground: 172 42% 24%;
+  --border: 40 8% 88%;
+  --input: 40 8% 88%;
+  --ring: 172 42% 30%;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+.institute-layout aside {
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+.institute-layout main { background: hsl(var(--background)); }
+.institute-layout .rounded-md,
+.institute-layout .rounded-lg { box-shadow: none; }
+.institute-layout [class*="bg-primary/10"] { background: hsl(var(--accent)); }
+.institute-layout [class*="text-primary"] { color: hsl(var(--primary)); }
+.institute-layout [class*="border-b"] { border-color: hsl(var(--border)); }
+.institute-layout [data-card],
+.institute-layout [class*="shadow"] { box-shadow: none; }
