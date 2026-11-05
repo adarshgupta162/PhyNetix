@@ -85,28 +85,28 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
 
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <div className="flex h-full flex-col">
-      <div className="flex h-[76px] items-center border-b border-white/[0.07] px-5">
+      <div className="flex h-[64px] items-center border-b border-white/[0.07] px-4">
         <Link to="/dashboard" className="flex min-w-0 items-center gap-3">
           <BrandLogo compact={collapsed && !mobile} />
           {(!collapsed || mobile) && <span className="text-[17px] font-semibold tracking-tight text-white">PhyNetix</span>}
         </Link>
         {mobile && <button type="button" onClick={() => setDrawerOpen(false)} aria-label="Close navigation" className="ml-auto rounded-lg p-2 text-slate-400 hover:bg-white/5"><X size={18} /></button>}
       </div>
-      <div className="px-4 pt-6 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{(!collapsed || mobile) ? "Workspace" : " "}</div>
-      <nav className="flex-1 space-y-1 px-3">
+      <div className="px-3.5 pt-5 pb-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">{(!collapsed || mobile) ? "Workspace" : " "}</div>
+      <nav className="flex-1 space-y-1 px-2.5">
         {navItems.map(({ label, path, icon: Icon }) => {
           const active = location.pathname === path || (path !== "/dashboard" && location.pathname.startsWith(path + "/"));
           return <Link key={path} to={path} title={collapsed && !mobile ? label : undefined}
-            className={cn("group flex items-center gap-3 rounded-xl border px-3 py-3 text-[13px] font-medium transition-all",
+            className={cn("group flex items-center gap-3 rounded-lg border px-2.5 py-2.5 text-[12px] font-medium transition-all",
               active ? "border-[#258DD2]/30 bg-[#0E3450] text-white shadow-[inset_2px_0_0_#38A8F4]" : "border-transparent text-slate-400 hover:border-white/[0.06] hover:bg-white/[0.04] hover:text-slate-100")}>
-            <Icon size={18} strokeWidth={1.8} className={active ? "text-[#58B9FF]" : "text-slate-500 group-hover:text-slate-300"} />
+            <Icon size={17} strokeWidth={1.8} className={active ? "text-[#58B9FF]" : "text-slate-500 group-hover:text-slate-300"} />
             {(!collapsed || mobile) && <span>{label}</span>}
           </Link>;
         })}
       </nav>
-      <div className="border-t border-white/[0.07] p-3">
-        <div className={cn("mb-3 flex items-center gap-3 rounded-xl bg-white/[0.035] p-3", collapsed && !mobile && "justify-center px-1")}>
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#123B5A] text-xs font-semibold text-[#A9DDFF]">{initials}</div>
+      <div className="border-t border-white/[0.07] p-2.5">
+        <div className={cn("mb-3 flex items-center gap-3 rounded-lg bg-white/[0.035] p-2.5", collapsed && !mobile && "justify-center px-1")}>
+          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#123B5A] text-xs font-semibold text-[#A9DDFF]">{initials}</div>
           {(!collapsed || mobile) && <div className="min-w-0"><p className="truncate text-xs font-medium text-slate-200">{name}</p><p className="text-[10px] text-slate-500">{roleLabel}</p></div>}
         </div>
         <button onClick={logout} className={cn("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs text-slate-500 transition hover:bg-rose-500/10 hover:text-rose-300", collapsed && !mobile && "justify-center")}><LogOut size={16} />{(!collapsed || mobile) && "Sign out"}</button>
@@ -117,18 +117,19 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
 
   return <div className="min-h-screen bg-[#050A12] text-[#EAF2FA]">
     <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_70%_0%,rgba(21,112,177,0.12),transparent_38%),radial-gradient(ellipse_at_0%_100%,rgba(22,80,125,0.08),transparent_35%)]" />
-    <aside className={cn("fixed inset-y-0 left-0 z-40 hidden border-r border-white/[0.07] bg-[#08111D]/95 backdrop-blur-xl transition-[width] duration-200 lg:block", collapsed ? "w-[82px]" : "w-[238px]")}><Sidebar /></aside>
+    <aside className={cn("fixed inset-y-0 left-0 z-40 hidden border-r border-white/[0.07] bg-[#08111D]/95 backdrop-blur-xl transition-[width] duration-200 lg:block", collapsed ? "w-[64px]" : "w-[208px]")}><Sidebar /></aside>
     <AnimatePresence>
       {drawerOpen && <>
         <motion.button aria-label="Close navigation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDrawerOpen(false)} className="fixed inset-0 z-50 bg-black/70 lg:hidden" />
         <motion.aside initial={{ x: -300 }} animate={{ x: 0 }} exit={{ x: -300 }} transition={{ type: "spring", damping: 28, stiffness: 300 }} className="fixed inset-y-0 left-0 z-[60] w-[280px] border-r border-white/10 bg-[#08111D] lg:hidden"><Sidebar mobile /></motion.aside>
       </>}
     </AnimatePresence>
-    <div className={cn("relative min-h-screen transition-[margin] duration-200", collapsed ? "lg:ml-[82px]" : "lg:ml-[238px]")}>
-      <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-white/[0.07] bg-[#07101B]/85 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+    <div className={cn("relative min-h-screen transition-[margin] duration-200", collapsed ? "lg:ml-[64px]" : "lg:ml-[208px]")}>
+      <header className="sticky top-0 z-30 flex h-[64px] items-center gap-2.5 border-b border-white/[0.07] bg-[#07101B]/85 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
         <button onClick={() => setDrawerOpen(true)} className="rounded-lg border border-white/10 p-2 text-slate-300 hover:bg-white/5 lg:hidden" aria-label="Open navigation"><Menu size={18} /></button>
         <div className="min-w-0"><p className="hidden text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:block">Student workspace</p><h1 className="truncate text-[16px] font-semibold text-white sm:text-[17px]">{title}</h1></div>
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">\n          <span className="hidden rounded-full border border-sky-400/15 bg-sky-400/[0.06] px-2.5 py-1 text-[10px] font-medium text-sky-200 sm:inline-flex">{roleLabel}</span>
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <span className="hidden rounded-full border border-sky-400/15 bg-sky-400/[0.06] px-2.5 py-1 text-[10px] font-medium text-sky-200 sm:inline-flex">{roleLabel}</span>
           {canManageUsers && <div className="hidden items-center gap-2 xl:flex">
             <Link to="/admin/users?action=add-student" className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-[11px] text-slate-300 hover:border-sky-400/40 hover:text-white"><UserPlus size={14} />Add Student</Link>
             <Link to="/admin/users?action=add-admin" className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-[11px] text-slate-300 hover:border-sky-400/40 hover:text-white"><ShieldPlus size={14} />Add Admin</Link>
@@ -153,13 +154,14 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
             <DropdownMenuContent align="end" className="w-52 border-white/10 bg-[#0B1725] text-slate-100">
               <DropdownMenuLabel><span className="block truncate text-xs">{name}</span><span className="text-[10px] font-normal text-slate-500">{roleLabel}</span></DropdownMenuLabel><DropdownMenuSeparator className="bg-white/10" />
               <DropdownMenuItem onSelect={() => navigate("/profile")} className="cursor-pointer focus:bg-white/5"><UserRound size={15} className="mr-2" />My Profile</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => navigate("/settings")} className="cursor-pointer focus:bg-white/5"><Settings size={15} className="mr-2" />Account Settings</DropdownMenuItem>\n              <DropdownMenuItem onSelect={() => navigate("/settings")} className="cursor-pointer focus:bg-white/5"><Bell size={15} className="mr-2" />Notification Preferences</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => navigate("/settings")} className="cursor-pointer focus:bg-white/5"><Settings size={15} className="mr-2" />Account Settings</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => navigate("/settings")} className="cursor-pointer focus:bg-white/5"><Bell size={15} className="mr-2" />Notification Preferences</DropdownMenuItem>
               <DropdownMenuSeparator className="bg-white/10" /><DropdownMenuItem onSelect={logout} className="cursor-pointer text-rose-300 focus:bg-rose-500/10"><LogOut size={15} className="mr-2" />Sign out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </header>
-      <main className="relative min-h-[calc(100vh-72px)] p-4 sm:p-6 lg:p-8">{children}</main>
+      <main className="relative min-h-[calc(100vh-64px)] p-4 sm:p-6 lg:p-8">{children}</main>
     </div>
   </div>;
 }
