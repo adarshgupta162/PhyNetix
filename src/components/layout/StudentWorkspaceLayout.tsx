@@ -126,14 +126,14 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
   );
 
   return <div className="student-workspace min-h-screen text-[#E8ECEA]">
-    <aside className={cn("fixed inset-y-0 left-0 z-40 hidden border-r border-white/[0.07] student-sidebar bg-[#111516] transition-[width] duration-200 lg:block", collapsed ? "w-[48px]" : "w-[176px]")}><Sidebar /></aside>
+    <aside className={cn("fixed inset-y-0 left-0 z-40 hidden border-r border-white/[0.07] student-sidebar bg-[#111516] transition-[width] duration-200 lg:block", collapsed ? "w-[60px]" : "w-[224px]")}><Sidebar /></aside>
     <AnimatePresence>
       {drawerOpen && <>
         <motion.button aria-label="Close navigation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDrawerOpen(false)} className="fixed inset-0 z-50 bg-black/70 lg:hidden" />
         <motion.aside initial={{ x: -300 }} animate={{ x: 0 }} exit={{ x: -300 }} transition={{ type: "spring", damping: 28, stiffness: 300 }} className="fixed inset-y-0 left-0 z-[60] w-[260px] border-r border-white/10 student-sidebar bg-[#111516] lg:hidden"><Sidebar mobile /></motion.aside>
       </>}
     </AnimatePresence>
-    <div className={cn("relative min-h-screen transition-[margin] duration-200", collapsed ? "lg:ml-[48px]" : "lg:ml-[176px]")}>
+    <div className={cn("relative min-h-screen transition-[margin] duration-200", collapsed ? "lg:ml-[60px]" : "lg:ml-[224px]")}>
       <header className="sticky top-0 z-30 flex h-[56px] items-center gap-2.5 border-b border-white/[0.07] student-topbar bg-[#0D1011]/95 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
         <button onClick={() => setDrawerOpen(true)} className="rounded-lg border border-white/10 p-2 text-slate-300 hover:bg-white/5 lg:hidden" aria-label="Open navigation"><Menu size={18} /></button>
         <div className="min-w-0"><p className="hidden text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:block">Student workspace</p><h1 className="truncate text-[16px] font-semibold text-white sm:text-[17px]">{title}</h1></div>
