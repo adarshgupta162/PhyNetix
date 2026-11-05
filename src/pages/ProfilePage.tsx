@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import { CalendarDays, Camera, Check, Clock3, GraduationCap, Mail, Pencil, Phone, Save, Target, Trophy, UserRound, X, BookOpen, MapPin } from "lucide-react";
+import { CalendarDays, Camera, Clock3, GraduationCap, Mail, Pencil, Save, Target, Trophy, UserRound, X, BookOpen, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import StudentWorkspaceLayout from "@/components/layout/StudentWorkspaceLayout";
