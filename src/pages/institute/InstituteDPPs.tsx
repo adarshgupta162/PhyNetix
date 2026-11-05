@@ -102,7 +102,7 @@ export default function InstituteDPPs() {
         <label className="sm:col-span-2 flex items-center justify-between rounded-md border p-3 text-sm">Timed practice<Switch checked={form.is_timed} onCheckedChange={v=>setForm({...form,is_timed:v})} /></label>
       </div>
       <DialogFooter><Button variant="outline" onClick={()=>setCreateOpen(false)}>Cancel</Button><Button onClick={()=>create.mutate()} disabled={create.isPending || !isActive || !can("dpps.manage")}>{create.isPending&&<Loader2 className="w-4 h-4 mr-2 animate-spin" />}Create DPP</Button></DialogFooter>
-    </Dialog>
+    </DialogContent></Dialog>
     {questionsFor && <QuestionDialog dpp={questionsFor} institutionId={institutionId!} onClose={()=>setQuestionsFor(null)} />}
   </div>;
 }
