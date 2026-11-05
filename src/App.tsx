@@ -72,6 +72,7 @@ const InstituteDashboard = lazy(() => import("./pages/institute/InstituteDashboa
 const InstituteBatches = lazy(() => import("./pages/institute/InstituteBatches"));
 const InstituteStudents = lazy(() => import("./pages/institute/InstituteStudents"));
 const InstituteTests = lazy(() => import("./pages/institute/InstituteTests"));
+const InstituteDPPs = lazy(() => import("./pages/institute/InstituteDPPs"));
 const InstituteResults = lazy(() => import("./pages/institute/InstituteResults"));
 const InstituteStaff = lazy(() => import("./pages/institute/InstituteStaff"));
 const InstituteSettings = lazy(() => import("./pages/institute/InstituteSettings"));
@@ -116,6 +117,7 @@ const App = () => (
                 <Route path="/institute/batches" element={<InstituteRoute><InstituteBatches /></InstituteRoute>} />
                 <Route path="/institute/students" element={<InstituteRoute><InstituteStudents /></InstituteRoute>} />
                 <Route path="/institute/tests" element={<InstituteRoute><InstituteTests /></InstituteRoute>} />
+                <Route path="/institute/dpps" element={<InstituteRoute><InstituteDPPs /></InstituteRoute>} />
                 <Route path="/institute/results" element={<InstituteRoute><InstituteResults /></InstituteRoute>} />
                 <Route path="/institute/staff" element={<InstituteRoute><InstituteStaff /></InstituteRoute>} />
                 <Route path="/institute/settings" element={<InstituteRoute><InstituteSettings /></InstituteRoute>} />
