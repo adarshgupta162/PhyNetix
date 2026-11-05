@@ -1,15 +1,28 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-/** Place the original PhyNetix logo at public/logo.png to replace the text fallback everywhere. */
+/**
+ * Uses the original square PhyNetix artwork as a clipped wordmark/atom mark.
+ * The compact crop reveals only the atom; the expanded crop reveals the full wordmark.
+ */
 export function BrandLogo({ className, compact = false }: { className?: string; compact?: boolean }) {
   const [missing, setMissing] = useState(false);
   return (
-    <span className={cn("inline-flex items-center font-display font-bold text-primary", className)}>
+    <span className={cn("relative inline-flex shrink-0 overflow-hidden", compact ? "h-9 w-9" : "h-10 w-[164px]", className)}>
       {!missing ? (
-        <img src="/logo.png" alt="PhyNetix" className={cn("object-contain object-left", compact ? "h-9 w-9" : "h-10 max-w-40")} onError={() => setMissing(true)} />
+        <img
+          src="/logo.png"
+          alt="PhyNetix"
+          onError={() => setMissing(true)}
+          className={cn(
+            "absolute left-0 top-1/2 max-w-none -translate-y-1/2 object-contain",
+            compact ? "h-36 w-36" : "h-[164px] w-[164px]"
+          )}
+        />
       ) : (
-        <span className={cn("leading-none", compact ? "text-sm" : "text-xl")}>{compact ? "P" : "PhyNetix"}</span>
+        <span className={cn("grid h-full w-full place-items-center font-semibold leading-none text-[#13DCCB]", compact ? "text-sm" : "text-xl")}>
+          {compact ? "P" : "PHYNETIX"}
+        </span>
       )}
     </span>
   );
