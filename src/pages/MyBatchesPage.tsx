@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { format, isValid } from "date-fns";
 import {
-  ArrowUpRight, BookOpen, CalendarDays, Clock3, GraduationCap,
-  Layers3, Plus, ReceiptText, Sparkles, Wallet
+  ArrowUpRight, BookOpen, Plus, Sparkles
 } from "lucide-react";
 import { useUserEnrollments } from "@/hooks/useEnrollment";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,7 +40,7 @@ export default function MyBatchesPage() {
     [enrollments],
   );
 
-  const { data: latestPaymentsByBatch = {}, isLoading: paymentsLoading } = useQuery<Record<string, ReceiptPayment>>({
+  const { data: latestPaymentsByBatch = {} } = useQuery<Record<string, ReceiptPayment>>({
     queryKey: ["my-batches-payments", user?.id, batchIds],
     enabled: !!user && batchIds.length > 0,
     queryFn: async () => {
@@ -68,8 +67,7 @@ export default function MyBatchesPage() {
       const expiry = new Date(item.expires_at).getTime();
       return expiry > now && expiry <= now + 7 * 24 * 60 * 60 * 1000;
     }).length;
-    const totalPaid = Object.values(latestPaymentsByBatch).reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
-    return { total: enrollments.length, expiring, totalPaid };
+    return { total: enrollments.length, expiring };
   }, [enrollments, latestPaymentsByBatch]);
 
   if (isLoading) {
