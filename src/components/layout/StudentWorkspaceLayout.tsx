@@ -125,8 +125,7 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
     </div>
   );
 
-  return <div className="min-h-screen bg-[#050A12] text-[#EAF2FA]">
-    <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_70%_0%,rgba(21,112,177,0.12),transparent_38%),radial-gradient(ellipse_at_0%_100%,rgba(22,80,125,0.08),transparent_35%)]" />
+  return <div className="student-workspace min-h-screen text-[#E8ECEA]">
     <aside className={cn("fixed inset-y-0 left-0 z-40 hidden border-r border-white/[0.07] student-sidebar bg-[#111516] transition-[width] duration-200 lg:block", collapsed ? "w-[48px]" : "w-[176px]")}><Sidebar /></aside>
     <AnimatePresence>
       {drawerOpen && <>
