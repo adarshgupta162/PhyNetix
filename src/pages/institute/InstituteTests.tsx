@@ -185,7 +185,7 @@ function TestQuestionDialog({ test, institutionId, onClose }: { test:any; instit
     queryFn:async()=>{
       const {data,error}=await supabase.from("phynetix_library")
         .select("id,question_text,question_image_url,question_type,options,correct_answer,marks,negative_marks,solution_text,solution_image_url,difficulty,time_seconds,subject,chapter,topic")
-        .not("question_text","is",null)
+        .not("question_text","is",null).not("correct_answer","is",null)
         .or(`institution_id.eq.${institutionId},and(institution_id.is.null,is_published.eq.true)`)
         .ilike("question_text",`%${search}%`).order("created_at",{ascending:false}).limit(100);
       if(error)throw error; return data??[];
