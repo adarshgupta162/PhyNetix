@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Calendar, CircleAlert, Layers3, SlidersHorizontal } from "lucide-react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import StudentWorkspaceLayout from "@/components/layout/StudentWorkspaceLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ type AggregateStats = {
 
 type QuestionMeta = {
   id: string;
-  subject: SubjectName;
+  subject: SubjectName | null;
   sectionType?: string | null;
   correctAnswer: unknown;
   marks?: number | null;
@@ -71,11 +71,12 @@ const SUBJECTS: SubjectName[] = ["Physics", "Chemistry", "Mathematics"];
 
 const emptyQuestionStats = (): QuestionStats => ({ correct: 0, incorrect: 0, unattempted: 0, total: 0 });
 
-const normalizeSubject = (value?: string | null): SubjectName => {
+const normalizeSubject = (value?: string | null): SubjectName | null => {
   const text = (value || "").toLowerCase();
   if (text.includes("phy")) return "Physics";
   if (text.includes("chem")) return "Chemistry";
-  return "Mathematics";
+  if (text.includes("math")) return "Mathematics";
+  return null;
 };
 
 const toTestTypeLabel = (testType?: string | null, examType?: string | null, testName?: string) => {
@@ -97,6 +98,7 @@ const getBadge = (score: number) => {
 
 function CircularScore({ score }: { score: number }) {
   const [progress, setProgress] = useState(0);
+  const gradientId = useId().replace(/:/g, "");
   const size = 116;
   const stroke = 10;
   const radius = (size - stroke) / 2;
@@ -119,7 +121,7 @@ function CircularScore({ score }: { score: number }) {
           cy={size / 2}
           r={radius}
           fill="transparent"
-          stroke="url(#scoreGradient)"
+          stroke={`url(#scoreGradient-${gradientId})`}
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -127,7 +129,7 @@ function CircularScore({ score }: { score: number }) {
           style={{ transition: "stroke-dashoffset 700ms ease" }}
         />
         <defs>
-          <linearGradient id="scoreGradient" x1="0" y1="0" x2="1" y2="1">
+          <linearGradient id={`scoreGradient-${gradientId}`} x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor={COLORS.blue} />
             <stop offset="100%" stopColor={COLORS.cyan} />
           </linearGradient>
@@ -286,6 +288,7 @@ export default function Dashboard() {
           };
 
           for (const question of questions) {
+            if (!question.subject) continue;
             const answer = answers[question.id];
             const evaluation = evaluateQuestionScore({
               sectionType: question.sectionType,
@@ -428,7 +431,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      <StudentWorkspaceLayout>
         <div className="p-4 lg:p-6 space-y-6">
           <div className="grid xl:grid-cols-[1.05fr_1fr] gap-6">
             <div className="space-y-4">
@@ -442,13 +445,13 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </DashboardLayout>
+      </StudentWorkspaceLayout>
     );
   }
 
   if (error) {
     return (
-      <DashboardLayout>
+      <StudentWorkspaceLayout>
         <div className="p-6">
           <div className="rounded-2xl border border-[#203B5C] bg-[#0B1A2E] p-8 text-center max-w-2xl mx-auto">
             <CircleAlert className="w-10 h-10 text-[#F05268] mx-auto mb-4" />
@@ -457,15 +460,15 @@ export default function Dashboard() {
             <Button onClick={loadDashboard}>Try again</Button>
           </div>
         </div>
-      </DashboardLayout>
+      </StudentWorkspaceLayout>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="dashboard-page mx-auto max-w-[1040px] bg-black p-3 sm:p-5 lg:p-7 xl:h-[calc(100vh-4rem)] xl:overflow-hidden">
-        <div className="grid xl:grid-cols-[0.92fr_1.08fr] gap-3 xl:h-full">
-          <section className="min-h-0 flex flex-col gap-2.5">
+    <StudentWorkspaceLayout>
+      <div className="mx-auto w-full max-w-[1480px] space-y-5">
+        <div className="grid gap-5 lg:grid-cols-[minmax(350px,0.92fr)_minmax(0,1.08fr)]">
+          <section className="min-w-0 flex flex-col gap-3">
             <div
               className="shrink-0 rounded-[10px] border p-3"
               style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 40px rgba(3, 11, 26, 0.45)" }}
@@ -474,7 +477,7 @@ export default function Dashboard() {
                 <h2 className="text-[13px] font-medium tracking-tight" style={{ color: COLORS.text }}>
                   Previous Exams
                 </h2>
-                <Link to="/tests" className="inline-flex items-center rounded-full border px-2 py-0.5 text-[9px] hover:bg-[#10233B] transition" style={{ borderColor: COLORS.border, color: COLORS.textMuted }}>
+                <Link to="/analytics" className="inline-flex items-center rounded-full border px-2 py-0.5 text-[9px] hover:bg-[#10233B] transition" style={{ borderColor: COLORS.border, color: COLORS.textMuted }}>
                   View all
                 </Link>
               </div>
@@ -489,7 +492,7 @@ export default function Dashboard() {
                 </Link>
               </div>
             ) : (
-              <div className="min-h-0 flex-1 space-y-2 overflow-hidden">
+              <div className="max-h-[820px] space-y-3 overflow-y-auto pr-1">
               {attempts.slice(0, 3).map((attempt, index) => {
                 const badge = getBadge(attempt.scorePercentage);
 
@@ -542,13 +545,13 @@ export default function Dashboard() {
             )}
           </section>
 
-          <section className="min-h-0 grid xl:grid-rows-[minmax(0,1fr)_minmax(0,0.82fr)] gap-3">
+          <section className="min-w-0 grid content-start gap-5">
             <div
               className="min-h-0 rounded-2xl border p-4 overflow-hidden"
               style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 38px rgba(4, 12, 30, 0.44)" }}
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-[13px] font-medium text-[#F4F7FF]">Question Bank Analysis</h2>
+                <h2 className="text-sm font-semibold tracking-tight text-[#F4F7FF]">Subject Wise Analysis <span className="font-normal text-[#91A8BB]">· {rightPanelTitle}</span></h2>
 
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="relative">
@@ -634,7 +637,7 @@ export default function Dashboard() {
               style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 38px rgba(4, 12, 30, 0.44)" }}
             >
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <h2 className="text-[13px] font-medium text-[#F4F7FF]">Exams Vs Topper</h2>
+                <h2 className="text-sm font-semibold tracking-tight text-[#F4F7FF]">Questions Breakdown <span className="font-normal text-[#91A8BB]">· {rightPanelTitle}</span></h2>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-[#C9D7EA]">
                   <span className="inline-flex items-center gap-1 text-[9px]"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.blue }} />Topper</span>
                   <span className="inline-flex items-center gap-1 text-[9px]"><span className="w-1.5 h-1.5 rounded-full bg-[#DDEAF3]" />Average</span>
@@ -688,6 +691,6 @@ export default function Dashboard() {
           </section>
         </div>
       </div>
-    </DashboardLayout>
+    </StudentWorkspaceLayout>
   );
 }
