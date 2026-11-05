@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,74 +8,74 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { StaffRolesProvider } from "@/hooks/useStaffRoles";
 import AdminRoute from "@/components/AdminRoute";
 import ProfileGuard from "@/components/ProfileGuard";
-import LandingPage from "./pages/LandingPage";
-import AboutPage from "./pages/AboutPage";
-import ContactPage from "./pages/ContactPage";
-import CoursePage from "./pages/CoursePage";
-import FAQPage from "./pages/FAQPage";
-import PrivacyPage from "./pages/PrivacyPage";
-import TermsPage from "./pages/TermsPage";
-import RefundPage from "./pages/RefundPage";
-import AuthPage from "./pages/AuthPage";
-import StaffAuthPage from "./pages/StaffAuthPage";
-import Dashboard from "./pages/Dashboard";
-import TestLibrary from "./pages/TestLibrary";
-import NormalTestInterface from "./pages/NormalTestInterface";
-import NormalTestAnalysis from "./pages/NormalTestAnalysis";
+const LandingPage = lazy(() => import("./pages/LandingPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const CoursePage = lazy(() => import("./pages/CoursePage"));
+const FAQPage = lazy(() => import("./pages/FAQPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const RefundPage = lazy(() => import("./pages/RefundPage"));
+const AuthPage = lazy(() => import("./pages/AuthPage"));
+const StaffAuthPage = lazy(() => import("./pages/StaffAuthPage"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const TestLibrary = lazy(() => import("./pages/TestLibrary"));
+const NormalTestInterface = lazy(() => import("./pages/NormalTestInterface"));
+const NormalTestAnalysis = lazy(() => import("./pages/NormalTestAnalysis"));
 
-import QuestionWiseAnalysis from "./pages/QuestionWiseAnalysis";
+const QuestionWiseAnalysis = lazy(() => import("./pages/QuestionWiseAnalysis"));
 
-import Analytics from "./pages/Analytics";
-import SettingsPage from "./pages/SettingsPage";
-import ProfilePage from "./pages/ProfilePage";
-import QuestionBankPage from "./pages/QuestionBankPage";
-import AnalysisPage from "./pages/AnalysisPage";
-import SolutionsPage from "./pages/SolutionsPage";
-import TestSeriesEnrollment from "./pages/TestSeriesEnrollment";
+const Analytics = lazy(() => import("./pages/Analytics"));
+const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const QuestionBankPage = lazy(() => import("./pages/QuestionBankPage"));
+const AnalysisPage = lazy(() => import("./pages/AnalysisPage"));
+const SolutionsPage = lazy(() => import("./pages/SolutionsPage"));
+const TestSeriesEnrollment = lazy(() => import("./pages/TestSeriesEnrollment"));
 // Batch pages
-import BatchCatalogPage from "./pages/BatchCatalogPage";
-import BatchDetailsPage from "./pages/BatchDetailsPage";
-import MyBatchesPage from "./pages/MyBatchesPage";
-import PaymentHistoryPage from "./pages/PaymentHistoryPage";
-import CheckoutPage from "./pages/CheckoutPage";
+const BatchCatalogPage = lazy(() => import("./pages/BatchCatalogPage"));
+const BatchDetailsPage = lazy(() => import("./pages/BatchDetailsPage"));
+const MyBatchesPage = lazy(() => import("./pages/MyBatchesPage"));
+const PaymentHistoryPage = lazy(() => import("./pages/PaymentHistoryPage"));
+const CheckoutPage = lazy(() => import("./pages/CheckoutPage"));
 // Admin pages
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminQuestionBank from "./pages/admin/AdminQuestionBank";
-import AdminTests from "./pages/admin/AdminTests";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminSettings from "./pages/admin/AdminSettings";
-import TestCreator from "./pages/admin/TestCreator";
-import TestEditor from "./pages/admin/TestEditor";
-import NormalTestAnalytics from "./pages/admin/NormalTestAnalytics";
-import TestManagement from "./pages/admin/TestManagement";
-import StaffCommunity from "./pages/admin/StaffCommunity";
-import AuditLogs from "./pages/admin/AuditLogs";
-import StaffRequests from "./pages/admin/StaffRequests";
-import PhyNetixLibrary from "./pages/admin/PhyNetixLibrary";
-import FullscreenTestEditor from "./pages/admin/FullscreenTestEditor";
-import FinanceDashboard from "./pages/admin/FinanceDashboard";
-import DPPManager from "./pages/admin/DPPManager";
-import DPPEditor from "./pages/admin/DPPEditor";
-import DPPPage from "./pages/DPPPage";
-import DPPPractice from "./pages/DPPPractice";
-import AcademicDashboard from "./pages/admin/AcademicDashboard";
-import OperationsDashboard from "./pages/admin/OperationsDashboard";
-import BatchManagement from "./pages/admin/BatchManagement";
-import RoleSelectorPage from "./pages/admin/RoleSelectorPage";
-import BulkImportPage from "./pages/admin/BulkImportPage";
-import InstitutionsManager from "./pages/admin/InstitutionsManager";
-import LiveMonitoring from "./pages/admin/LiveMonitoring";
-import DevPortfolio from "./pages/DevPortfolio";
-import RegisterInstitutePage from "./pages/RegisterInstitutePage";
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminQuestionBank = lazy(() => import("./pages/admin/AdminQuestionBank"));
+const AdminTests = lazy(() => import("./pages/admin/AdminTests"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const TestCreator = lazy(() => import("./pages/admin/TestCreator"));
+const TestEditor = lazy(() => import("./pages/admin/TestEditor"));
+const NormalTestAnalytics = lazy(() => import("./pages/admin/NormalTestAnalytics"));
+const TestManagement = lazy(() => import("./pages/admin/TestManagement"));
+const StaffCommunity = lazy(() => import("./pages/admin/StaffCommunity"));
+const AuditLogs = lazy(() => import("./pages/admin/AuditLogs"));
+const StaffRequests = lazy(() => import("./pages/admin/StaffRequests"));
+const PhyNetixLibrary = lazy(() => import("./pages/admin/PhyNetixLibrary"));
+const FullscreenTestEditor = lazy(() => import("./pages/admin/FullscreenTestEditor"));
+const FinanceDashboard = lazy(() => import("./pages/admin/FinanceDashboard"));
+const DPPManager = lazy(() => import("./pages/admin/DPPManager"));
+const DPPEditor = lazy(() => import("./pages/admin/DPPEditor"));
+const DPPPage = lazy(() => import("./pages/DPPPage"));
+const DPPPractice = lazy(() => import("./pages/DPPPractice"));
+const AcademicDashboard = lazy(() => import("./pages/admin/AcademicDashboard"));
+const OperationsDashboard = lazy(() => import("./pages/admin/OperationsDashboard"));
+const BatchManagement = lazy(() => import("./pages/admin/BatchManagement"));
+const RoleSelectorPage = lazy(() => import("./pages/admin/RoleSelectorPage"));
+const BulkImportPage = lazy(() => import("./pages/admin/BulkImportPage"));
+const InstitutionsManager = lazy(() => import("./pages/admin/InstitutionsManager"));
+const LiveMonitoring = lazy(() => import("./pages/admin/LiveMonitoring"));
+const DevPortfolio = lazy(() => import("./pages/DevPortfolio"));
+const RegisterInstitutePage = lazy(() => import("./pages/RegisterInstitutePage"));
 import InstituteRoute from "@/components/institute/InstituteRoute";
-import InstituteDashboard from "./pages/institute/InstituteDashboard";
-import InstituteBatches from "./pages/institute/InstituteBatches";
-import InstituteStudents from "./pages/institute/InstituteStudents";
-import InstituteTests from "./pages/institute/InstituteTests";
-import InstituteResults from "./pages/institute/InstituteResults";
-import InstituteStaff from "./pages/institute/InstituteStaff";
-import InstituteSettings from "./pages/institute/InstituteSettings";
-import NotFound from "./pages/NotFound";
+const InstituteDashboard = lazy(() => import("./pages/institute/InstituteDashboard"));
+const InstituteBatches = lazy(() => import("./pages/institute/InstituteBatches"));
+const InstituteStudents = lazy(() => import("./pages/institute/InstituteStudents"));
+const InstituteTests = lazy(() => import("./pages/institute/InstituteTests"));
+const InstituteResults = lazy(() => import("./pages/institute/InstituteResults"));
+const InstituteStaff = lazy(() => import("./pages/institute/InstituteStaff"));
+const InstituteSettings = lazy(() => import("./pages/institute/InstituteSettings"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 
 const queryClient = new QueryClient();
@@ -88,6 +89,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <ProfileGuard>
+              <Suspense fallback={<div className="min-h-screen bg-[#050A12] px-6 py-8"><div className="mx-auto max-w-6xl animate-pulse space-y-4"><div className="h-7 w-44 rounded-lg bg-white/[0.07]" /><div className="h-32 rounded-2xl bg-white/[0.04]" /><div className="h-56 rounded-2xl bg-white/[0.04]" /></div></div>}>
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/dev" element={<DevPortfolio />} />
@@ -167,6 +169,7 @@ const App = () => (
                 <Route path="/admin/institutions" element={<AdminRoute><InstitutionsManager /></AdminRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </Suspense>
             </ProfileGuard>
           </BrowserRouter>
         </TooltipProvider>
