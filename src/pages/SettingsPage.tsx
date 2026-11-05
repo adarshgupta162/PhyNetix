@@ -1,221 +1,114 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { 
-  User, 
-  Bell, 
-  Lock, 
-  Palette, 
-  Shield,
-  LogOut,
-  Moon,
-  Sun
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Bell, LockKeyhole, LogOut, Mail, ShieldCheck, SlidersHorizontal, UserRound } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import StudentWorkspaceLayout from "@/components/layout/StudentWorkspaceLayout";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+type Preferences = { emailUpdates: boolean; testReminders: boolean; weeklySummary: boolean };
+const defaults: Preferences = { emailUpdates: true, testReminders: true, weeklySummary: false };
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("account");
-  const [notifications, setNotifications] = useState({
-    email: true,
-    testReminders: true,
-    performance: false,
-  });
+  const [preferences, setPreferences] = useState<Preferences>(defaults);
+  const [signingOut, setSigningOut] = useState(false);
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/auth");
+  useEffect(() => {
+    if (!user) return;
+    try {
+      const saved = window.localStorage.getItem(`phynetix:preferences:${user.id}`);
+      if (saved) setPreferences({ ...defaults, ...JSON.parse(saved) });
+    } catch {
+      toast.error("Couldn't load saved preferences on this device.");
+    }
+  }, [user]);
+
+  const updatePreference = (key: keyof Preferences, value: boolean) => {
+    const next = { ...preferences, [key]: value };
+    setPreferences(next);
+    if (!user) return;
+    try {
+      window.localStorage.setItem(`phynetix:preferences:${user.id}`, JSON.stringify(next));
+      toast.success("Preference saved on this device");
+    } catch {
+      toast.error("Could not save this preference.");
+    }
   };
 
-  const tabs = [
-    { id: "account", label: "Account", icon: User },
-    { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "appearance", label: "Appearance", icon: Palette },
-    { id: "security", label: "Security", icon: Shield },
-  ];
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    try {
+      await signOut();
+      navigate("/auth", { replace: true });
+    } catch {
+      toast.error("Sign out failed. Please try again.");
+      setSigningOut(false);
+    }
+  };
 
   return (
-    <DashboardLayout>
-      <div className="p-6 lg:p-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl lg:text-3xl font-bold font-display mb-2">
-            <span className="gradient-text">Settings</span>
-          </h1>
-          <p className="text-muted-foreground">
-            Manage your account preferences
-          </p>
-        </div>
+    <StudentWorkspaceLayout>
+      <div className="mx-auto max-w-5xl space-y-7">
+        <header>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8BBAAF]">Preferences</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">Settings</h1>
+          <p className="mt-2 max-w-2xl text-sm text-slate-400">Manage your account, reminders and sign-in preferences.</p>
+        </header>
 
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="glass-card p-2">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all",
-                    activeTab === tab.id
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                  )}
-                >
-                  <tab.icon className="w-5 h-5" />
-                  <span className="font-medium">{tab.label}</span>
-                </button>
-              ))}
+        <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111819]">
+          <div className="flex items-center gap-3 border-b border-white/[0.07] px-5 py-4">
+            <UserRound size={18} className="text-[#A4C9C0]" />
+            <div><h2 className="text-sm font-semibold text-slate-100">Account</h2><p className="mt-0.5 text-xs text-slate-500">Your PhyNetix sign-in identity</p></div>
+          </div>
+          <div className="divide-y divide-white/[0.06]">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+              <div className="flex items-center gap-3"><Mail size={16} className="text-slate-500" /><div><Label className="text-xs text-slate-400">Email address</Label><p className="mt-1 text-sm text-slate-100">{user?.email || "Not available"}</p></div></div>
+              {user?.email_confirmed_at ? <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/[0.07] px-2.5 py-1 text-[11px] text-emerald-300"><ShieldCheck size={13} />Verified</span> : <span className="rounded-full border border-amber-400/20 bg-amber-400/[0.07] px-2.5 py-1 text-[11px] text-amber-300">Not verified</span>}
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+              <div><p className="text-sm font-medium text-slate-100">Password</p><p className="mt-1 text-xs text-slate-500">Reset your password using your registered email.</p></div>
+              <Button variant="outline" onClick={() => navigate("/auth?mode=reset")} className="border-white/10 bg-white/[0.03] text-slate-200 hover:bg-white/[0.07]"><LockKeyhole size={14} className="mr-2" />Reset password</Button>
             </div>
           </div>
+        </section>
 
-          {/* Content */}
-          <div className="lg:col-span-3">
-            {activeTab === "account" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass-card p-6"
-              >
-                <h2 className="text-lg font-semibold font-display mb-6">Account Settings</h2>
-                
-                <div className="space-y-6">
-                  <div className="p-4 rounded-lg bg-secondary/30">
-                    <Label className="text-sm text-muted-foreground">Email</Label>
-                    <p className="font-medium mt-1">{user?.email}</p>
-                  </div>
-
-                  <div className="p-4 rounded-lg bg-secondary/30">
-                    <Label className="text-sm text-muted-foreground">Account ID</Label>
-                    <p className="font-mono text-sm mt-1">{user?.id}</p>
-                  </div>
-
-                  <div className="pt-4 border-t border-border">
-                    <Button variant="destructive" onClick={handleSignOut}>
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === "notifications" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass-card p-6"
-              >
-                <h2 className="text-lg font-semibold font-display mb-6">Notification Preferences</h2>
-                
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30">
-                    <div>
-                      <p className="font-medium">Email Notifications</p>
-                      <p className="text-sm text-muted-foreground">Receive important updates via email</p>
-                    </div>
-                    <Switch 
-                      checked={notifications.email}
-                      onCheckedChange={(checked) => setNotifications({...notifications, email: checked})}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30">
-                    <div>
-                      <p className="font-medium">Test Reminders</p>
-                      <p className="text-sm text-muted-foreground">Get reminded about scheduled tests</p>
-                    </div>
-                    <Switch 
-                      checked={notifications.testReminders}
-                      onCheckedChange={(checked) => setNotifications({...notifications, testReminders: checked})}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30">
-                    <div>
-                      <p className="font-medium">Performance Reports</p>
-                      <p className="text-sm text-muted-foreground">Weekly performance summary</p>
-                    </div>
-                    <Switch 
-                      checked={notifications.performance}
-                      onCheckedChange={(checked) => setNotifications({...notifications, performance: checked})}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === "appearance" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass-card p-6"
-              >
-                <h2 className="text-lg font-semibold font-display mb-6">Appearance</h2>
-                
-                <div className="space-y-6">
-                  <div className="p-4 rounded-lg bg-secondary/30">
-                    <p className="font-medium mb-4">Theme</p>
-                    <div className="flex gap-4">
-                      <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-background border border-border">
-                        <Moon className="w-4 h-4" />
-                        Dark
-                      </button>
-                      <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/50 text-muted-foreground">
-                        <Sun className="w-4 h-4" />
-                        Light
-                      </button>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-2">Currently using dark theme</p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === "security" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass-card p-6"
-              >
-                <h2 className="text-lg font-semibold font-display mb-6">Security</h2>
-                
-                <div className="space-y-6">
-                  <div className="p-4 rounded-lg bg-secondary/30">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Password</p>
-                        <p className="text-sm text-muted-foreground">Last changed: Never</p>
-                      </div>
-                      <Button variant="outline" onClick={() => navigate("/auth?mode=reset")}>
-                        Change Password
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-lg bg-secondary/30">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Two-Factor Authentication</p>
-                        <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
-                      </div>
-                      <Button variant="outline" disabled>
-                        Coming Soon
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+        <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111819]">
+          <div className="flex items-center gap-3 border-b border-white/[0.07] px-5 py-4">
+            <Bell size={18} className="text-[#A4C9C0]" />
+            <div><h2 className="text-sm font-semibold text-slate-100">Notifications</h2><p className="mt-0.5 text-xs text-slate-500">Choose which reminders you want to keep enabled.</p></div>
           </div>
-        </div>
+          <div className="divide-y divide-white/[0.06]">
+            {([
+              ["emailUpdates", "Important updates", "Product and account-related updates."],
+              ["testReminders", "Test reminders", "Reminders for scheduled tests and practice."],
+              ["weeklySummary", "Weekly study summary", "A weekly overview of your practice activity."],
+            ] as const).map(([key, title, description]) => (
+              <div key={key} className="flex items-center justify-between gap-4 px-5 py-4">
+                <div><p className="text-sm font-medium text-slate-100">{title}</p><p className="mt-1 text-xs text-slate-500">{description}</p></div>
+                <Switch checked={preferences[key]} onCheckedChange={(checked) => updatePreference(key, checked)} aria-label={title} />
+              </div>
+            ))}
+          </div>
+          <p className="px-5 pb-4 text-[11px] text-slate-500">These preferences are currently saved in this browser on this device. They do not yet control email delivery.</p>
+        </section>
+
+        <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111819]">
+          <div className="flex items-center gap-3 border-b border-white/[0.07] px-5 py-4">
+            <SlidersHorizontal size={18} className="text-[#A4C9C0]" />
+            <div><h2 className="text-sm font-semibold text-slate-100">Appearance</h2><p className="mt-0.5 text-xs text-slate-500">Interface display preferences</p></div>
+          </div>
+          <div className="px-5 py-4"><p className="text-sm font-medium text-slate-100">Dark workspace</p><p className="mt-1 text-xs text-slate-500">PhyNetix currently uses its dark student workspace. Theme switching is not enabled yet.</p></div>
+        </section>
+
+        <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-rose-400/15 bg-rose-400/[0.035] px-5 py-4">
+          <div><h2 className="text-sm font-semibold text-slate-100">Sign out</h2><p className="mt-1 text-xs text-slate-500">End your current session on this device.</p></div>
+          <Button variant="outline" disabled={signingOut} onClick={handleSignOut} className="border-rose-400/25 bg-transparent text-rose-300 hover:bg-rose-400/10"><LogOut size={14} className="mr-2" />{signingOut ? "Signing out…" : "Sign out"}</Button>
+        </section>
       </div>
-    </DashboardLayout>
+    </StudentWorkspaceLayout>
   );
 }
