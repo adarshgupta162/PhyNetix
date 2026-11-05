@@ -1,35 +1,38 @@
 import { useState } from "react";
+import { Atom } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** Compact crop of the original PhyNetix artwork for the student workspace sidebar. */
+/** Dedicated, tightly-cropped brand assets; never scale the square source artwork inside the sidebar. */
 export function BrandLogo({ className, compact = false }: { className?: string; compact?: boolean }) {
-  const [missing, setMissing] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const src = compact ? "/phynetix-mark.svg" : "/phynetix-wordmark.svg";
 
   return (
     <span
       className={cn(
-        "relative inline-flex shrink-0 overflow-hidden",
-        compact ? "h-8 w-8" : "h-8 w-[142px]",
+        "relative inline-flex shrink-0 items-center justify-center overflow-hidden",
+        compact ? "h-7 w-7" : "h-7 w-[132px]",
         className,
       )}
+      aria-label="PhyNetix"
     >
-      {!missing ? (
+      {!loaded && !failed && (
+        <span className={cn("absolute inset-0 flex items-center", compact ? "justify-center" : "gap-2")}>
+          <Atom className="h-6 w-6 shrink-0 animate-[spin_7s_linear_infinite] text-[#13DCCB]" strokeWidth={1.6} />
+          {!compact && <span className="h-3 w-20 overflow-hidden rounded-sm bg-white/[0.06]"><span className="block h-full w-1/2 animate-[brand-shimmer_1.4s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-[#13DCCB]/35 to-transparent" /></span>}
+        </span>
+      )}
+      {!failed ? (
         <img
-          src="/logo.png"
+          src={src}
           alt="PhyNetix"
-          onError={() => setMissing(true)}
-          className={cn(
-            "pointer-events-none absolute top-1/2 max-w-none -translate-y-1/2 object-contain",
-            compact
-              ? "left-[-9px] h-32 w-32 mix-blend-screen"
-              : "left-0 h-[142px] w-[142px] mix-blend-screen",
-          )}
+          onLoad={() => setLoaded(true)}
+          onError={() => setFailed(true)}
+          className={cn("relative z-[1] block max-h-full max-w-full object-contain transition-opacity duration-300", loaded ? "opacity-100" : "opacity-0")}
         />
       ) : (
-        <span className={cn(
-          "grid h-full w-full place-items-center font-semibold leading-none text-[#13DCCB]",
-          compact ? "text-sm" : "text-lg tracking-tight",
-        )}>
+        <span className={cn("relative z-[1] font-semibold tracking-tight text-[#13DCCB]", compact ? "text-xs" : "text-sm")}>
           {compact ? "P" : "PHYNETIX"}
         </span>
       )}
