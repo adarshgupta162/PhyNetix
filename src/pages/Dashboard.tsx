@@ -31,6 +31,8 @@ type AttemptSummary = {
   completedAt: string;
   testTypeLabel: string;
   scorePercentage: number;
+  score: number;
+  totalMarks: number;
   subjectAccuracy: Record<SubjectName, number>;
   analytics: AttemptAnalytics;
 };
@@ -337,6 +339,8 @@ export default function Dashboard() {
             completedAt: attempt.completed_at,
             testTypeLabel: toTestTypeLabel(testType, attempt.test?.exam_type, attempt.test?.name),
             scorePercentage: marksPercentage,
+            score: Number(attempt.score),
+            totalMarks: Number(attempt.total_marks),
             subjectAccuracy,
             analytics,
           };
@@ -428,6 +432,18 @@ export default function Dashboard() {
     ],
     [aggregate],
   );
+
+  const marksTrend = useMemo(
+    () => filteredAttempts.slice(0, 10).reverse(),
+    [filteredAttempts],
+  );
+  const maxChartMarks = Math.max(10, ...marksTrend.map((attempt) => attempt.totalMarks));
+  const chartPoints = marksTrend.map((attempt, index) => ({
+    ...attempt,
+    x: marksTrend.length === 1 ? 400 : 64 + (index / (marksTrend.length - 1)) * 700,
+    y: 220 - (attempt.score / maxChartMarks) * 180,
+  }));
+  const marksPath = chartPoints.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
 
   if (loading) {
     return (
@@ -692,6 +708,52 @@ export default function Dashboard() {
             </div>
           </section>
         </div>
+
+        <section className="overflow-hidden rounded-2xl border p-4 sm:p-5" style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 38px rgba(4, 12, 30, 0.35)" }}>
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-[#F4F7FF]">Test vs Marks</h2>
+              <p className="mt-1 text-[11px] text-[#91A8BB]">Your latest 10 evaluated tests · actual marks scored</p>
+            </div>
+            <div className="rounded-lg border border-[#1D364A] bg-[#10233B] px-3 py-2">
+              <p className="text-[9px] uppercase tracking-wider text-[#91A8BB]">Tests plotted</p>
+              <p className="mt-0.5 text-lg font-semibold tabular-nums text-white">{marksTrend.length}</p>
+            </div>
+          </div>
+          {marksTrend.length === 0 ? (
+            <div className="grid min-h-[220px] place-items-center rounded-xl border border-dashed border-[#203B5C] text-center">
+              <div><Layers3 className="mx-auto h-6 w-6 text-[#64819C]" /><p className="mt-3 text-sm text-[#DDEAF3]">No marks trend yet</p><p className="mt-1 text-xs text-[#8199B8]">Complete an evaluated test to plot your score.</p></div>
+            </div>
+          ) : (
+            <div className="w-full overflow-x-auto">
+              <svg viewBox="0 0 800 270" role="img" aria-label="Line chart showing marks scored across completed tests" className="h-[230px] min-w-[620px] w-full">
+                {[0, 0.25, 0.5, 0.75, 1].map((fraction) => {
+                  const y = 220 - fraction * 180;
+                  return <g key={fraction}>
+                    <line x1="58" x2="770" y1={y} y2={y} stroke="#203B5C" strokeDasharray="4 5" />
+                    <text x="48" y={y + 4} textAnchor="end" fill="#8199B8" fontSize="10">{Math.round(maxChartMarks * fraction)}</text>
+                  </g>;
+                })}
+                <path d={marksPath} fill="none" stroke="#35A9F4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                {chartPoints.map((point, index) => <g key={point.id}>
+                  <circle cx={point.x} cy={point.y} r="10" fill="#35A9F4" opacity="0.13" />
+                  <circle cx={point.x} cy={point.y} r="4.5" fill="#62C4FF" stroke="#07111D" strokeWidth="2">
+                    <title>{point.testName}: {point.score} / {point.totalMarks} marks</title>
+                  </circle>
+                  <text x={point.x} y="244" textAnchor="middle" fill="#A9BED0" fontSize="10">{`T${index + 1}`}</text>
+                  <text x={point.x} y={Math.max(15, point.y - 13)} textAnchor="middle" fill="#EAF5FF" fontSize="10" fontWeight="600">{point.score}</text>
+                </g>)}
+              </svg>
+              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-2 border-t border-[#1D364A] pt-3">
+                {chartPoints.map((point, index) => <div key={point.id} className="flex min-w-0 items-center gap-2 text-[10px] text-[#91A8BB]">
+                  <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-[#153653] text-[9px] font-semibold text-sky-200">T{index + 1}</span>
+                  <span className="max-w-[150px] truncate">{point.testName}</span>
+                  <span className="shrink-0 font-semibold tabular-nums text-slate-200">{point.score}/{point.totalMarks}</span>
+                </div>)}
+              </div>
+            </div>
+          )}
+        </section>
       </div>
     </StudentWorkspaceLayout>
   );
