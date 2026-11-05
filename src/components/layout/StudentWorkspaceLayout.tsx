@@ -128,7 +128,7 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
       <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-white/[0.07] bg-[#07101B]/85 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
         <button onClick={() => setDrawerOpen(true)} className="rounded-lg border border-white/10 p-2 text-slate-300 hover:bg-white/5 lg:hidden" aria-label="Open navigation"><Menu size={18} /></button>
         <div className="min-w-0"><p className="hidden text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:block">Student workspace</p><h1 className="truncate text-[16px] font-semibold text-white sm:text-[17px]">{title}</h1></div>
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">\n          <span className="hidden rounded-full border border-sky-400/15 bg-sky-400/[0.06] px-2.5 py-1 text-[10px] font-medium text-sky-200 sm:inline-flex">{roleLabel}</span>
           {canManageUsers && <div className="hidden items-center gap-2 xl:flex">
             <Link to="/admin/users?action=add-student" className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-[11px] text-slate-300 hover:border-sky-400/40 hover:text-white"><UserPlus size={14} />Add Student</Link>
             <Link to="/admin/users?action=add-admin" className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-[11px] text-slate-300 hover:border-sky-400/40 hover:text-white"><ShieldPlus size={14} />Add Admin</Link>
@@ -153,7 +153,7 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
             <DropdownMenuContent align="end" className="w-52 border-white/10 bg-[#0B1725] text-slate-100">
               <DropdownMenuLabel><span className="block truncate text-xs">{name}</span><span className="text-[10px] font-normal text-slate-500">{roleLabel}</span></DropdownMenuLabel><DropdownMenuSeparator className="bg-white/10" />
               <DropdownMenuItem onSelect={() => navigate("/profile")} className="cursor-pointer focus:bg-white/5"><UserRound size={15} className="mr-2" />My Profile</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => navigate("/settings")} className="cursor-pointer focus:bg-white/5"><Settings size={15} className="mr-2" />Account Settings</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => navigate("/settings")} className="cursor-pointer focus:bg-white/5"><Settings size={15} className="mr-2" />Account Settings</DropdownMenuItem>\n              <DropdownMenuItem onSelect={() => navigate("/settings")} className="cursor-pointer focus:bg-white/5"><Bell size={15} className="mr-2" />Notification Preferences</DropdownMenuItem>
               <DropdownMenuSeparator className="bg-white/10" /><DropdownMenuItem onSelect={logout} className="cursor-pointer text-rose-300 focus:bg-rose-500/10"><LogOut size={15} className="mr-2" />Sign out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
