@@ -379,7 +379,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="lg:hidden fixed left-0 top-0 h-screen w-[280px] bg-card border-r border-border z-[60]"
+              className="lg:hidden fixed left-0 top-0 h-screen w-[260px] bg-card border-r border-border z-[60]"
             >
               <div className="absolute top-3 right-3">
                 <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg hover:bg-muted">
@@ -395,7 +395,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Desktop Sidebar */}
       <motion.aside
         initial={false}
-        animate={{ width: collapsed ? 68 : 248 }}
+        animate={{ width: collapsed ? 60 : 224 }}
         transition={{ duration: 0.22, ease: "easeInOut" }}
         className="hidden lg:block fixed left-0 top-0 h-screen bg-card border-r border-border/60 z-40"
       >
@@ -406,7 +406,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <main
         className={cn(
           "flex-1 transition-all duration-300 pt-14 lg:pt-0 min-w-0",
-          collapsed ? "lg:ml-[68px]" : "lg:ml-[248px]"
+          collapsed ? "lg:ml-[60px]" : "lg:ml-[224px]"
         )}
       >
         {/* Desktop topbar */}
