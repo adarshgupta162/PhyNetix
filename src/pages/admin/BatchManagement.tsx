@@ -95,7 +95,6 @@ export default function BatchManagement() {
     totalBatches: batches?.length || 0,
     activeBatches: batches?.filter(b => b.is_active).length || 0,
     featuredBatches: batches?.filter(b => b.is_featured).length || 0,
-    totalStudents: batches?.reduce((acc, b) => acc + (b.current_students || 0), 0) || 0,
   };
 
   return (
@@ -120,7 +119,7 @@ export default function BatchManagement() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Total Batches</CardTitle>
@@ -151,15 +150,6 @@ export default function BatchManagement() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Enrollments</CardTitle>
-                <Users className="w-4 h-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalStudents}</div>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Batches Table */}

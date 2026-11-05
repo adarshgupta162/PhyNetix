@@ -232,7 +232,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <Link to="/admin" className="flex items-center gap-3 px-4 py-5 border-b border-border/60">
-        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0 shadow-sm shadow-primary/30">
+        <div className="w-8 h-8 rounded-md bg-accent flex items-center justify-center flex-shrink-0">
           <AtomIcon className="w-5 h-5 text-primary-foreground" />
         </div>
         <AnimatePresence mode="wait">
@@ -379,7 +379,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="lg:hidden fixed left-0 top-0 h-screen w-[280px] bg-card border-r border-border z-[60]"
+              className="lg:hidden fixed left-0 top-0 h-screen w-[260px] bg-card border-r border-border z-[60]"
             >
               <div className="absolute top-3 right-3">
                 <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg hover:bg-muted">
@@ -395,7 +395,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Desktop Sidebar */}
       <motion.aside
         initial={false}
-        animate={{ width: collapsed ? 68 : 248 }}
+        animate={{ width: collapsed ? 60 : 224 }}
         transition={{ duration: 0.22, ease: "easeInOut" }}
         className="hidden lg:block fixed left-0 top-0 h-screen bg-card border-r border-border/60 z-40"
       >
@@ -406,7 +406,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <main
         className={cn(
           "flex-1 transition-all duration-300 pt-14 lg:pt-0 min-w-0",
-          collapsed ? "lg:ml-[68px]" : "lg:ml-[248px]"
+          collapsed ? "lg:ml-[60px]" : "lg:ml-[224px]"
         )}
       >
         {/* Desktop topbar */}

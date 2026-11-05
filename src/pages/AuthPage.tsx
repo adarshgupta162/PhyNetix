@@ -232,7 +232,7 @@ export default function AuthPage() {
   // Show full-page loading when redirecting after OAuth
   if (isRedirecting || (authLoading && !user)) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
+      <div className="auth-page min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
         <div className="fixed inset-0 pointer-events-none">
           <div className="floating-orb w-96 h-96 bg-primary/30 top-20 -left-48" />
           <div className="floating-orb w-80 h-80 bg-accent/30 bottom-20 -right-40" style={{ animationDelay: '2s' }} />
@@ -254,7 +254,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex relative overflow-hidden">
+    <div className="auth-page min-h-screen bg-background flex relative overflow-hidden">
       {/* Background Effects */}
 
       {/* Left Side - Benefits (Signup only) */}

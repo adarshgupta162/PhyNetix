@@ -371,3 +371,152 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(142, 50%, 28%);
 }
+
+
+/* Minimal product surfaces: admin pages share a quiet, neutral palette. */
+.admin-layout {
+  --background: 40 20% 98%;
+  --foreground: 220 10% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 10% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 10% 14%;
+  --primary: 172 42% 30%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 40 12% 95%;
+  --secondary-foreground: 220 10% 20%;
+  --muted: 40 12% 95%;
+  --muted-foreground: 220 6% 46%;
+  --accent: 172 25% 94%;
+  --accent-foreground: 172 42% 24%;
+  --border: 40 8% 88%;
+  --input: 40 8% 88%;
+  --ring: 172 42% 30%;
+  --radius: .55rem;
+  --glass-bg: #fff;
+  --glass-border: hsl(40 8% 88%);
+  --glass-shadow: none;
+  --gradient-primary: #246F68;
+  --gradient-secondary: #246F68;
+  --gradient-glass: none;
+  --glow-primary: none;
+  --glow-accent: none;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+.admin-layout .glass-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.admin-layout .glass-card::before { display: none; }
+.admin-layout .stat-card { transition: border-color .15s ease; }
+.admin-layout .stat-card:hover { transform: none; box-shadow: none; border-color: hsl(var(--foreground) / .22); }
+.admin-layout .gradient-text {
+  background: none;
+  color: hsl(var(--foreground));
+  -webkit-text-fill-color: currentColor;
+}
+.admin-layout .btn-gradient {
+  background: hsl(var(--primary));
+  box-shadow: none;
+}
+.admin-layout .btn-gradient:hover { transform: none; filter: brightness(1.05); box-shadow: none; }
+.admin-layout .btn-glass { background: hsl(var(--card)); border-color: hsl(var(--border)); backdrop-filter: none; }
+.admin-layout .floating-orb { display: none; }
+
+/* The student workspace stays dark, but removes glow and glass effects. */
+.student-workspace {
+  background: #0d1011;
+  color: #e8ecea;
+}
+.student-workspace .student-sidebar { background: #111516; border-color: #242a29; }
+.student-workspace .student-topbar { background: rgba(13,16,17,.96); border-color: #242a29; backdrop-filter: blur(12px); }
+.student-workspace .student-active-link { background: #1a2926; border-color: #29433d; box-shadow: inset 2px 0 0 #6eaaa0; }
+.student-workspace .student-accent { color: #8bbdb2; }
+.student-workspace .student-muted { color: #8c9692; }
+.student-workspace .student-divider { border-color: #242a29; }
+.student-workspace .student-card { background: #141a19; border-color: #29312e; box-shadow: none; }
+
+/* Authentication uses the same restrained surfaces as the public site. */
+.auth-page { background: #fafaf8; color: #202526; }
+.auth-page .glass-card { background: #fff; border: 1px solid #e6e8e3; border-radius: 10px; box-shadow: 0 12px 36px rgba(20,30,25,.05); backdrop-filter: none; }
+.auth-page .glass-card::before { display: none; }
+.auth-page .floating-orb { display: none; }
+.auth-page .gradient-text { background: none; color: #202526; -webkit-text-fill-color: currentColor; }
+.auth-page button, .auth-page a { transition-duration: 150ms; }
+
+.landing-page { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+.landing-page h1, .landing-page h2, .landing-page h3 { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+
+.student-workspace [class*="bg-[#0B1725]"],
+.student-workspace [class*="bg-[#0D1D2B]"],
+.student-workspace [class*="bg-[#152C3F]"] { background-color: #141a19 !important; }
+.student-workspace [class*="border-white/"] { border-color: #29312e !important; }
+.student-workspace [class*="text-sky-"] { color: #8bbdb2 !important; }
+.student-workspace [class*="bg-sky-"] { background-color: rgba(110,170,160,.12) !important; }
+.student-workspace [class*="border-sky-"] { border-color: rgba(110,170,160,.3) !important; }
+.student-workspace [class*="shadow-["] { box-shadow: none !important; }
+
+/* Institute workspace: neutral, consistent product surfaces. */
+.institute-layout {
+  --background: 40 20% 98%;
+  --foreground: 220 10% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 10% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 10% 14%;
+  --primary: 172 42% 30%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 40 12% 95%;
+  --secondary-foreground: 220 10% 20%;
+  --muted: 40 12% 95%;
+  --muted-foreground: 220 6% 46%;
+  --accent: 172 25% 94%;
+  --accent-foreground: 172 42% 24%;
+  --border: 40 8% 88%;
+  --input: 40 8% 88%;
+  --ring: 172 42% 30%;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+.institute-layout aside {
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+.institute-layout main { background: hsl(var(--background)); }
+.institute-layout .rounded-md,
+.institute-layout .rounded-lg { box-shadow: none; }
+.institute-layout [class*="bg-primary/10"] { background: hsl(var(--accent)); }
+.institute-layout [class*="text-primary"] { color: hsl(var(--primary)); }
+.institute-layout [class*="border-b"] { border-color: hsl(var(--border)); }
+.institute-layout [data-card],
+.institute-layout [class*="shadow"] { box-shadow: none; }
+
+/* Shared minimal workspace polish. Keep every rule scoped outside the NTA test root. */
+.admin-layout,.student-workspace,.institute-layout,.auth-page,.landing-page {
+  font-family: Inter,ui-sans-serif,system-ui,sans-serif;
+  -webkit-user-select:text; -moz-user-select:text; -ms-user-select:text; user-select:text;
+}
+.admin-layout :is(h1,h2,h3,h4,h5,h6),.student-workspace :is(h1,h2,h3,h4,h5,h6),.institute-layout :is(h1,h2,h3,h4,h5,h6),.auth-page :is(h1,h2,h3,h4,h5,h6) {
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif; letter-spacing:-.025em;
+}
+.student-workspace .glass-card,.student-workspace .stat-card,.student-workspace .gradient-border {
+  background:#141a19; border:1px solid #29312e; border-radius:10px; box-shadow:none; backdrop-filter:none;
+}
+.student-workspace .glass-card::before,.student-workspace .gradient-border::before {display:none;}
+.student-workspace .stat-card:hover {transform:none;box-shadow:none;border-color:#3b514a;}
+.student-workspace .gradient-text,.student-workspace .gradient-icon {background:none;color:#e8ecea;-webkit-text-fill-color:currentColor;}
+.student-workspace .btn-gradient {background:#326e62;color:#fff;box-shadow:none;border-radius:8px;}
+.student-workspace .btn-gradient:hover {transform:none;filter:brightness(1.06);box-shadow:none;}
+.student-workspace .btn-glass {background:#171e1c;border-color:#29312e;box-shadow:none;backdrop-filter:none;}
+.institute-layout .glass-card,.institute-layout .stat-card {background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:10px;box-shadow:none;backdrop-filter:none;}
+.institute-layout .glass-card::before {display:none;}
+.institute-layout .gradient-text {background:none;color:hsl(var(--foreground));-webkit-text-fill-color:currentColor;}
+.institute-layout .floating-orb,.admin-layout .floating-orb,.student-workspace .floating-orb {display:none;}
+.institute-layout .btn-gradient {background:hsl(var(--primary));box-shadow:none;}
+.institute-layout .btn-gradient:hover {transform:none;box-shadow:none;}
+.admin-layout ::-webkit-scrollbar-track,.student-workspace ::-webkit-scrollbar-track,.institute-layout ::-webkit-scrollbar-track {background:transparent;}
+.admin-layout ::-webkit-scrollbar-thumb,.institute-layout ::-webkit-scrollbar-thumb {background:#d4d8d2;}
+.student-workspace ::-webkit-scrollbar-thumb {background:#303a36;}

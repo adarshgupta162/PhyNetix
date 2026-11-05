@@ -340,7 +340,7 @@ export default function AdminUsers() {
       const last = attemptStats[p.id]?.last;
       return last && now - new Date(last).getTime() <= 7 * 86400000;
     }).length;
-    return { total, admins, banned, active7, students: total - admins };
+    return { total, admins, banned, active7 };
   }, [profiles, userRoles, attemptStats]);
 
   const rowPad = density === "compact" ? "py-2 px-3" : "py-3 px-4";
@@ -372,9 +372,8 @@ export default function AdminUsers() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
           <Stat label="Total" value={stats.total} />
-          <Stat label="Students" value={stats.students} />
           <Stat label="Staff" value={stats.admins} accent="text-primary" />
           <Stat label="Banned" value={stats.banned} accent="text-destructive" />
           <Stat label="Active (7d)" value={stats.active7} accent="text-emerald-500" />

@@ -27,7 +27,7 @@ export default function InstituteLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="institute-layout min-h-screen flex">
       <aside className="hidden md:flex w-64 shrink-0 flex-col border-r bg-card">
         <div className="p-4 border-b">
           <div className="flex items-center gap-3">

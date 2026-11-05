@@ -72,7 +72,6 @@ const testSeriesData = {
     couponMessage: "Valid till next Sunday!",
     logo: "/logos/test-series/jee-main.png",
     offerEndsIn: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-    studentsEnrolled: 25430,
     rating: 4.8,
     reviews: 3240
   }
@@ -498,7 +497,6 @@ export default function TestSeriesEnrollment() {
                 </div>
                 <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
                   <Users className="w-4 h-4" />
-                  <span>{testSeries.studentsEnrolled.toLocaleString()} students already enrolled</span>
                 </div>
               </div>
 
@@ -1008,7 +1006,6 @@ export default function TestSeriesEnrollment() {
                     <Users className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium text-sm">50,000+ Students</p>
                     <p className="text-xs text-muted-foreground">Trust our platform</p>
                   </div>
                 </div>
@@ -1018,7 +1015,6 @@ export default function TestSeriesEnrollment() {
                   </div>
                   <div>
                     <p className="font-medium text-sm">99% Success Rate</p>
-                    <p className="text-xs text-muted-foreground">Students achieving goals</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

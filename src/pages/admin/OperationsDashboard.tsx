@@ -57,10 +57,8 @@ export default function OperationsDashboard() {
   });
 
   const stats = {
-    totalStudents: students?.length || 0,
     activeEnrollments: enrollments?.filter(e => e.is_active).length || 0,
     pendingEnrollments: enrollments?.filter(e => e.payment_status === 'pending').length || 0,
-    completedProfiles: students?.filter(s => s.profile_completed).length || 0,
   };
 
   const filteredEnrollments = enrollments?.filter(enrollment => {
@@ -90,59 +88,9 @@ export default function OperationsDashboard() {
             </Button>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-                <Users className="w-4 h-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalStudents}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Registered users
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Active Enrollments</CardTitle>
-                <BookOpen className="w-4 h-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.activeEnrollments}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Currently enrolled
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Pending</CardTitle>
-                <UserPlus className="w-4 h-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.pendingEnrollments}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Awaiting payment
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Complete Profiles</CardTitle>
-                <CheckCircle className="w-4 h-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.completedProfiles}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Verified students
-                </p>
-              </CardContent>
-            </Card>
+          <div className="mb-8 grid gap-3 sm:grid-cols-2">
+            <Card className="rounded-lg border-border shadow-none"><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">Active enrollments</CardTitle><BookOpen className="h-4 w-4 text-muted-foreground"/></CardHeader><CardContent><div className="text-2xl font-semibold tabular-nums">{stats.activeEnrollments}</div><p className="mt-1 text-xs text-muted-foreground">Currently active batch access</p></CardContent></Card>
+            <Card className="rounded-lg border-border shadow-none"><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">Pending payments</CardTitle><UserPlus className="h-4 w-4 text-muted-foreground"/></CardHeader><CardContent><div className="text-2xl font-semibold tabular-nums">{stats.pendingEnrollments}</div><p className="mt-1 text-xs text-muted-foreground">Enrollments awaiting payment</p></CardContent></Card>
           </div>
 
           {/* Tabs */}

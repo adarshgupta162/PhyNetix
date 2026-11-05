@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useInstitute } from "@/hooks/useInstitute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, Layers, ClipboardList, Activity, Target, History } from "lucide-react";
+import { Layers, ClipboardList, Activity, Target, History } from "lucide-react";
 import { format } from "date-fns";
 
 export default function InstituteDashboard() {
@@ -35,7 +35,6 @@ export default function InstituteDashboard() {
   });
 
   const cards = [
-    { label: "Total Students", value: stats?.students, icon: Users },
     { label: "Active Batches", value: stats?.batches, icon: Layers },
     { label: "Total Tests", value: stats?.tests, icon: ClipboardList },
     { label: "Test Attempts", value: stats?.attempts, icon: Activity },
@@ -51,7 +50,7 @@ export default function InstituteDashboard() {
         </p>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
           <Card key={c.label}>
             <CardContent className="p-4">
