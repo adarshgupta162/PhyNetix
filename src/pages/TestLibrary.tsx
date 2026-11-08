@@ -55,7 +55,7 @@ export default function TestLibrary() {
       // an empty library for users whose enrollments/sections were not visible.
       const { data: availableTests, error: testsError } = await supabase
         .from("tests")
-        .select("id, name, syllabus, syllabus_subtitle, duration_minutes, scheduled_at, is_published, total_questions, total_marks")
+        .select("id, name, syllabus, syllabus_subtitle, duration_minutes, scheduled_at, is_published, institution_id")
         .eq("is_published", true)
         .order("created_at", { ascending: false });
       if (testsError) throw testsError;
@@ -174,9 +174,7 @@ export default function TestLibrary() {
         syllabus: r.tests.syllabus,
         syllabus_subtitle: r.tests.syllabus_subtitle,
         duration_minutes: duration,
-        total_questions: r.tests.total_questions ?? undefined,
-        total_marks: r.tests.total_marks ?? undefined,
-        scheduled_at: r.tests.scheduled_at || r.unlock_date,
+                scheduled_at: r.tests.scheduled_at || r.unlock_date,
         isCompleted: !!att?.completed_at || expired,
         isInProgress: !!att && !att.completed_at && !expired,
         attemptId: att?.id,
