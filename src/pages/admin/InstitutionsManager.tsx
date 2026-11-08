@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ type Tab = (typeof STATUS_TABS)[number];
 
 export default function InstitutionsManager() {
   const qc = useQueryClient();
+  const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("pending");
   const [search, setSearch] = useState("");
   const [rejectFor, setRejectFor] = useState<any | null>(null);
@@ -45,8 +47,8 @@ export default function InstitutionsManager() {
 
   const setStatus = useMutation({
     mutationFn: async ({ id, status, rejection_reason }: { id: string; status: string; rejection_reason?: string | null }) => {
-      const patch: any = { status, rejection_reason: rejection_reason ?? null };
-      if (status === "active") patch.approved_at = new Date().toISOString();
+      const patch: any = { status, rejection_reason: rejection_reason ?? null, is_active: status === "active" };
+      if (status === "active") { patch.approved_at = new Date().toISOString(); patch.approved_by = user?.id ?? null; }
       const { error } = await supabase.from("institutions").update(patch).eq("id", id);
       if (error) throw error;
     },

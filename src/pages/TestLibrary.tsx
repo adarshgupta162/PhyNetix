@@ -43,35 +43,87 @@ export default function TestLibrary() {
 
   useEffect(() => { if (user) load(); }, [user]);
 
+  const [loadError, setLoadError] = useState<string | null>(null);
+
   const load = async () => {
+    if (!user) return;
     setLoading(true);
-    const { data: enrollments } = await supabase
-      .from("batch_enrollments")
-      .select("batch_id")
-      .eq("user_id", user!.id)
-      .eq("status", "active");
-    const batchIds = (enrollments || []).map((e: any) => e.batch_id);
+    setLoadError(null);
+    try {
+      // Fetch tests through the tests RLS policy first. The old nested
+      // batch_tests -> tests relationship silently hid failures and returned
+      // an empty library for users whose enrollments/sections were not visible.
+      const { data: availableTests, error: testsError } = await supabase
+        .from("tests")
+        .select("id, name, syllabus, syllabus_subtitle, duration_minutes, scheduled_at, is_published, institution_id")
+        // RLS already limits students to published/assigned tests while allowing
+        // institute staff and platform admins to inspect their own drafts.
+        .order("created_at", { ascending: false });
+      if (testsError) throw testsError;
 
-    if (batchIds.length) {
-      const { data: bt } = await supabase
-        .from("batch_tests")
-        .select(`test_id, section_id, batch_id, unlock_date, display_order, order_index, section:course_sections(id, name, display_order), tests(*)`)
-        .in("batch_id", batchIds)
-        .order("display_order", { ascending: true });
-      setRows((bt as any) || []);
-    } else {
+      const testIds = (availableTests ?? []).map((t: any) => t.id);
+      if (!testIds.length) {
+        setRows([]);
+        const { data: att, error: attemptsError } = await supabase
+          .from("test_attempts")
+          .select("id, test_id, completed_at, started_at")
+          .eq("user_id", user.id);
+        if (attemptsError) throw attemptsError;
+        setAttempts(att ?? []);
+        return;
+      }
+
+      const [{ data: enrollments, error: enrollmentsError }, { data: batchLinks, error: linksError }, { data: att, error: attemptsError }] = await Promise.all([
+        supabase.from("batch_enrollments").select("batch_id").eq("user_id", user.id).eq("status", "active"),
+        supabase.from("batch_tests").select("test_id, section_id, batch_id, unlock_date, display_order, order_index").in("test_id", testIds),
+        supabase.from("test_attempts").select("id, test_id, completed_at, started_at").eq("user_id", user.id),
+      ]);
+      if (enrollmentsError) throw enrollmentsError;
+      if (linksError) throw linksError;
+      if (attemptsError) throw attemptsError;
+
+      const enrolledBatchIds = new Set((enrollments ?? []).map((e: any) => e.batch_id));
+      const visibleLinks = (batchLinks ?? []).filter((link: any) => enrolledBatchIds.has(link.batch_id));
+      const sectionIds = Array.from(new Set(visibleLinks.map((link: any) => link.section_id).filter(Boolean)));
+
+      let sectionMap = new Map<string, any>();
+      if (sectionIds.length) {
+        const { data: sections, error: sectionsError } = await supabase
+          .from("course_sections")
+          .select("id, name, display_order")
+          .in("id", sectionIds);
+        if (sectionsError) throw sectionsError;
+        sectionMap = new Map((sections ?? []).map((section: any) => [section.id, section]));
+      }
+
+      const testsById = new Map((availableTests ?? []).map((test: any) => [test.id, test]));
+      const mappedRows: BatchTestRow[] = visibleLinks.map((link: any) => ({
+        ...link,
+        section: link.section_id ? (sectionMap.get(link.section_id) ?? null) : null,
+        tests: testsById.get(link.test_id) ?? null,
+      })).filter((row: BatchTestRow) => !!row.tests);
+
+      // Keep standalone published tests visible too (e.g. platform mock tests
+      // not assigned to a batch), while institute tests remain assignment-scoped.
+      const assignedIds = new Set(mappedRows.map(row => row.test_id));
+      const standaloneRows: BatchTestRow[] = (availableTests ?? [])
+        .filter((test: any) => !assignedIds.has(test.id) && !test.institution_id)
+        .map((test: any) => ({
+          test_id: test.id, section_id: null, section: null, tests: test,
+          batch_id: "", unlock_date: null, display_order: null, order_index: null,
+        }));
+
+      setRows([...mappedRows, ...standaloneRows]);
+      setAttempts(att ?? []);
+    } catch (error: any) {
+      console.error("Test library load failed:", error);
+      setLoadError(error?.message || "Unable to load your tests. Please try again.");
       setRows([]);
+      setAttempts([]);
+    } finally {
+      setLoading(false);
     }
-
-    const { data: att } = await supabase
-      .from("test_attempts")
-      .select("id, test_id, completed_at, started_at")
-      .eq("user_id", user!.id);
-    setAttempts((att as any) || []);
-
-    setLoading(false);
   };
-
   const categories: CategoryItem[] = useMemo(() => {
     const seen = new Map<string, CategoryItem & { order: number }>();
     for (const r of rows) {
@@ -123,9 +175,7 @@ export default function TestLibrary() {
         syllabus: r.tests.syllabus,
         syllabus_subtitle: r.tests.syllabus_subtitle,
         duration_minutes: duration,
-        total_questions: r.tests.total_questions ?? undefined,
-        total_marks: r.tests.total_marks ?? undefined,
-        scheduled_at: r.tests.scheduled_at || r.unlock_date,
+                scheduled_at: r.tests.scheduled_at || r.unlock_date,
         isCompleted: !!att?.completed_at || expired,
         isInProgress: !!att && !att.completed_at && !expired,
         attemptId: att?.id,
@@ -207,6 +257,12 @@ export default function TestLibrary() {
 
         {loading ? (
           <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>
+        ) : loadError ? (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/5 px-5 py-10 text-center">
+            <p className="text-sm font-medium text-red-300">Could not load your test library</p>
+            <p className="mt-2 text-xs text-slate-400">{loadError}</p>
+            <Button className="mt-4" onClick={load}>Try again</Button>
+          </div>
         ) : visibleTests.length === 0 ? (
           <div className="text-center py-12 rounded-xl border border-border bg-secondary/20">
             <BookOpen className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />

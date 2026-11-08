@@ -34,21 +34,18 @@ serve(async (req) => {
       website, password, description, logoUrl, acceptedTerms, autoApprove,
     } = body as Record<string, string | boolean>;
 
-    // Only a platform admin may create an already-approved institute manually.
-    let isPlatformAdmin = false;
+    // Self-service registration must be tied to the authenticated account.
+    // Never attach an institute owner membership to an email supplied by the browser.
     const authHeader = req.headers.get("Authorization") ?? "";
-    if (authHeader.startsWith("Bearer ")) {
-      const token = authHeader.slice(7);
-      const { data: userData } = await admin.auth.getUser(token);
-      if (userData?.user) {
-        const { data: roleOk } = await admin.rpc("has_role", { _user_id: userData.user.id, _role: "admin" });
-        isPlatformAdmin = roleOk === true;
-      }
-    }
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    if (!token) return json({ error: "Sign in before registering an institute" }, 401);
+    const { data: userData, error: authError } = await admin.auth.getUser(token);
+    if (authError || !userData?.user) return json({ error: "Your session is invalid. Sign in again." }, 401);
+    const authenticatedUser = userData.user;
+    const { data: roleOk } = await admin.rpc("has_role", { _user_id: authenticatedUser.id, _role: "admin" });
+    const isPlatformAdmin = roleOk === true;
     const approveNow = autoApprove === true && isPlatformAdmin;
-    if (autoApprove === true && !isPlatformAdmin) {
-      return json({ error: "Only platform administrators can create approved institutes" }, 403);
-    }
+    if (autoApprove === true && !isPlatformAdmin) return json({ error: "Only platform administrators can create approved institutes" }, 403);
 
     const errors: Record<string, string> = {};
     const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
@@ -60,15 +57,19 @@ serve(async (req) => {
     if (!str(city)) errors.city = "City is required";
     if (!str(state)) errors.state = "State is required";
     if (!str(country)) errors.country = "Country is required";
-    if (str(password).length < 8) errors.password = "Password must be at least 8 characters";
+    if (isPlatformAdmin && str(password).length < 8) errors.password = "Password must be at least 8 characters";
     if (str(website) && !/^https?:\/\/.+/.test(str(website))) errors.website = "Website must start with http(s)://";
     if (acceptedTerms !== true && !isPlatformAdmin) errors.acceptedTerms = "You must accept the terms";
     if (Object.keys(errors).length) return json({ error: "Validation failed", fields: errors }, 400);
 
     const email = str(adminEmail).toLowerCase();
+    if (!isPlatformAdmin && email !== (authenticatedUser.email ?? "").toLowerCase()) {
+      return json({ error: "The institute admin email must match your signed-in account email." }, 403);
+    }
 
-    // Find existing auth user with this email (never create a duplicate account)
-    let userId: string | null = null;
+    // Platform administrators may provision an owner account. Self-service users
+    // always become owner through their own verified, authenticated session.
+    let userId: string | null = isPlatformAdmin ? null : authenticatedUser.id;
     for (let page = 1; page <= 20 && !userId; page++) {
       const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
       if (error) break;

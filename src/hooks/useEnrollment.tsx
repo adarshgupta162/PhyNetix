@@ -13,18 +13,63 @@ export function useUserEnrollments() {
     queryFn: async () => {
       if (!user) return [];
 
-      const { data, error } = await supabase
-        .from('batch_enrollments')
-        .select(`
-          *,
-          batches (*)
-        `)
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .order('enrolled_at', { ascending: false });
+      // Do not trust is_active alone: older successful checkouts may have
+      // completed payments while the enrollment flag is stale or missing.
+      const [{ data: enrollmentRows, error: enrollmentError }, { data: paidRows, error: paymentsError }] = await Promise.all([
+        supabase
+          .from('batch_enrollments')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('enrolled_at', { ascending: false }),
+        supabase
+          .from('payments')
+          .select('id, batch_id, status, amount, currency, created_at, updated_at, provider, transaction_id, provider_order_id, metadata')
+          .eq('user_id', user.id)
+          .eq('status', 'completed')
+          .not('batch_id', 'is', null)
+          .order('created_at', { ascending: false }),
+      ]);
 
-      if (error) throw error;
-      return data;
+      if (enrollmentError) throw enrollmentError;
+      if (paymentsError) throw paymentsError;
+
+      const byBatch = new Map<string, any>();
+      for (const row of enrollmentRows ?? []) {
+        if (row.batch_id && (row.is_active === true || row.status === 'active' || row.payment_status === 'completed')) {
+          if (!byBatch.has(row.batch_id)) byBatch.set(row.batch_id, row);
+        }
+      }
+
+      for (const payment of paidRows ?? []) {
+        if (!payment.batch_id || byBatch.has(payment.batch_id)) continue;
+        byBatch.set(payment.batch_id, {
+          id: `paid-${payment.id}`,
+          user_id: user.id,
+          batch_id: payment.batch_id,
+          status: 'active',
+          is_active: true,
+          payment_status: 'completed',
+          enrollment_type: 'paid',
+          enrolled_at: payment.created_at,
+          expires_at: null,
+          payment_id: payment.id,
+          recovered_from_payment: true,
+        });
+      }
+
+      const batchIds = Array.from(byBatch.keys());
+      if (batchIds.length === 0) return [];
+
+      const { data: batchRows, error: batchesError } = await supabase
+        .from('batches')
+        .select('*')
+        .in('id', batchIds);
+      if (batchesError) throw batchesError;
+
+      const batchesById = new Map((batchRows ?? []).map((batch: any) => [batch.id, batch]));
+      return Array.from(byBatch.values())
+        .map((enrollment: any) => ({ ...enrollment, batches: batchesById.get(enrollment.batch_id) ?? null }))
+        .filter((enrollment: any) => !!enrollment.batches);
     },
     enabled: !!user,
   });

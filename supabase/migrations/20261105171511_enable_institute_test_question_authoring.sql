@@ -1,0 +1,13 @@
+-- Allow institute question editors to create the existing test subject/section structure.
+DROP POLICY IF EXISTS "Admins manage test subjects" ON public.test_subjects;
+CREATE POLICY institute_manage_test_subjects ON public.test_subjects FOR ALL TO authenticated
+USING(has_role(auth.uid(),'admin'::app_role) OR EXISTS(SELECT 1 FROM public.tests t WHERE t.id=test_subjects.test_id AND t.institution_id IS NOT NULL AND (public.has_institution_permission(t.institution_id,'questions.manage') OR public.has_institution_permission(t.institution_id,'tests.edit')) AND public.institution_is_active(t.institution_id)))
+WITH CHECK(has_role(auth.uid(),'admin'::app_role) OR EXISTS(SELECT 1 FROM public.tests t WHERE t.id=test_subjects.test_id AND t.institution_id IS NOT NULL AND (public.has_institution_permission(t.institution_id,'questions.manage') OR public.has_institution_permission(t.institution_id,'tests.edit')) AND public.institution_is_active(t.institution_id)));
+DROP POLICY IF EXISTS "Admins manage test sections" ON public.test_sections;
+CREATE POLICY institute_manage_test_sections ON public.test_sections FOR ALL TO authenticated
+USING(has_role(auth.uid(),'admin'::app_role) OR EXISTS(SELECT 1 FROM public.test_subjects s JOIN public.tests t ON t.id=s.test_id WHERE s.id=test_sections.subject_id AND t.institution_id IS NOT NULL AND (public.has_institution_permission(t.institution_id,'questions.manage') OR public.has_institution_permission(t.institution_id,'tests.edit')) AND public.institution_is_active(t.institution_id)))
+WITH CHECK(has_role(auth.uid(),'admin'::app_role) OR EXISTS(SELECT 1 FROM public.test_subjects s JOIN public.tests t ON t.id=s.test_id WHERE s.id=test_sections.subject_id AND t.institution_id IS NOT NULL AND (public.has_institution_permission(t.institution_id,'questions.manage') OR public.has_institution_permission(t.institution_id,'tests.edit')) AND public.institution_is_active(t.institution_id)));
+DROP POLICY IF EXISTS lib_institution_write ON public.phynetix_library;
+CREATE POLICY lib_institution_write ON public.phynetix_library FOR ALL TO authenticated
+USING(institution_id IS NOT NULL AND public.has_institution_permission(institution_id,'questions.manage') AND public.institution_is_active(institution_id))
+WITH CHECK(institution_id IS NOT NULL AND public.has_institution_permission(institution_id,'questions.manage') AND public.institution_is_active(institution_id));
