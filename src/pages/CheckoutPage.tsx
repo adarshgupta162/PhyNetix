@@ -7,6 +7,8 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { INDIAN_STATES } from "@/lib/indiaGeo";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,6 +17,15 @@ import { IndianRupee, ArrowLeft, Shield, Tag, CheckCircle, AlertTriangle } from 
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
+
+const COUNTRIES = ["Australia", "Bangladesh", "Brazil", "Canada", "China", "France", "Germany", "India", "Indonesia", "Ireland", "Italy", "Japan", "Malaysia", "Nepal", "Netherlands", "New Zealand", "Pakistan", "Philippines", "Qatar", "Saudi Arabia", "Singapore", "South Africa", "Sri Lanka", "United Arab Emirates", "United Kingdom", "United States"];
+const STATES_BY_COUNTRY: Record<string, string[]> = {
+  India: INDIAN_STATES,
+  "United States": ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"],
+  Canada: ["Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", "Northwest Territories", "Nova Scotia", "Nunavut", "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan", "Yukon"],
+  Australia: ["Australian Capital Territory", "New South Wales", "Northern Territory", "Queensland", "South Australia", "Tasmania", "Victoria", "Western Australia"],
+  "United Kingdom": ["England", "Northern Ireland", "Scotland", "Wales"],
+};
 
 interface AppliedCoupon {
   id: string;
@@ -275,11 +286,21 @@ export default function CheckoutPage() {
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="student-country">Country</Label>
-                      <Input id="student-country" autoComplete="country-name" value={studentDetails.country} onChange={(e) => setStudentDetails({ ...studentDetails, country: e.target.value })} placeholder="Country" />
+                      <Select value={studentDetails.country} onValueChange={(country) => setStudentDetails({ ...studentDetails, country, state: "" })}>
+                        <SelectTrigger id="student-country"><SelectValue placeholder="Select country" /></SelectTrigger>
+                        <SelectContent>{COUNTRIES.map((country) => <SelectItem key={country} value={country}>{country}</SelectItem>)}</SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="student-state">State</Label>
-                      <Input id="student-state" autoComplete="address-level1" value={studentDetails.state} onChange={(e) => setStudentDetails({ ...studentDetails, state: e.target.value })} placeholder="State" />
+                      <Label htmlFor="student-state">State / Province</Label>
+                      {STATES_BY_COUNTRY[studentDetails.country]?.length ? (
+                        <Select value={studentDetails.state} onValueChange={(state) => setStudentDetails({ ...studentDetails, state })}>
+                          <SelectTrigger id="student-state"><SelectValue placeholder="Select state / province" /></SelectTrigger>
+                          <SelectContent>{STATES_BY_COUNTRY[studentDetails.country].map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent>
+                        </Select>
+                      ) : (
+                        <Input id="student-state" autoComplete="address-level1" value={studentDetails.state} onChange={(e) => setStudentDetails({ ...studentDetails, state: e.target.value })} placeholder={studentDetails.country ? "Enter state / province" : "Select country first"} disabled={!studentDetails.country} />
+                      )}
                     </div>
                     <div className="space-y-1.5 sm:col-span-2">
                       <Label htmlFor="student-city">City</Label>
