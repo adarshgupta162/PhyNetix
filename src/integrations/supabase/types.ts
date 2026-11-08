@@ -1590,6 +1590,7 @@ export type Database = {
           banned_reason: string | null
           banned_until: string | null
           city: string | null
+          country: string | null
           coaching_name: string | null
           coaching_type: string | null
           created_at: string
@@ -1614,6 +1615,7 @@ export type Database = {
           banned_reason?: string | null
           banned_until?: string | null
           city?: string | null
+          country?: string | null
           coaching_name?: string | null
           coaching_type?: string | null
           created_at?: string
@@ -1638,6 +1640,7 @@ export type Database = {
           banned_reason?: string | null
           banned_until?: string | null
           city?: string | null
+          country?: string | null
           coaching_name?: string | null
           coaching_type?: string | null
           created_at?: string
