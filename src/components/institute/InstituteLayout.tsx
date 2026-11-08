@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Layers, ClipboardList, BarChart3, UserCog, Settings, LogOut, Building2, ShieldAlert, FileText } from "lucide-react";
+import { LayoutDashboard, Users, Layers, ClipboardList, BarChart3, UserCog, Settings, LogOut, Building2, ShieldAlert, FileText, Video, History } from "lucide-react";
 import { useInstitute } from "@/hooks/useInstitute";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
