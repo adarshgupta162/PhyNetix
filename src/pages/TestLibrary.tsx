@@ -56,7 +56,8 @@ export default function TestLibrary() {
       const { data: availableTests, error: testsError } = await supabase
         .from("tests")
         .select("id, name, syllabus, syllabus_subtitle, duration_minutes, scheduled_at, is_published, institution_id")
-        .eq("is_published", true)
+        // RLS already limits students to published/assigned tests while allowing
+        // institute staff and platform admins to inspect their own drafts.
         .order("created_at", { ascending: false });
       if (testsError) throw testsError;
 
