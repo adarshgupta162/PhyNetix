@@ -164,9 +164,11 @@ export default function Dashboard() {
     setError(null);
 
     try {
+      // Keep the attempts query independent from the tests relationship.
+      // This avoids PostgREST relationship/RLS failures blanking the entire dashboard.
       const { data: rawAttempts, error: attemptsError } = await supabase
         .from("test_attempts")
-        .select("id, test_id, score, total_marks, completed_at, answers, awaiting_result, test:tests(name, test_type, exam_type)")
+        .select("id, test_id, score, total_marks, completed_at, answers, awaiting_result")
         .eq("user_id", user.id)
         .not("completed_at", "is", null)
         .order("completed_at", { ascending: false });
@@ -188,7 +190,8 @@ export default function Dashboard() {
 
       const testIds = Array.from(new Set(validAttempts.map((attempt: any) => attempt.test_id)));
 
-      const [{ data: sectionQuestions }, { data: regularQuestions }] = await Promise.all([
+      const [{ data: testRows, error: testsError }, { data: sectionQuestions, error: sectionError }, { data: regularQuestions, error: regularError }] = await Promise.all([
+        supabase.from("tests").select("id, name, test_type, exam_type").in("id", testIds),
         supabase
           .from("test_section_questions")
           .select(`
@@ -220,6 +223,12 @@ export default function Dashboard() {
           `)
           .in("test_id", testIds),
       ]);
+
+      if (testsError) throw testsError;
+      if (sectionError) throw sectionError;
+      if (regularError) throw regularError;
+
+      const testsById = new Map((testRows || []).map((test: any) => [test.id, test]));
 
       const sectionByTest = new Map<string, QuestionMeta[]>();
       for (const row of sectionQuestions || []) {
@@ -268,7 +277,8 @@ export default function Dashboard() {
         .map((attempt: any) => {
           const answers = (attempt.answers as Record<string, unknown>) || {};
           const testId = attempt.test_id as string;
-          const testType = attempt.test?.test_type as string | null | undefined;
+          const test = testsById.get(testId) as any;
+          const testType = test?.test_type as string | null | undefined;
 
           const sectionQuestionsForTest = sectionByTest.get(testId) || [];
           const regularQuestionsForTest = regularByTest.get(testId) || [];
@@ -335,9 +345,9 @@ export default function Dashboard() {
           return {
             id: attempt.id,
             testId,
-            testName: attempt.test?.name || "Untitled Test",
+            testName: test?.name || "Untitled Test",
             completedAt: attempt.completed_at,
-            testTypeLabel: toTestTypeLabel(testType, attempt.test?.exam_type, attempt.test?.name),
+            testTypeLabel: toTestTypeLabel(testType, test?.exam_type, test?.name),
             scorePercentage: marksPercentage,
             score: Number(attempt.score),
             totalMarks: Number(attempt.total_marks),
@@ -351,7 +361,7 @@ export default function Dashboard() {
       setAttempts(mappedAttempts);
     } catch (err) {
       console.error(err);
-      setError("Failed to load dashboard analytics.");
+      setError(err instanceof Error ? err.message : "Failed to load dashboard analytics.");
     } finally {
       setLoading(false);
     }
