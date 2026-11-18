@@ -22,12 +22,13 @@ const navItems = [
   { label: "Test Library", path: "/tests", icon: FileText },
   { label: "DPP", path: "/dpps", icon: ClipboardList },
   { label: "Analytics", path: "/analytics", icon: BarChart3 },
+  { label: "Real Exam Calculator", path: "/real-exam-calculator", icon: ClipboardList },
   { label: "Settings", path: "/settings", icon: Settings },
 ];
 
 const titles: Record<string, string> = {
   "/dashboard": "Dashboard", "/my-batches": "My Batches", "/tests": "Test Library",
-  "/dpps": "Daily Practice Problems", "/analytics": "Analytics", "/settings": "Settings",
+  "/dpps": "Daily Practice Problems", "/analytics": "Analytics", "/real-exam-calculator": "Real Exam Calculator", "/settings": "Settings",
   "/profile": "My Profile", "/payments": "Payment History", "/batches": "Explore Courses",
 };
 
