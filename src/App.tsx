@@ -26,6 +26,7 @@ const NormalTestAnalysis = lazy(() => import("./pages/NormalTestAnalysis"));
 const QuestionWiseAnalysis = lazy(() => import("./pages/QuestionWiseAnalysis"));
 
 const Analytics = lazy(() => import("./pages/Analytics"));
+const RealExamCalculator = lazy(() => import("./pages/RealExamCalculator"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const QuestionBankPage = lazy(() => import("./pages/QuestionBankPage"));
@@ -133,6 +134,7 @@ const App = () => (
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/attempts" element={<Navigate to="/tests" replace />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/real-exam-calculator" element={<RealExamCalculator />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 {/* DPP Routes */}
                 <Route path="/dpps" element={<DPPPage />} />
