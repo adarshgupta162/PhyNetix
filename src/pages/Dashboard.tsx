@@ -55,12 +55,12 @@ type QuestionMeta = {
 };
 
 const COLORS = {
-  bg: "#000000",
-  card: "#0D1D2B",
-  cardAlt: "#152C3F",
+  bg: "#0b111b",
+  card: "#111e2c",
+  cardAlt: "#17283a",
   text: "#F4F7FF",
   textMuted: "#91A8BB",
-  border: "#1D364A",
+  border: "#2b3d51",
   blue: "#1697E8",
   cyan: "#5CB8E9",
   purple: "#7594A9",
@@ -138,7 +138,7 @@ function CircularScore({ score }: { score: number }) {
         </defs>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <p className="text-3xl font-semibold text-[#F4F7FF] leading-none">{Math.round(clamped)}%</p>
+        <p className="text-3xl font-semibold text-[#F4F7FF] leading-none">{Math.round(score)}%</p>
         <p className="text-xs text-[#9AADC5] mt-1">Score</p>
       </div>
     </div>
@@ -152,6 +152,8 @@ export default function Dashboard() {
   const [attempts, setAttempts] = useState<AttemptSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pendingResults,setPendingResults]=useState(0);
+  const [visibleCount,setVisibleCount]=useState(5);
 
   const [filter, setFilter] = useState<FilterOption>("all");
   const [fromDate, setFromDate] = useState("");
@@ -173,6 +175,7 @@ export default function Dashboard() {
 
       if (attemptsError) throw attemptsError;
 
+      setPendingResults((rawAttempts || []).filter(a => a.awaiting_result).length);
       const validAttempts = (rawAttempts || []).filter((attempt: any) => {
         if (!attempt.completed_at) return false;
         if (attempt.awaiting_result === true) return false;
@@ -327,7 +330,7 @@ export default function Dashboard() {
 
           const marksPercentage =
             attempt.total_marks && attempt.total_marks > 0
-              ? Math.max(0, Math.min(100, (attempt.score / attempt.total_marks) * 100))
+              ? (attempt.score / attempt.total_marks) * 100
               : analytics.overall.total > 0
                 ? (analytics.overall.correct / analytics.overall.total) * 100
                 : 0;
@@ -345,7 +348,6 @@ export default function Dashboard() {
             analytics,
           };
         })
-        .filter((attempt) => attempt.analytics.overall.total > 0)
         .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime());
 
       setAttempts(mappedAttempts);
@@ -438,10 +440,11 @@ export default function Dashboard() {
     [filteredAttempts],
   );
   const maxChartMarks = Math.max(10, ...marksTrend.map((attempt) => attempt.totalMarks));
+  const minChartMarks = Math.min(0, ...marksTrend.map((attempt) => attempt.score));
   const chartPoints = marksTrend.map((attempt, index) => ({
     ...attempt,
     x: marksTrend.length === 1 ? 400 : 64 + (index / (marksTrend.length - 1)) * 700,
-    y: 220 - (attempt.score / maxChartMarks) * 180,
+    y: 220 - ((attempt.score - minChartMarks) / (maxChartMarks - minChartMarks)) * 180,
   }));
   const marksPath = chartPoints.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
 
@@ -482,7 +485,17 @@ export default function Dashboard() {
 
   return (
     <StudentWorkspaceLayout>
-      <div className="mx-auto w-full max-w-[1480px] space-y-5">
+      <div className="student-dashboard mx-auto w-full max-w-[1480px] space-y-5">
+        <div className="workspace-page-header"><div><div className="workspace-overline">Your preparation, in focus</div><h1>Make your next attempt count.</h1><p>Review your progress, find your focus, and keep moving forward.</p></div><Link to="/tests" className="product-button">Open test library</Link></div>
+        <div className="workspace-stats">{[
+          ["Released results",String(attempts.length),"Completed and ready to review"],
+          ["Average score",attempts.length ? (attempts.reduce((sum,a)=>sum+a.scorePercentage,0)/attempts.length).toFixed(1)+"%" : "—","Across your released results"],
+          ["Best score",attempts.length ? Math.max(...attempts.map(a=>a.scorePercentage)).toFixed(1)+"%" : "—","Your highest percentage score"],
+          ["Awaiting result",String(pendingResults),"Results will appear after release"]
+        ].map(([label,value,note])=><div className="workspace-card" key={label}><p className="workspace-stat-label">{label}</p><p className="workspace-stat-value">{value}</p><p className="workspace-stat-note">{note}</p></div>)}</div>
+        <div className="flex flex-wrap gap-3 pb-2"><Link to="/my-batches" className="product-button product-button-secondary product-button-small">My batches</Link><Link to="/dpps" className="product-button product-button-secondary product-button-small">Daily practice</Link><Link to="/real-exam-calculator" className="product-button product-button-secondary product-button-small">Real exam calculator</Link><Link to="/batches" className="product-button product-button-secondary product-button-small">Explore test series</Link></div>
+        {attempts.some(a=>!a.analytics.overall.total)&&<p className="workspace-notice" role="status">Some question-level data is unavailable. Your saved scores are included; subject breakdowns use only available questions.</p>}
+        {pendingResults>0&&<p className="workspace-notice" role="status">{pendingResults} completed {pendingResults===1?"attempt is":"attempts are"} awaiting result release.</p>}
         <div className="grid gap-5 lg:grid-cols-[minmax(350px,0.92fr)_minmax(0,1.08fr)]">
           <section className="min-w-0 flex flex-col gap-3">
             <div
@@ -490,26 +503,26 @@ export default function Dashboard() {
               style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 40px rgba(3, 11, 26, 0.45)" }}
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-[13px] font-medium tracking-tight" style={{ color: COLORS.text }}>
-                  Previous Exams
+                <h2 className="text-[15px] font-medium tracking-tight" style={{ color: COLORS.text }}>
+                  Your attempts
                 </h2>
-                <Link to="/analytics" className="inline-flex items-center rounded-full border px-2 py-0.5 text-[9px] hover:bg-[#10233B] transition" style={{ borderColor: COLORS.border, color: COLORS.textMuted }}>
+                <Link to="/analytics" className="inline-flex items-center rounded-full border px-2 py-0.5 text-[12px] hover:bg-[#10233B] transition" style={{ borderColor: COLORS.border, color: COLORS.textMuted }}>
                   View all
                 </Link>
               </div>
             </div>
 
-            {attempts.length === 0 ? (
-              <div className="rounded-[10px] border bg-[#0D1D2B] p-5 text-center" style={{ borderColor: COLORS.border }}>
+            {filteredAttempts.length === 0 ? (
+              <div className="rounded-[10px] border bg-[#111e2c] p-5 text-center" style={{ borderColor: COLORS.border }}>
                 <p className="text-sm font-medium text-[#F4F7FF]">No completed tests yet</p>
-                <p className="mt-1.5 text-[11px] text-[#91A8BB]">Complete your first test to start seeing analytics here.</p>
-                <Link to="/tests" className="inline-flex mt-4 rounded-md bg-[#168BFF] text-white px-3 py-1.5 text-[11px] font-medium hover:bg-[#157de6] transition">
+                <p className="mt-1.5 text-[13px] text-[#91A8BB]">Complete your first test to start seeing analytics here.</p>
+                <Link to="/tests" className="inline-flex mt-4 rounded-md bg-[#168BFF] text-white px-3 py-1.5 text-[15px] font-medium hover:bg-[#157de6] transition">
                   Go to Test Library
                 </Link>
               </div>
             ) : (
               <div className="max-h-[820px] space-y-3 overflow-y-auto pr-1">
-              {attempts.slice(0, 3).map((attempt, index) => {
+              {filteredAttempts.slice(0, visibleCount).map((attempt, index) => {
                 const badge = getBadge(attempt.scorePercentage);
 
                 return (
@@ -522,18 +535,18 @@ export default function Dashboard() {
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <h3 className="text-[13px] font-medium leading-tight text-[#E8F1F8]">{attempt.testName}</h3>
-                        <p className="text-[10px] text-[#91A8BB] mt-0.5">{index === 0 ? "Performance summary of your recent exam." : "Detailed insight into your mid-term performance."}</p>
+                        <h3 className="text-[15px] font-medium leading-tight text-[#E8F1F8]">{attempt.testName}</h3>
+                        <p className="text-[12px] text-[#91A8BB] mt-0.5">{index === 0 ? "Performance summary of your recent exam." : "Review this attempt and identify your next revision priorities."}</p>
                       </div>
-                      <span className={cn("text-[9px] px-2 py-0.5 rounded-full border font-medium", badge.className)}>{badge.label}</span>
+                      <span className={cn("text-[12px] px-2 py-0.5 rounded-full border font-medium", badge.className)}>{badge.label}</span>
                     </div>
 
-                    <div className="mt-2 flex flex-wrap gap-1.5 text-[9px] text-[#91A8BB]">
-                      <span className="inline-flex items-center gap-1 rounded-full border border-[#1D364A] bg-[#152C3F] px-2 py-0.5">
+                    <div className="mt-2 flex flex-wrap gap-1.5 text-[12px] text-[#91A8BB]">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[#2b3d51] bg-[#17283a] px-2 py-0.5">
                         <Calendar className="w-3 h-3" />
                         {new Date(attempt.completedAt).toLocaleString()}
                       </span>
-                      <span className="inline-flex items-center gap-1 rounded-full border border-[#1D364A] bg-[#152C3F] px-2 py-0.5">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[#2b3d51] bg-[#17283a] px-2 py-0.5">
                         <Layers3 className="w-3 h-3" />
                         {attempt.testTypeLabel}
                       </span>
@@ -549,7 +562,7 @@ export default function Dashboard() {
                               <span className="w-3 h-3 rounded-full" style={{ background: subject === "Physics" ? COLORS.blue : subject === "Chemistry" ? COLORS.purple : COLORS.cyan }} />
                               {subject}
                             </span>
-                            <span className="font-semibold text-[#F4F7FF]">{Math.round(attempt.subjectAccuracy[subject])}%</span>
+                            <span className="font-semibold text-[#F4F7FF]">{attempt.analytics.subjectStats[subject].total ? Math.round(attempt.subjectAccuracy[subject])+"%" : "—"}</span>
                           </div>
                         ))}
                       </div>
@@ -557,6 +570,7 @@ export default function Dashboard() {
                   </button>
                 );
               })}
+              {filteredAttempts.length>visibleCount&&<button className="product-button product-button-secondary w-full" onClick={()=>setVisibleCount(n=>n+5)}>Show more attempts</button>}
               </div>
             )}
           </section>
@@ -567,15 +581,16 @@ export default function Dashboard() {
               style={{ backgroundColor: COLORS.card, borderColor: COLORS.border, boxShadow: "0 12px 38px rgba(4, 12, 30, 0.44)" }}
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-sm font-semibold tracking-tight text-[#F4F7FF]">Subject Wise Analysis <span className="font-normal text-[#91A8BB]">· {rightPanelTitle}</span></h2>
+                <h2 className="text-sm font-semibold tracking-tight text-[#F4F7FF]">Subject breakdown <span className="font-normal text-[#91A8BB]">· {rightPanelTitle}</span></h2>
 
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="relative">
                     <SlidersHorizontal className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#9AADC5]" />
                     <select
+                      aria-label="Filter attempts"
                       value={filter}
                       onChange={(event) => setFilter(event.target.value as FilterOption)}
-                      className="pl-7 pr-5 py-1 rounded-md border bg-[#152C3F] text-[#DDEAF3] text-[10px]"
+                      className="pl-7 pr-5 py-1 rounded-md border bg-[#17283a] text-[#DDEAF3] text-[12px]"
                       style={{ borderColor: COLORS.border }}
                     >
                       <option value="all">All Tests</option>
@@ -591,6 +606,7 @@ export default function Dashboard() {
                 <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input
                     type="date"
+                    aria-label="From date"
                     value={fromDate}
                     onChange={(event) => setFromDate(event.target.value)}
                     className="h-10 rounded-lg border bg-[#10233B] px-3 text-sm text-[#F4F7FF]"
@@ -598,6 +614,8 @@ export default function Dashboard() {
                   />
                   <input
                     type="date"
+                    aria-label="To date"
+                    min={fromDate || undefined}
                     value={toDate}
                     onChange={(event) => setToDate(event.target.value)}
                     className="h-10 rounded-lg border bg-[#10233B] px-3 text-sm text-[#F4F7FF]"
@@ -607,7 +625,7 @@ export default function Dashboard() {
               )}
 
               <div className="mt-3 grid md:grid-cols-[1fr_132px] gap-3 items-end">
-                <div className="h-40 border border-[#1D364A] rounded-md p-2.5 bg-[#152C3F]/70">
+                <div className="h-40 border border-[#2b3d51] rounded-md p-2.5 bg-[#17283a]/70">
                   <div className="h-full flex items-end justify-around gap-4">
                     {SUBJECTS.map((subject) => {
                       const value = aggregate.subjectAccuracy[subject];
@@ -621,11 +639,11 @@ export default function Dashboard() {
 
                       return (
                         <div key={subject} className="flex flex-col items-center flex-1 h-full justify-end gap-1.5">
-                          <span className="text-[9px] text-[#DDEAF3]">{Math.round(value)}</span>
-                          <div className="w-full max-w-[60px] h-[78%] rounded-md bg-[#0B1A2E] border border-[#1D364A] flex items-end p-1">
+                          <span className="text-[12px] text-[#DDEAF3]">{Math.round(value)}</span>
+                          <div className="w-full max-w-[60px] h-[78%] rounded-md bg-[#0B1A2E] border border-[#2b3d51] flex items-end p-1">
                             <div className="w-full rounded-lg" style={{ height: barHeight, background: gradient }} />
                           </div>
-                          <span className="text-[9px] text-[#BBD0DF]">{subject}</span>
+                          <span className="text-[12px] text-[#BBD0DF]">{subject}</span>
                         </div>
                       );
                     })}
@@ -635,7 +653,7 @@ export default function Dashboard() {
                 <div className="space-y-3">
                   <div>
                     <p className="text-2xl font-semibold text-[#F4F7FF]">{aggregate.totalAttempts}</p>
-                    <p className="text-[9px] text-[#91A8BB]">Total Exams</p>
+                    <p className="text-[12px] text-[#91A8BB]">Total Exams</p>
                   </div>
                   <div className="h-px bg-[#203B5C]" />
                   <div className="space-y-1.5 text-sm">
@@ -654,7 +672,7 @@ export default function Dashboard() {
             >
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <h2 className="text-sm font-semibold tracking-tight text-[#F4F7FF]">Questions Breakdown <span className="font-normal text-[#91A8BB]">· {rightPanelTitle}</span></h2>
-                <div className="flex flex-wrap items-center gap-3 text-[9px] text-[#9AADC5]">
+                <div className="flex flex-wrap items-center gap-3 text-[12px] text-[#9AADC5]">
                   <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm" style={{ backgroundColor: COLORS.correct }} />Correct</span>
                   <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm" style={{ backgroundColor: COLORS.incorrect }} />Incorrect</span>
                   <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm" style={{ backgroundColor: COLORS.unattempted }} />Unattempted</span>
@@ -670,8 +688,8 @@ export default function Dashboard() {
 
                   return (
                     <div key={row.key} className="grid grid-cols-[76px_minmax(0,1fr)_38px] items-center gap-2">
-                      <span className="truncate text-[11px] text-[#DDEAF3] font-medium">{row.label}</span>
-                      <div className="h-5 rounded-full overflow-hidden border border-[#1D364A] bg-[#152C3F] flex text-[8px] font-semibold">
+                      <span className="truncate text-[13px] text-[#DDEAF3] font-medium">{row.label}</span>
+                      <div className="h-5 rounded-full overflow-hidden border border-[#2b3d51] bg-[#17283a] flex text-[8px] font-semibold">
                         <div className="h-full flex items-center justify-center text-white" style={{ width: `${correctWidth}%`, backgroundColor: COLORS.correct }}>
                           {correctWidth > 12 ? row.stats.correct.toLocaleString() : ""}
                         </div>
@@ -682,7 +700,7 @@ export default function Dashboard() {
                           {unattemptedWidth > 12 ? row.stats.unattempted.toLocaleString() : ""}
                         </div>
                       </div>
-                      <span className="text-right text-[10px] tabular-nums text-slate-500">{row.stats.total.toLocaleString()}</span>
+                      <span className="text-right text-[12px] tabular-nums text-slate-500">{row.stats.total.toLocaleString()}</span>
                     </div>
                   );
                 })}
@@ -690,8 +708,8 @@ export default function Dashboard() {
                 <div className="h-px bg-[#203B5C] my-2" />
 
                 <div className="grid grid-cols-[76px_minmax(0,1fr)_38px] items-center gap-2">
-                  <span className="text-[11px] text-[#F4F7FF] font-semibold">Overall</span>
-                  <div className="h-6 rounded-full overflow-hidden border border-[#1D364A] bg-[#152C3F] flex text-[8px] font-semibold">
+                  <span className="text-[13px] text-[#F4F7FF] font-semibold">Overall</span>
+                  <div className="h-6 rounded-full overflow-hidden border border-[#2b3d51] bg-[#17283a] flex text-[8px] font-semibold">
                     <div className="h-full flex items-center justify-center text-white" style={{ width: `${aggregate.overall.total ? (aggregate.overall.correct / aggregate.overall.total) * 100 : 0}%`, backgroundColor: COLORS.correct }}>
                       {aggregate.overall.correct.toLocaleString()}
                     </div>
@@ -702,7 +720,7 @@ export default function Dashboard() {
                       {aggregate.overall.unattempted.toLocaleString()}
                     </div>
                   </div>
-                  <span className="text-right text-[10px] tabular-nums font-semibold text-slate-300">{aggregate.overall.total.toLocaleString()}</span>
+                  <span className="text-right text-[12px] tabular-nums font-semibold text-slate-300">{aggregate.overall.total.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -713,10 +731,10 @@ export default function Dashboard() {
           <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-[#F4F7FF]">Test vs Marks</h2>
-              <p className="mt-1 text-[11px] text-[#91A8BB]">Your latest 10 evaluated tests · actual marks scored</p>
+              <p className="mt-1 text-[13px] text-[#91A8BB]">Your latest 10 evaluated tests · actual marks scored</p>
             </div>
-            <div className="rounded-lg border border-[#1D364A] bg-[#10233B] px-3 py-2">
-              <p className="text-[9px] uppercase tracking-wider text-[#91A8BB]">Tests plotted</p>
+            <div className="rounded-lg border border-[#2b3d51] bg-[#10233B] px-3 py-2">
+              <p className="text-[12px] uppercase tracking-wider text-[#91A8BB]">Tests plotted</p>
               <p className="mt-0.5 text-lg font-semibold tabular-nums text-white">{marksTrend.length}</p>
             </div>
           </div>
@@ -731,7 +749,7 @@ export default function Dashboard() {
                   const y = 220 - fraction * 180;
                   return <g key={fraction}>
                     <line x1="58" x2="770" y1={y} y2={y} stroke="#203B5C" strokeDasharray="4 5" />
-                    <text x="48" y={y + 4} textAnchor="end" fill="#8199B8" fontSize="10">{Math.round(maxChartMarks * fraction)}</text>
+                    <text x="48" y={y + 4} textAnchor="end" fill="#8199B8" fontSize="10">{Math.round(minChartMarks + (maxChartMarks - minChartMarks) * fraction)}</text>
                   </g>;
                 })}
                 <path d={marksPath} fill="none" stroke="#35A9F4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
@@ -744,9 +762,9 @@ export default function Dashboard() {
                   <text x={point.x} y={Math.max(15, point.y - 13)} textAnchor="middle" fill="#EAF5FF" fontSize="10" fontWeight="600">{point.score}</text>
                 </g>)}
               </svg>
-              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-2 border-t border-[#1D364A] pt-3">
-                {chartPoints.map((point, index) => <div key={point.id} className="flex min-w-0 items-center gap-2 text-[10px] text-[#91A8BB]">
-                  <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-[#153653] text-[9px] font-semibold text-sky-200">T{index + 1}</span>
+              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-2 border-t border-[#2b3d51] pt-3">
+                {chartPoints.map((point, index) => <div key={point.id} className="flex min-w-0 items-center gap-2 text-[12px] text-[#91A8BB]">
+                  <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-[#153653] text-[12px] font-semibold text-sky-200">T{index + 1}</span>
                   <span className="max-w-[150px] truncate">{point.testName}</span>
                   <span className="shrink-0 font-semibold tabular-nums text-slate-200">{point.score}/{point.totalMarks}</span>
                 </div>)}

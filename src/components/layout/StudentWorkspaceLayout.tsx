@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   LayoutDashboard, BookOpen, FileText, ClipboardList, BarChart3, Settings,
   Menu, X, ChevronDown, Bell, UserRound, LogOut, ChevronLeft, ChevronRight,
-  UserPlus, ShieldPlus, Users, CheckCheck
+  UserPlus, ShieldPlus, Users, CheckCheck, Compass, CreditCard, HelpCircle
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useStaffRoles, ROLE_DEFINITIONS } from "@/hooks/useStaffRoles";
@@ -16,6 +16,9 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { toast } from "sonner";
+
 const navItems = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
   { label: "My Batches", path: "/my-batches", icon: BookOpen },
@@ -23,19 +26,21 @@ const navItems = [
   { label: "DPP", path: "/dpps", icon: ClipboardList },
   { label: "Analytics", path: "/analytics", icon: BarChart3 },
   { label: "Real Exam Calculator", path: "/real-exam-calculator", icon: ClipboardList },
+  { label: "Explore Batches", path: "/batches", icon: Compass },
+  { label: "Payments", path: "/payments", icon: CreditCard },
   { label: "Settings", path: "/settings", icon: Settings },
 ];
 
 const titles: Record<string, string> = {
   "/dashboard": "Dashboard", "/my-batches": "My Batches", "/tests": "Test Library",
   "/dpps": "Daily Practice Problems", "/analytics": "Analytics", "/real-exam-calculator": "Real Exam Calculator", "/settings": "Settings",
-  "/profile": "My Profile", "/payments": "Payment History", "/batches": "Explore Courses",
+  "/profile": "My Profile", "/payments": "Payment History", "/batches": "Explore Batches",
 };
 
 type Notice = { id: string; title: string; message: string; created_at: string | null; is_read: boolean | null };
 
 export default function StudentWorkspaceLayout({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem("phynetix:sidebar-collapsed") === "true"; } catch { return false; } });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [profile, setProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null);
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -52,6 +57,12 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
   const unread = useMemo(() => notices.filter((notice) => notice.is_read === false).length, [notices]);
 
   useEffect(() => { setDrawerOpen(false); }, [location.pathname]);
+  useEffect(() => { try { localStorage.setItem("phynetix:sidebar-collapsed", String(collapsed)); } catch {} }, [collapsed]);
+  useEffect(() => {
+    const sync = () => { try { setCollapsed(localStorage.getItem("phynetix:sidebar-collapsed") === "true"); } catch {} };
+    window.addEventListener("phynetix:sidebar-change", sync); window.addEventListener("storage",sync);
+    return () => { window.removeEventListener("phynetix:sidebar-change",sync); window.removeEventListener("storage",sync); };
+  }, []);
   useEffect(() => {
     if (!user) return;
     const load = async () => {
@@ -70,7 +81,7 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
     return () => { void supabase.removeChannel(channel); };
   }, [user]);
 
-  const logout = async () => { await signOut(); navigate("/auth"); };
+  const logout = async () => { const {error} = await supabase.auth.signOut(); if(error){toast.error("Sign out failed. Please try again.");return;} navigate("/auth"); };
   const markRead = async (id: string) => {
     if (!user) return;
     const { error } = await supabase.from("notifications").update({ is_read: true }).eq("id", id).eq("user_id", user.id);
@@ -82,11 +93,12 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
     if (!error) setNotices((items) => items.map((item) => ({ ...item, is_read: true })));
   };
 
+  if (!isLoading && !user) return <Navigate to={"/auth?next=" + encodeURIComponent(location.pathname + location.search)} replace />;
   if (isLoading || !user) return <div className="min-h-screen bg-[#050A12] grid place-items-center"><div className="h-8 w-8 rounded-full border-2 border-[#233A54] border-t-[#36A9FF] animate-spin" /></div>;
 
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <div className="flex h-full flex-col">
-      <div className={cn("flex h-[56px] items-center border-b student-divider border-[#242A29]", collapsed && !mobile ? "justify-center px-2" : "px-3")}>
+      <div className={cn("flex h-[72px] items-center border-b student-divider border-[#242A29]", collapsed && !mobile ? "justify-center px-2" : "px-3")}>
         <Link to="/dashboard" aria-label="PhyNetix home" className={cn("flex min-w-0 items-center", collapsed && !mobile ? "justify-center" : "gap-1.5")}>
           <AnimatePresence mode="wait" initial={false}>
             {collapsed && !mobile ? (
@@ -103,10 +115,10 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
         {mobile && <button type="button" onClick={() => setDrawerOpen(false)} aria-label="Close navigation" className="ml-auto rounded-lg p-2 text-slate-400 hover:bg-white/5"><X size={18} /></button>}
       </div>
       <div className="px-3.5 pt-5 pb-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">{(!collapsed || mobile) ? "Workspace" : " "}</div>
-      <nav className={cn("flex-1 space-y-1", collapsed && !mobile ? "px-1" : "px-2.5")}>
+      <nav aria-label="Student navigation" className={cn("flex-1 min-h-0 overflow-y-auto space-y-1", collapsed && !mobile ? "px-1" : "px-2.5")}>
         {navItems.map(({ label, path, icon: Icon }) => {
           const active = location.pathname === path || (path !== "/dashboard" && location.pathname.startsWith(path + "/"));
-          return <Link key={path} to={path} title={collapsed && !mobile ? label : undefined}
+          return <Link key={path} to={path} aria-current={active ? "page" : undefined} aria-label={label} title={collapsed && !mobile ? label : undefined}
             className={cn("group flex items-center rounded-lg border py-2.5 text-[12px] font-medium transition-all",
               collapsed && !mobile ? "justify-center px-0" : "gap-3 px-2.5",
               active ? "student-active-link border-[#29433D] bg-[#1A2926] text-white" : "border-transparent text-slate-400 hover:border-white/[0.06] hover:bg-white/[0.04] hover:text-slate-100")}>
@@ -120,22 +132,18 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
           <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#123B5A] text-xs font-semibold text-[#A9DDFF]">{initials}</div>
           {(!collapsed || mobile) && <div className="min-w-0"><p className="truncate text-xs font-medium text-slate-200">{name}</p><p className="text-[10px] text-slate-500">{roleLabel}</p></div>}
         </div>
-        <button onClick={logout} className={cn("flex w-full items-center gap-3 rounded-xl py-2.5 text-xs text-slate-500 transition hover:bg-rose-500/10 hover:text-rose-300", collapsed && !mobile ? "justify-center px-1" : "px-3")}><LogOut size={16} />{(!collapsed || mobile) && "Sign out"}</button>
-        {!mobile && <button onClick={() => setCollapsed((value) => !value)} className={cn("mt-2 hidden w-full items-center justify-center rounded-lg text-slate-500 hover:bg-white/5 hover:text-slate-200 lg:flex", collapsed ? "p-1" : "p-2")} aria-label="Collapse sidebar">{collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}</button>}
+        <Link to="/contact" aria-label="Help and support" className={cn("flex items-center gap-3 px-3 py-3 text-sm text-slate-400 hover:text-white",collapsed&&!mobile&&"justify-center")}><HelpCircle size={17}/>{(!collapsed||mobile)&&"Help & support"}</Link>
+        <button aria-label="Sign out" onClick={logout} className={cn("flex w-full items-center gap-3 rounded-xl py-2.5 text-xs text-slate-500 transition hover:bg-rose-500/10 hover:text-rose-300", collapsed && !mobile ? "justify-center px-1" : "px-3")}><LogOut size={16} />{(!collapsed || mobile) && "Sign out"}</button>
+        {!mobile && <button onClick={() => setCollapsed((value) => !value)} className={cn("mt-2 hidden w-full items-center justify-center rounded-lg text-slate-500 hover:bg-white/5 hover:text-slate-200 lg:flex", collapsed ? "p-1" : "p-2")} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>{collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}</button>}
       </div>
     </div>
   );
 
   return <div className="student-workspace min-h-screen text-[#E8ECEA]">
-    <aside className={cn("fixed inset-y-0 left-0 z-40 hidden border-r border-white/[0.07] student-sidebar bg-[#111516] transition-[width] duration-200 lg:block", collapsed ? "w-[60px]" : "w-[224px]")}><Sidebar /></aside>
-    <AnimatePresence>
-      {drawerOpen && <>
-        <motion.button aria-label="Close navigation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDrawerOpen(false)} className="fixed inset-0 z-50 bg-black/70 lg:hidden" />
-        <motion.aside initial={{ x: -300 }} animate={{ x: 0 }} exit={{ x: -300 }} transition={{ type: "spring", damping: 28, stiffness: 300 }} className="fixed inset-y-0 left-0 z-[60] w-[260px] border-r border-white/10 student-sidebar bg-[#111516] lg:hidden"><Sidebar mobile /></motion.aside>
-      </>}
-    </AnimatePresence>
-    <div className={cn("relative min-h-screen transition-[margin] duration-200", collapsed ? "lg:ml-[60px]" : "lg:ml-[224px]")}>
-      <header className="sticky top-0 z-30 flex h-[56px] items-center gap-2.5 border-b border-white/[0.07] student-topbar bg-[#0D1011]/95 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+    <aside className={cn("fixed inset-y-0 left-0 z-40 hidden border-r border-white/[0.07] student-sidebar bg-[#111516] transition-[width] duration-200 lg:block", collapsed ? "w-[60px]" : "w-[248px]")}><Sidebar /></aside>
+    <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}><SheetContent side="left" className="student-workspace p-0 w-[280px]"><SheetTitle className="sr-only">Student navigation</SheetTitle><SheetDescription className="sr-only">Your learning tools and account.</SheetDescription><Sidebar mobile /></SheetContent></Sheet>
+    <div className={cn("relative min-h-screen transition-[margin] duration-200", collapsed ? "lg:ml-[60px]" : "lg:ml-[248px]")}>
+      <header className="sticky top-0 z-30 flex h-[72px] items-center gap-2.5 border-b border-white/[0.07] student-topbar bg-[#0D1011]/95 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
         <button onClick={() => setDrawerOpen(true)} className="rounded-lg border border-white/10 p-2 text-slate-300 hover:bg-white/5 lg:hidden" aria-label="Open navigation"><Menu size={18} /></button>
         <div className="min-w-0"><p className="hidden text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:block">Student workspace</p><h1 className="truncate text-[16px] font-semibold text-white sm:text-[17px]">{title}</h1></div>
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
@@ -157,7 +165,7 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
             </DropdownMenuContent>
           </DropdownMenu>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild><button className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-1.5 pr-2.5 hover:bg-white/[0.07]">
+            <DropdownMenuTrigger asChild><button aria-label="Account menu" className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-1.5 pr-2.5 hover:bg-white/[0.07]">
               {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="h-8 w-8 rounded-lg object-cover" /> : <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#123B5A] text-[11px] font-semibold text-sky-100">{initials}</span>}
               <span className="hidden max-w-[120px] truncate text-xs font-medium text-slate-200 sm:block">{name}</span><ChevronDown size={14} className="text-slate-500" />
             </button></DropdownMenuTrigger>
@@ -165,13 +173,12 @@ export default function StudentWorkspaceLayout({ children }: { children: React.R
               <DropdownMenuLabel><span className="block truncate text-xs">{name}</span><span className="text-[10px] font-normal text-slate-500">{roleLabel}</span></DropdownMenuLabel><DropdownMenuSeparator className="bg-white/10" />
               <DropdownMenuItem onSelect={() => navigate("/profile")} className="cursor-pointer focus:bg-white/5"><UserRound size={15} className="mr-2" />My Profile</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => navigate("/settings")} className="cursor-pointer focus:bg-white/5"><Settings size={15} className="mr-2" />Account Settings</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => navigate("/settings")} className="cursor-pointer focus:bg-white/5"><Bell size={15} className="mr-2" />Notification Preferences</DropdownMenuItem>
               <DropdownMenuSeparator className="bg-white/10" /><DropdownMenuItem onSelect={logout} className="cursor-pointer text-rose-300 focus:bg-rose-500/10"><LogOut size={15} className="mr-2" />Sign out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </header>
-      <main className="relative min-h-[calc(100vh-56px)] p-4 sm:p-6 lg:p-8">{children}</main>
+      <main className="relative min-h-[calc(100vh-72px)] p-4 sm:p-6 lg:p-8">{children}</main>
     </div>
   </div>;
 }

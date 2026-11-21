@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { AnalysisSidebar } from "@/components/analysis/AnalysisSidebar";
@@ -102,6 +102,8 @@ const indexToLetter = (index: number | string | null | undefined): string => {
 export default function AnalysisPage() {
   const navigate = useNavigate();
   const { testId } = useParams();
+  const [searchParams] = useSearchParams();
+  const selectedAttemptId = searchParams.get("attemptId");
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
   const [testName, setTestName] = useState("");
@@ -117,7 +119,7 @@ export default function AnalysisPage() {
 
   useEffect(() => {
     if (testId) fetchTestAnalysis();
-  }, [testId]);
+  }, [testId, selectedAttemptId]);
 
   // Fetch bookmarks
   useEffect(() => {
@@ -163,9 +165,13 @@ export default function AnalysisPage() {
       const { data: test } = await supabase.from("tests").select("name, duration_minutes").eq("id", testId).single();
       if (!test) { navigate("/tests"); return; }
 
-      const { data: attempt } = await supabase.from("test_attempts").select("*")
-        .eq("test_id", testId).eq("user_id", user.id).single();
-      if (!attempt) { navigate("/tests"); return; }
+      let attemptQuery = supabase.from("test_attempts").select("*")
+        .eq("test_id", testId).eq("user_id", user.id).not("completed_at","is",null);
+      if(selectedAttemptId) attemptQuery = attemptQuery.eq("id",selectedAttemptId);
+      const {data:attempt,error:attemptError} = await attemptQuery.order("completed_at",{ascending:false}).limit(1).maybeSingle();
+      if(attemptError) throw attemptError;
+      if (!attempt) { toast.error("This completed attempt could not be found."); navigate("/tests"); return; }
+      if(attempt.awaiting_result) {toast.info("This result has not been released yet.");navigate("/dashboard");return;}
 
       const timePerQuestion: Record<string, number> = (attempt as any).time_per_question || {};
       const hasTimeData = Object.keys(timePerQuestion).length > 0;

@@ -1,26 +1,11 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import StudentWorkspaceLayout from "@/components/layout/StudentWorkspaceLayout";
+import PublicLayout from "@/components/layout/PublicLayout";
 import { BatchCatalog } from "@/components/batch/BatchCatalog";
-import { motion } from "framer-motion";
-
-export default function BatchCatalogPage() {
-  return (
-    <DashboardLayout>
-      <div className="p-6 md:p-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Explore Batches</h1>
-            <p className="text-muted-foreground">
-              Find the perfect batch for your preparation journey
-            </p>
-          </div>
-
-          <BatchCatalog showEnrollButtons={true} />
-        </motion.div>
-      </div>
-    </DashboardLayout>
-  );
+import { TestSeriesSection } from "@/components/landing/TestSeriesSection";
+import { useAuth } from "@/hooks/useAuth";
+export default function BatchCatalogPage(){
+ const {user,isLoading}=useAuth();
+ if(isLoading)return <div className="product-utility grid place-items-center" role="status">Loading test series…</div>;
+ if(!user)return <PublicLayout><TestSeriesSection/></PublicLayout>;
+ return <StudentWorkspaceLayout><div className="workspace-page-header"><div><div className="workspace-overline">Find your next challenge</div><h1>Explore batches</h1><p>Find the test series that fits your preparation.</p></div></div><BatchCatalog showEnrollButtons/></StudentWorkspaceLayout>;
 }

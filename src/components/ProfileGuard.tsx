@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import CompleteProfileDialog from "@/components/admin/CompleteProfileDialog";
@@ -9,6 +10,8 @@ interface ProfileGuardProps {
 
 export default function ProfileGuard({ children }: ProfileGuardProps) {
   const { user } = useAuth();
+  const { pathname } = useLocation();
+  const isAuthPage = ["/auth", "/login", "/signup"].includes(pathname);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [checking, setChecking] = useState(true);
   const [existingName, setExistingName] = useState<string | undefined>();
@@ -51,14 +54,14 @@ export default function ProfileGuard({ children }: ProfileGuardProps) {
     setShowProfileDialog(false);
   };
 
-  if (checking) {
+  if (checking && !isAuthPage) {
     return null; // Or a loading spinner
   }
 
   return (
     <>
       {children}
-      {user && (
+      {user && !isAuthPage && (
         <CompleteProfileDialog
           open={showProfileDialog}
           onComplete={handleProfileComplete}

@@ -32,7 +32,9 @@ import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useStaffRoles } from "@/hooks/useStaffRoles";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { BrandLogo } from "@/components/BrandLogo";
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AtomIcon } from "@/components/icons/AtomIcon";
 import RoleSwitcher from "@/components/admin/RoleSwitcher";
@@ -215,7 +217,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   const handleSignOut = async () => {
-    await signOut();
+    const {error}=await supabase.auth.signOut();
+    if(error){toast.error("Sign out failed. Please try again.");return;}
     navigate("/");
   };
 
@@ -232,21 +235,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <Link to="/admin" className="flex items-center gap-3 px-4 py-5 border-b border-border/60">
-        <div className="w-8 h-8 rounded-md bg-accent flex items-center justify-center flex-shrink-0">
-          <AtomIcon className="w-5 h-5 text-primary-foreground" />
-        </div>
-        <AnimatePresence mode="wait">
-          {(!collapsed || mobileOpen) && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="overflow-hidden">
-              <span className="text-base font-bold tracking-wider uppercase text-foreground whitespace-nowrap">
-                PhyNetix
-              </span>
-              <span className="block text-[10px] text-muted-foreground font-medium tracking-widest uppercase">
-                Admin Console
-              </span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <BrandLogo compact={collapsed && !mobileOpen} />
+
       </Link>
 
       {userRoles.length > 1 && (!collapsed || mobileOpen) && (
@@ -278,6 +268,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <Link
                     key={item.path}
                     to={item.path}
+                    aria-current={isActive ? "page" : undefined}
+                    aria-label={item.label}
                     title={collapsed && !mobileOpen ? item.label : undefined}
                     className={cn(
                       "group flex items-center gap-3 px-3 py-2 rounded-md transition-all relative",
@@ -321,6 +313,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       <div className="border-t border-border/60 px-2 py-2 space-y-0.5">
         <button
+          aria-label="Student view"
           onClick={() => {
             setViewMode("student");
             navigate("/dashboard");
@@ -331,6 +324,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           {(!collapsed || mobileOpen) && <span className="text-sm">Student View</span>}
         </button>
         <button
+          aria-label="Sign out"
           onClick={handleSignOut}
           className="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors w-full"
         >
@@ -345,14 +339,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     <div className="min-h-screen bg-background flex admin-layout">
       {/* Mobile header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-card/95 backdrop-blur border-b border-border z-40 flex items-center px-4 gap-3">
-        <button onClick={() => setMobileOpen(true)} className="p-2 rounded-lg hover:bg-muted">
+        <button aria-label="Open navigation" onClick={() => setMobileOpen(true)} className="p-2 rounded-lg hover:bg-muted">
           <Menu className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2 flex-1">
-          <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
-            <AtomIcon className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <span className="font-bold text-sm uppercase tracking-wider text-foreground">PhyNetix</span>
+          <BrandLogo/>
         </div>
         <button
           onClick={() => setCmdOpen(true)}
@@ -363,34 +354,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </button>
       </div>
 
-      {/* Mobile sidebar */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="lg:hidden fixed inset-0 bg-black/50 z-50"
-              onClick={() => setMobileOpen(false)}
-            />
-            <motion.aside
-              initial={{ x: -280 }}
-              animate={{ x: 0 }}
-              exit={{ x: -280 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="lg:hidden fixed left-0 top-0 h-screen w-[260px] bg-card border-r border-border z-[60]"
-            >
-              <div className="absolute top-3 right-3">
-                <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg hover:bg-muted">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <SidebarContent />
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}><SheetContent side="left" className="admin-layout p-0 w-[280px]"><SheetTitle className="sr-only">Staff navigation</SheetTitle><SheetDescription className="sr-only">Your administration tools.</SheetDescription><SidebarContent/></SheetContent></Sheet>
 
       {/* Desktop Sidebar */}
       <motion.aside
@@ -455,7 +419,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             )}
           </Link>
 
-          <ThemeToggle />
+          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">View website</Link>
         </header>
 
         <div className="min-h-[calc(100vh-3.5rem)]">{children}</div>
